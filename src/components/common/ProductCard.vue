@@ -2,7 +2,11 @@
   <div class="product-card" @click="$router.push(`/product/${product.id}`)">
     <div class="product-card__image-wrap">
       <img :src="product.image" :alt="product.name" class="product-card__image" />
-      <div v-if="product.tag" class="product-card__tag" :class="product.tag === '天猫' ? 'tmall' : 'taobao'">
+      <div
+        v-if="product.tag"
+        class="product-card__tag"
+        :class="product.tag === '天猫' ? 'tmall' : 'taobao'"
+      >
         {{ product.tag }}
       </div>
       <div class="product-card__fav" @click.stop="toggleFav">
@@ -12,7 +16,10 @@
     <div class="product-card__info">
       <h3 class="product-card__name text-clamp-2">{{ product.name }}</h3>
       <div class="product-card__price-row">
-        <span class="product-card__price price" :class="{ 'price-sm': String(product.price).length > 4 }">
+        <span
+          class="product-card__price price"
+          :class="{ 'price-sm': String(product.price).length > 4 }"
+        >
           ¥{{ product.price }}
         </span>
         <span class="product-card__original">¥{{ product.originalPrice }}</span>
@@ -35,7 +42,7 @@ import { Star } from '@element-plus/icons-vue'
 defineProps({
   product: { type: Object, required: true },
   showLocation: { type: Boolean, default: false },
-  showShop: { type: Boolean, default: false }
+  showShop: { type: Boolean, default: false },
 })
 
 const isFav = ref(false)
@@ -95,7 +102,7 @@ function formatSold(num) {
 }
 
 .product-card__tag.tmall {
-  background: #FF0036;
+  background: #ff0036;
 }
 
 .product-card__tag.taobao {

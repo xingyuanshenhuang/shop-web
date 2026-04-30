@@ -243,6 +243,17 @@ const userStore = useUserStore()
 const user = ref(userStore.user)
 const activeTab = ref('default')
 
+/**
+ * 是否显示默认概览视图
+ *
+ * 计算逻辑：
+ * 1. 当 activeTab 为 'default' 时，显示默认视图
+ * 2. 当 activeTab 为已知的一级 Tab（orders/coupons/history/address/help/settings）时，隐藏默认视图，显示对应子视图
+ * 3. 当 activeTab 为子级 Tab（以 'order-' 或 'settings-' 开头）时，隐藏默认视图
+ * 4. 其他未知 Tab 值，兜底显示默认视图，避免页面空白
+ *
+ * 使用场景：控制用户中心内容区域显示默认概览页还是具体功能子视图
+ */
 const showDefaultView = computed(() => {
   const tab = activeTab.value
   if (tab === 'default') return true

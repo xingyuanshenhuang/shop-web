@@ -18,17 +18,18 @@
         <span class="top-utility-bar__divider"></span>
         <span class="top-utility-bar__link">已买到的宝贝</span>
         <span class="top-utility-bar__divider"></span>
-        <el-dropdown trigger="hover">
+        <el-dropdown trigger="hover" @command="handleOrderStatusClick">
           <span class="top-utility-bar__link">
             我的订单 <el-icon :size="10"><ArrowDown /></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item>全部订单</el-dropdown-item>
-              <el-dropdown-item>待付款</el-dropdown-item>
-              <el-dropdown-item>待发货</el-dropdown-item>
-              <el-dropdown-item>待收货</el-dropdown-item>
-              <el-dropdown-item>待评价</el-dropdown-item>
+              <el-dropdown-item command="orders">全部订单</el-dropdown-item>
+              <el-dropdown-item command="order-unpaid">待付款</el-dropdown-item>
+              <el-dropdown-item command="order-unshipped">待发货</el-dropdown-item>
+              <el-dropdown-item command="order-shipped">待收货</el-dropdown-item>
+              <el-dropdown-item command="order-review">待评价</el-dropdown-item>
+              <el-dropdown-item command="order-refund">退换售后</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -59,11 +60,21 @@
 import { ref } from 'vue'
 import { ArrowDown, User } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+import { useOrderStore } from '@/stores/order'
+const orderStore = useOrderStore()
 
+const router = useRouter()
 const userStore = useUserStore()
 const userName = ref(userStore.user.name)
 const showRegion = ref(false)
 const showTheme = ref(false)
+const handleOrderStatusClick = (command) => {
+  console.log(command)
+  router.push('/user?tab=orders')
+  if (command === 'orders') return
+  orderStore.updateSelectedStatus(command)
+}
 </script>
 
 <style scoped>
