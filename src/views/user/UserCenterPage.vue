@@ -14,13 +14,13 @@
           <div
             class="sidebar-nav__item"
             :class="{ active: activeTab === 'orders' || activeTab.startsWith('order-') }"
-            @click="activeTab = 'orders'"
+            @click="toggleSub('orders')"
           >
             <span>我的订单</span>
-            <el-icon :size="12"><ArrowDown /></el-icon>
+            <el-icon :size="12" class="sidebar-nav__arrow" :class="{ expanded: expandedMenus.orders }"><ArrowDown /></el-icon>
           </div>
           <div
-            v-if="activeTab === 'orders' || activeTab.startsWith('order-')"
+            v-if="expandedMenus.orders"
             class="sidebar-nav__sub"
           >
             <div
@@ -77,13 +77,13 @@
           <div
             class="sidebar-nav__item"
             :class="{ active: activeTab === 'settings' || activeTab.startsWith('settings-') }"
-            @click="activeTab = 'settings'"
+            @click="toggleSub('settings')"
           >
             <span>账号设置</span>
-            <el-icon :size="12"><ArrowDown /></el-icon>
+            <el-icon :size="12" class="sidebar-nav__arrow" :class="{ expanded: expandedMenus.settings }"><ArrowDown /></el-icon>
           </div>
           <div
-            v-if="activeTab === 'settings' || activeTab.startsWith('settings-')"
+            v-if="expandedMenus.settings"
             class="sidebar-nav__sub"
           >
             <div
@@ -102,47 +102,165 @@
 
     <div class="user-center__content">
       <div v-if="showDefaultView" class="user-default">
-        <div class="user-info-card">
-          <img :src="user.avatar" class="user-info-card__avatar" />
-          <div class="user-info-card__info">
-            <h3>{{ user.name }}</h3>
-            <el-tag effect="plain" type="warning" size="small">{{ user.level }}</el-tag>
-            <p class="user-info-card__address">收货地址：浙江省杭州市</p>
+        <div class="user-profile-card">
+          <div class="user-profile-card__left">
+            <div class="user-profile-card__top">
+              <img :src="user.avatar" class="user-profile-card__avatar" />
+              <div class="user-profile-card__name-area">
+                <h3 class="user-profile-card__name">{{ user.name }}</h3>
+                <span class="user-profile-card__level-tag">{{ user.level }}</span>
+              </div>
+            </div>
+            <div class="user-profile-card__address-row">
+              <span class="user-profile-card__address-text">收货地址：{{ user.address }}</span>
+              <a class="user-profile-card__address-link" @click="activeTab = 'address'">收货地址 &gt;</a>
+            </div>
+            <div class="user-profile-card__coin-bar">
+              <el-icon :size="20" color="#FF5000"><Coin /></el-icon>
+              <span class="user-profile-card__coin-text">淘金币 领金币购物抵钱花，100金币抵1元</span>
+            </div>
+          </div>
+          <div class="user-profile-card__right">
+            <div class="user-profile-card__asset-row">
+              <div class="user-profile-card__asset-item">
+                <el-icon :size="20" color="#FF5000"><Present /></el-icon>
+                <span class="user-profile-card__asset-label">红包</span>
+                <span class="user-profile-card__asset-value">¥{{ user.redPacket }}</span>
+              </div>
+            </div>
+            <div class="user-profile-card__asset-row">
+              <div class="user-profile-card__asset-item">
+                <el-icon :size="20" color="#FF5000"><Ticket /></el-icon>
+                <span class="user-profile-card__asset-label">优惠券</span>
+                <span class="user-profile-card__asset-value">{{ user.couponCount }}</span>
+              </div>
+            </div>
+            <div class="user-profile-card__asset-row">
+              <div class="user-profile-card__asset-item">
+                <el-icon :size="20" color="#FF5000"><Star /></el-icon>
+                <span class="user-profile-card__asset-label">积分</span>
+                <span class="user-profile-card__asset-value">{{ user.points }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="user-profile-card__cta-bar">
+            <div class="user-profile-card__cta-left">
+              <span class="user-profile-card__cta-icon-wrap">
+                <el-icon :size="16" color="#FF5000"><Present /></el-icon>
+              </span>
+              <span class="user-profile-card__cta-title">领券中心</span>
+              <span class="user-profile-card__cta-desc">发现官方补贴找优惠</span>
+            </div>
+            <button class="user-profile-card__cta-btn">去领取</button>
           </div>
         </div>
-        <div class="user-assets">
-          <div class="user-assets__item">
-            <span class="price price-lg">{{ user.redPacket }}</span>
-            <span>红包</span>
+
+        <div class="order-dashboard">
+          <div class="order-dashboard__header">
+            <span class="order-dashboard__title">我的订单</span>
+            <a class="order-dashboard__link" @click="activeTab = 'orders'">查看全部 &gt;</a>
           </div>
-          <div class="user-assets__item" @click="activeTab = 'coupons'" style="cursor: pointer">
-            <span class="price price-lg">{{ user.couponCount }}</span>
-            <span>优惠券</span>
-          </div>
-          <div class="user-assets__item">
-            <span class="price price-lg">{{ user.points }}</span>
-            <span>积分</span>
-          </div>
-        </div>
-        <div class="user-orders-nav">
-          <div class="user-orders-nav__header">
-            <h3>我的订单</h3>
-            <a
-              @click="activeTab = 'orders'"
-              style="cursor: pointer; font-size: 12px; color: var(--color-text-light)"
-              >查看全部 &gt;</a
-            >
-          </div>
-          <div class="user-orders-nav__items">
+          <div class="order-dashboard__status-row">
             <div
               v-for="status in orderStatuses"
               :key="status.key"
-              class="user-orders-nav__item"
+              class="order-dashboard__status-item"
+              :class="{ 'has-pending': status.count > 0 }"
               @click="activeTab = status.key"
             >
               <el-icon :size="24"><component :is="status.icon" /></el-icon>
-              <span class="price" style="font-size: 18px">{{ status.count }}</span>
-              <span style="font-size: 12px; color: var(--color-text-mid)">{{ status.label }}</span>
+              <span class="order-dashboard__status-count">{{ status.count }}</span>
+              <span class="order-dashboard__status-label">{{ status.label }}</span>
+            </div>
+          </div>
+          <div class="order-dashboard__footer">
+            <span class="order-dashboard__footer-text">当前暂无物流信息更新</span>
+            <a class="order-dashboard__footer-link" @click="activeTab = 'orders'">查看全部订单 &gt;</a>
+          </div>
+        </div>
+
+        <div class="quick-access-grid">
+          <div class="quick-access-card" @click="activeTab = 'favorites'">
+            <div class="quick-access-card__header">
+              <el-icon :size="20" color="#FF5000"><Star /></el-icon>
+              <span class="quick-access-card__title">我的收藏</span>
+              <span class="quick-access-card__arrow">&gt;</span>
+            </div>
+            <div v-if="favoriteItems.length" class="quick-access-card__content">
+              <div v-for="item in favoriteItems.slice(0, 2)" :key="item.id" class="quick-access-card__product">
+                <img :src="item.image" class="quick-access-card__product-img" />
+                <div class="quick-access-card__product-info">
+                  <span class="quick-access-card__product-name text-truncate">{{ item.name }}</span>
+                  <span class="price price-sm">¥{{ item.price }}</span>
+                </div>
+              </div>
+            </div>
+            <div v-else class="quick-access-card__empty">
+              <el-icon :size="40" color="#E0D6CE"><Star /></el-icon>
+              <span>暂无内容</span>
+              <a class="quick-access-card__empty-link">去逛逛</a>
+            </div>
+          </div>
+
+          <div class="quick-access-card" @click="activeTab = 'history'">
+            <div class="quick-access-card__header">
+              <el-icon :size="20" color="#FF5000"><Clock /></el-icon>
+              <span class="quick-access-card__title">我的足迹</span>
+              <span class="quick-access-card__arrow">&gt;</span>
+            </div>
+            <div v-if="historyItems.length" class="quick-access-card__content">
+              <div v-for="item in historyItems.slice(0, 2)" :key="item.id" class="quick-access-card__product">
+                <img :src="item.image" class="quick-access-card__product-img" />
+                <div class="quick-access-card__product-info">
+                  <span class="quick-access-card__product-name text-truncate">{{ item.name }}</span>
+                  <span class="price price-sm">¥{{ item.price }}</span>
+                </div>
+              </div>
+            </div>
+            <div v-else class="quick-access-card__empty">
+              <el-icon :size="40" color="#E0D6CE"><Clock /></el-icon>
+              <span>暂无内容</span>
+              <a class="quick-access-card__empty-link">去逛逛</a>
+            </div>
+          </div>
+
+          <div class="quick-access-card" @click="handleCartClick">
+            <div class="quick-access-card__header">
+              <el-icon :size="20" color="#FF5000"><ShoppingCart /></el-icon>
+              <span class="quick-access-card__title">购物车</span>
+              <span class="quick-access-card__arrow">&gt;</span>
+            </div>
+            <div v-if="cartItemCount > 0" class="quick-access-card__content">
+              <div class="quick-access-card__cart-info">
+                <span class="quick-access-card__cart-count">{{ cartItemCount }}件商品</span>
+                <span class="price">¥{{ cartTotal.toFixed(2) }}</span>
+              </div>
+            </div>
+            <div v-else class="quick-access-card__empty">
+              <el-icon :size="40" color="#E0D6CE"><ShoppingCart /></el-icon>
+              <span>暂无内容</span>
+              <a class="quick-access-card__empty-link">去逛逛</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="frequent-section">
+          <div class="frequent-section__header">
+            <span class="frequent-section__icon-wrap">
+              <el-icon :size="14" color="#FF5000"><Star /></el-icon>
+            </span>
+            <span class="frequent-section__title">常买常逛</span>
+            <span class="frequent-section__desc">推荐常看商品</span>
+          </div>
+          <div class="frequent-section__scroll">
+            <div
+              v-for="item in frequentProducts"
+              :key="item.id"
+              class="frequent-product-card"
+            >
+              <img :src="item.image" class="frequent-product-card__img" />
+              <span class="price price-sm">¥{{ item.price }}</span>
+              <span class="frequent-product-card__tag">最近浏览</span>
             </div>
           </div>
         </div>
@@ -155,6 +273,7 @@
       />
       <CouponView v-if="activeTab === 'coupons'" />
       <HistoryView v-if="activeTab === 'history'" />
+      <ReviewView v-if="activeTab === 'reviews'" />
       <AddressView v-if="activeTab === 'address' || activeTab === 'settings-address'" />
       <HelpView v-if="activeTab === 'help'" />
       <SettingsView
@@ -172,7 +291,7 @@
         <img :src="user.avatar" class="mobile-user__avatar" />
         <div>
           <h3>{{ user.name }}</h3>
-          <el-tag effect="plain" type="warning" size="small">{{ user.level }}</el-tag>
+          <span class="mobile-user__level-tag">{{ user.level }}</span>
         </div>
       </div>
       <div class="mobile-user__assets">
@@ -189,15 +308,33 @@
           <span>积分</span>
         </div>
       </div>
-      <div class="mobile-user__menu">
-        <div class="mobile-user__menu-item" @click="activeTab = 'orders'">
-          <el-icon><List /></el-icon> 我的订单
+      <div class="mobile-user__orders-nav">
+        <div class="mobile-user__orders-header">
+          <span style="font-weight: 600">我的订单</span>
+          <a @click="activeTab = 'orders'" style="font-size: 12px; color: var(--color-text-light); cursor: pointer">查看全部 &gt;</a>
         </div>
+        <div class="mobile-user__orders-items">
+          <div
+            v-for="status in orderStatuses"
+            :key="status.key"
+            class="mobile-user__orders-item"
+            @click="activeTab = status.key"
+          >
+            <el-icon :size="22"><component :is="status.icon" /></el-icon>
+            <span>{{ status.label }}</span>
+            <span v-if="status.count > 0" class="mobile-user__orders-badge">{{ status.count }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-user__menu">
         <div class="mobile-user__menu-item" @click="activeTab = 'coupons'">
           <el-icon><Ticket /></el-icon> 优惠券
         </div>
         <div class="mobile-user__menu-item" @click="activeTab = 'history'">
           <el-icon><Clock /></el-icon> 我的足迹
+        </div>
+        <div class="mobile-user__menu-item" @click="activeTab = 'reviews'">
+          <el-icon><ChatDotRound /></el-icon> 评价管理
         </div>
         <div class="mobile-user__menu-item" @click="activeTab = 'address'">
           <el-icon><Location /></el-icon> 收货地址
@@ -214,7 +351,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowDown,
@@ -228,11 +365,17 @@ import {
   Van,
   ChatDotRound,
   RefreshLeft,
+  Coin,
+  Present,
+  Star,
+  ShoppingCart,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { favoriteProducts, frequentProducts, browsingHistory, cartItems } from '@/mock/data'
 import OrderView from '@/views/user/OrderView.vue'
 import CouponView from '@/views/user/CouponView.vue'
 import HistoryView from '@/views/user/HistoryView.vue'
+import ReviewView from '@/views/user/ReviewView.vue'
 import AddressView from '@/views/user/AddressView.vue'
 import HelpView from '@/views/user/HelpView.vue'
 import SettingsView from '@/views/user/SettingsView.vue'
@@ -243,21 +386,37 @@ const userStore = useUserStore()
 const user = ref(userStore.user)
 const activeTab = ref('default')
 
-/**
- * 是否显示默认概览视图
- *
- * 计算逻辑：
- * 1. 当 activeTab 为 'default' 时，显示默认视图
- * 2. 当 activeTab 为已知的一级 Tab（orders/coupons/history/address/help/settings）时，隐藏默认视图，显示对应子视图
- * 3. 当 activeTab 为子级 Tab（以 'order-' 或 'settings-' 开头）时，隐藏默认视图
- * 4. 其他未知 Tab 值，兜底显示默认视图，避免页面空白
- *
- * 使用场景：控制用户中心内容区域显示默认概览页还是具体功能子视图
- */
+const expandedMenus = reactive({
+  orders: false,
+  settings: false,
+})
+
+function toggleSub(menu) {
+  expandedMenus[menu] = !expandedMenus[menu]
+  if (menu === 'orders') {
+    activeTab.value = 'orders'
+  } else if (menu === 'settings') {
+    activeTab.value = 'settings'
+  }
+}
+
+const favoriteItems = ref([...favoriteProducts])
+
+const historyItems = computed(() => {
+  const all = []
+  browsingHistory.forEach((group) => {
+    group.products.forEach((p) => all.push(p))
+  })
+  return all
+})
+
+const cartItemCount = computed(() => cartItems.length)
+const cartTotal = computed(() => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0))
+
 const showDefaultView = computed(() => {
   const tab = activeTab.value
   if (tab === 'default') return true
-  if (['orders', 'coupons', 'history', 'address', 'help', 'settings'].includes(tab)) return false
+  if (['orders', 'coupons', 'history', 'address', 'help', 'settings', 'reviews'].includes(tab)) return false
   if (tab.startsWith('order-') || tab.startsWith('settings-')) return false
   return true
 })
@@ -294,6 +453,12 @@ const orderStatuses = [
 onMounted(() => {
   if (route.query.tab) {
     activeTab.value = route.query.tab
+  }
+  if (activeTab.value === 'orders' || activeTab.value.startsWith('order-')) {
+    expandedMenus.orders = true
+  }
+  if (activeTab.value === 'settings' || activeTab.value.startsWith('settings-')) {
+    expandedMenus.settings = true
   }
 })
 </script>
@@ -360,6 +525,14 @@ onMounted(() => {
   background: var(--color-primary);
 }
 
+.sidebar-nav__arrow {
+  transition: transform var(--transition-fast);
+}
+
+.sidebar-nav__arrow.expanded {
+  transform: rotate(180deg);
+}
+
 .sidebar-nav__sub {
   padding-left: 20px;
 }
@@ -386,98 +559,464 @@ onMounted(() => {
   min-width: 0;
 }
 
-.user-info-card {
+.user-default {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-profile-card {
+  background: var(--color-bg-white);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.user-profile-card__left {
+  flex: 0 0 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-profile-card__top {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 24px;
 }
 
-.user-info-card__avatar {
-  width: 64px;
-  height: 64px;
+.user-profile-card__avatar {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   border: 2px solid var(--color-border);
   object-fit: cover;
+  flex-shrink: 0;
 }
 
-.user-info-card__info h3 {
+.user-profile-card__name-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-profile-card__name {
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 4px;
+  color: var(--color-text-dark);
+  margin: 0;
 }
 
-.user-info-card__address {
+.user-profile-card__level-tag {
+  display: inline-block;
+  background: var(--color-light-orange);
+  color: var(--color-primary);
+  font-size: 10px;
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  width: fit-content;
+}
+
+.user-profile-card__address-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-profile-card__address-text {
   font-size: 12px;
   color: var(--color-text-light);
-  margin-top: 4px;
 }
 
-.user-assets {
+.user-profile-card__address-link {
+  font-size: 12px;
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.user-profile-card__address-link:hover {
+  color: var(--color-primary);
+}
+
+.user-profile-card__coin-bar {
   display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F5F5F5;
+  border-radius: var(--radius-btn);
+  padding: 8px 12px;
+}
+
+.user-profile-card__coin-text {
+  font-size: 12px;
+  color: var(--color-text-mid);
+}
+
+.user-profile-card__right {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-profile-card__asset-row {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.user-profile-card__asset-row:last-child {
+  border-bottom: none;
+}
+
+.user-profile-card__asset-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0 12px;
+}
+
+.user-profile-card__asset-label {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.user-profile-card__asset-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  font-family: var(--font-price);
+  margin-left: auto;
+}
+
+.user-profile-card__cta-bar {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.user-profile-card__cta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-profile-card__cta-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-light-orange);
+}
+
+.user-profile-card__cta-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.user-profile-card__cta-desc {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.user-profile-card__cta-btn {
+  height: 28px;
+  border-radius: var(--radius-pill);
+  padding: 4px 16px;
+  font-size: 12px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.user-profile-card__cta-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.order-dashboard {
   background: var(--color-bg-white);
   border-radius: var(--radius-card);
   padding: 16px 24px;
   box-shadow: var(--shadow-light);
-  margin-bottom: 24px;
 }
 
-.user-assets__item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  border-right: 1px solid var(--color-border);
-}
-
-.user-assets__item:last-child {
-  border-right: none;
-}
-
-.user-assets__item span:last-child {
-  font-size: 12px;
-  color: var(--color-text-light);
-}
-
-.user-orders-nav {
-  background: var(--color-bg-white);
-  border-radius: var(--radius-card);
-  padding: 16px 24px;
-}
-
-.user-orders-nav__header {
+.order-dashboard__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
-.user-orders-nav__header h3 {
+.order-dashboard__title {
   font-size: 14px;
   font-weight: 600;
+  color: var(--color-text-dark);
 }
 
-.user-orders-nav__items {
+.order-dashboard__link {
+  font-size: 12px;
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.order-dashboard__link:hover {
+  color: var(--color-primary);
+}
+
+.order-dashboard__status-row {
   display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
 }
 
-.user-orders-nav__item {
+.order-dashboard__status-item {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  padding: 8px;
+  padding: 8px 4px;
   border-radius: var(--radius-btn);
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
+  color: var(--color-text-dark);
 }
 
-.user-orders-nav__item:hover {
+.order-dashboard__status-item:hover {
   background: var(--color-light-orange);
+}
+
+.order-dashboard__status-item:hover .order-dashboard__status-label,
+.order-dashboard__status-item:hover .order-dashboard__status-count {
+  color: var(--color-primary);
+}
+
+.order-dashboard__status-item.has-pending .order-dashboard__status-count,
+.order-dashboard__status-item.has-pending .order-dashboard__status-label {
+  color: var(--color-primary);
+}
+
+.order-dashboard__status-count {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-price);
+}
+
+.order-dashboard__status-label {
+  font-size: 12px;
+  color: var(--color-text-mid);
+}
+
+.order-dashboard__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.order-dashboard__footer-text {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.order-dashboard__footer-link {
+  font-size: 12px;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.order-dashboard__footer-link:hover {
+  text-decoration: underline;
+}
+
+.quick-access-grid {
+  display: flex;
+  gap: 12px;
+}
+
+.quick-access-card {
+  flex: 1;
+  background: var(--color-bg-white);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: var(--shadow-light);
+  min-height: 120px;
+  cursor: pointer;
+  transition: box-shadow var(--transition-fast);
+}
+
+.quick-access-card:hover {
+  box-shadow: var(--shadow-card);
+}
+
+.quick-access-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quick-access-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  flex: 1;
+}
+
+.quick-access-card__arrow {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.quick-access-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-access-card__product {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-access-card__product-img {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-btn);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.quick-access-card__product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.quick-access-card__product-name {
+  font-size: 12px;
+  color: var(--color-text-dark);
+}
+
+.quick-access-card__cart-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quick-access-card__cart-count {
+  font-size: 12px;
+  color: var(--color-text-mid);
+}
+
+.quick-access-card__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.quick-access-card__empty span {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.quick-access-card__empty-link {
+  font-size: 12px;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.frequent-section {
+  background: var(--color-bg-white);
+  border-radius: var(--radius-card);
+  padding: 16px 24px;
+  box-shadow: var(--shadow-light);
+}
+
+.frequent-section__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.frequent-section__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-light-orange);
+}
+
+.frequent-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.frequent-section__desc {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.frequent-section__scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.frequent-section__scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.frequent-section__scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+.frequent-product-card {
+  flex-shrink: 0;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.frequent-product-card__img {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-btn);
+  object-fit: cover;
+}
+
+.frequent-product-card__tag {
+  font-size: 10px;
+  color: var(--color-text-light);
+  background: #F5F5F5;
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  width: fit-content;
 }
 
 .mobile-user {
@@ -503,6 +1042,16 @@ onMounted(() => {
 .mobile-user__header h3 {
   font-size: 18px;
   font-weight: 700;
+  margin: 0;
+}
+
+.mobile-user__level-tag {
+  display: inline-block;
+  background: var(--color-light-orange);
+  color: var(--color-primary);
+  font-size: 10px;
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
 }
 
 .mobile-user__assets {
@@ -521,6 +1070,53 @@ onMounted(() => {
   gap: 2px;
   font-size: 12px;
   color: var(--color-text-light);
+}
+
+.mobile-user__orders-nav {
+  background: var(--color-bg-white);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.mobile-user__orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mobile-user__orders-items {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mobile-user__orders-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-mid);
+  cursor: pointer;
+  position: relative;
+  padding: 4px 8px;
+}
+
+.mobile-user__orders-badge {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 10px;
+  border-radius: var(--radius-pill);
+  padding: 0 4px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mobile-user__menu {

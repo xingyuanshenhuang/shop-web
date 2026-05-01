@@ -284,8 +284,72 @@ export const userInfo = {
   phone: '138****8888',
   redPacket: 25.5,
   couponCount: 5,
-  points: 3200
+  points: 3200,
+  address: '浙江省杭州市'
 }
+
+export const pendingReviews = [
+  {
+    id: 1,
+    productId: 7,
+    name: '有机坚果混合装每日坚果零食大礼包',
+    spec: '750g装',
+    image: 'https://picsum.photos/seed/p7/200/200',
+    orderId: 'DD20250410002'
+  },
+  {
+    id: 2,
+    productId: 5,
+    name: '智能手表运动健康监测心率血氧NFC',
+    spec: '曜石黑 / 标准版',
+    image: 'https://picsum.photos/seed/p5/200/200',
+    orderId: 'DD20250405003'
+  }
+]
+
+export const reviewedItems = [
+  {
+    id: 1,
+    productId: 8,
+    name: '运动鞋男透气网面跑步鞋轻便休闲',
+    spec: '黑色 / 42码',
+    image: 'https://picsum.photos/seed/p8/200/200',
+    rating: 5,
+    content: '鞋子质量非常好，穿着很舒适，透气性也不错。物流很快，两天就到了，包装也很好，下次还会回购！',
+    images: ['https://picsum.photos/seed/review4/200/200', 'https://picsum.photos/seed/review5/200/200'],
+    reviewDate: '2025-04-08',
+    merchantReply: '感谢您的好评，欢迎下次光临！'
+  },
+  {
+    id: 2,
+    productId: 3,
+    name: '夏季新款女士碎花连衣裙法式复古气质',
+    spec: '碎花 / M码',
+    image: 'https://picsum.photos/seed/p3/200/200',
+    rating: 4,
+    content: '裙子面料很舒服，颜色和图片一样，就是稍微有点大，不过整体还是很满意的。',
+    images: ['https://picsum.photos/seed/review6/200/200'],
+    reviewDate: '2025-04-05',
+    merchantReply: null
+  }
+]
+
+export const frequentProducts = [
+  { id: 1, name: '日式简约实木餐桌', price: 1299, image: 'https://picsum.photos/seed/p1/200/200' },
+  { id: 7, name: '有机坚果混合装', price: 69.9, image: 'https://picsum.photos/seed/p7/200/200' },
+  { id: 5, name: '智能手表运动版', price: 899, image: 'https://picsum.photos/seed/p5/200/200' },
+  { id: 9, name: '全自动胶囊咖啡机', price: 599, image: 'https://picsum.photos/seed/p9/200/200' },
+  { id: 2, name: '轻薄笔记本电脑', price: 3999, image: 'https://picsum.photos/seed/p2/200/200' },
+  { id: 6, name: '北欧简约布艺沙发', price: 2399, image: 'https://picsum.photos/seed/p6/200/200' },
+  { id: 8, name: '运动鞋男透气网面', price: 199, image: 'https://picsum.photos/seed/p8/200/200' },
+  { id: 10, name: '儿童益智积木拼装', price: 89, image: 'https://picsum.photos/seed/p10/200/200' }
+]
+
+export const favoriteProducts = [
+  { id: 1, name: '日式简约实木餐桌北欧原木色饭桌', price: 1299, image: 'https://picsum.photos/seed/p1/200/200' },
+  { id: 6, name: '北欧简约布艺沙发小户型客厅', price: 2399, image: 'https://picsum.photos/seed/p6/200/200' },
+  { id: 9, name: '全自动胶囊咖啡机意式小型', price: 599, image: 'https://picsum.photos/seed/p9/200/200' }
+]
 
 export const listingCategories = [
   { id: 1, name: '床', icon: '🛏️' },
