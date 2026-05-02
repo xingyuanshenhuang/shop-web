@@ -11,7 +11,7 @@
         </span>
       </div>
       <div class="top-utility-bar__right">
-        <span class="top-utility-bar__link">
+        <span class="top-utility-bar__link" @click="$router.push('/user?tab=default')">
           <el-icon :size="14"><User /></el-icon>
           Hi，{{ userName }}
         </span>

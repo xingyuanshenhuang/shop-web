@@ -3,7 +3,13 @@
     <div class="user-center__sidebar hide-on-mobile">
       <div class="sidebar-nav">
         <div class="sidebar-nav__group">
-          <div class="sidebar-nav__group-title">购物相关</div>
+          <div
+            class="sidebar-nav__item"
+            :class="{ active: activeTab === 'default' }"
+            @click="activeTab = 'default'"
+          >
+            <span>我的主页</span>
+          </div>
           <div
             class="sidebar-nav__item"
             :class="{ active: activeTab === 'cart' }"
@@ -17,12 +23,14 @@
             @click="toggleSub('orders')"
           >
             <span>我的订单</span>
-            <el-icon :size="12" class="sidebar-nav__arrow" :class="{ expanded: expandedMenus.orders }"><ArrowDown /></el-icon>
+            <el-icon
+              :size="12"
+              class="sidebar-nav__arrow"
+              :class="{ expanded: expandedMenus.orders }"
+              ><ArrowDown
+            /></el-icon>
           </div>
-          <div
-            v-if="expandedMenus.orders"
-            class="sidebar-nav__sub"
-          >
+          <div v-if="expandedMenus.orders" class="sidebar-nav__sub">
             <div
               v-for="sub in orderSubs"
               :key="sub.key"
@@ -33,9 +41,6 @@
               {{ sub.label }}
             </div>
           </div>
-        </div>
-        <div class="sidebar-nav__group">
-          <div class="sidebar-nav__group-title">优惠与收藏</div>
           <div
             class="sidebar-nav__item"
             :class="{ active: activeTab === 'coupons' }"
@@ -57,9 +62,6 @@
           >
             <span>评价管理</span>
           </div>
-        </div>
-        <div class="sidebar-nav__group">
-          <div class="sidebar-nav__group-title">账户服务</div>
           <div
             class="sidebar-nav__item"
             :class="{ active: activeTab === 'address' }"
@@ -80,12 +82,14 @@
             @click="toggleSub('settings')"
           >
             <span>账号设置</span>
-            <el-icon :size="12" class="sidebar-nav__arrow" :class="{ expanded: expandedMenus.settings }"><ArrowDown /></el-icon>
+            <el-icon
+              :size="12"
+              class="sidebar-nav__arrow"
+              :class="{ expanded: expandedMenus.settings }"
+              ><ArrowDown
+            /></el-icon>
           </div>
-          <div
-            v-if="expandedMenus.settings"
-            class="sidebar-nav__sub"
-          >
+          <div v-if="expandedMenus.settings" class="sidebar-nav__sub">
             <div
               v-for="sub in settingsSubs"
               :key="sub.key"
@@ -113,11 +117,15 @@
             </div>
             <div class="user-profile-card__address-row">
               <span class="user-profile-card__address-text">收货地址：{{ user.address }}</span>
-              <a class="user-profile-card__address-link" @click="activeTab = 'address'">收货地址 &gt;</a>
+              <a class="user-profile-card__address-link" @click="activeTab = 'address'"
+                >收货地址 &gt;</a
+              >
             </div>
             <div class="user-profile-card__coin-bar">
               <el-icon :size="20" color="#FF5000"><Coin /></el-icon>
-              <span class="user-profile-card__coin-text">淘金币 领金币购物抵钱花，100金币抵1元</span>
+              <span class="user-profile-card__coin-text"
+                >淘金币 领金币购物抵钱花，100金币抵1元</span
+              >
             </div>
           </div>
           <div class="user-profile-card__right">
@@ -175,7 +183,9 @@
           </div>
           <div class="order-dashboard__footer">
             <span class="order-dashboard__footer-text">当前暂无物流信息更新</span>
-            <a class="order-dashboard__footer-link" @click="activeTab = 'orders'">查看全部订单 &gt;</a>
+            <a class="order-dashboard__footer-link" @click="activeTab = 'orders'"
+              >查看全部订单 &gt;</a
+            >
           </div>
         </div>
 
@@ -187,7 +197,11 @@
               <span class="quick-access-card__arrow">&gt;</span>
             </div>
             <div v-if="favoriteItems.length" class="quick-access-card__content">
-              <div v-for="item in favoriteItems.slice(0, 2)" :key="item.id" class="quick-access-card__product">
+              <div
+                v-for="item in favoriteItems.slice(0, 2)"
+                :key="item.id"
+                class="quick-access-card__product"
+              >
                 <img :src="item.image" class="quick-access-card__product-img" />
                 <div class="quick-access-card__product-info">
                   <span class="quick-access-card__product-name text-truncate">{{ item.name }}</span>
@@ -209,7 +223,11 @@
               <span class="quick-access-card__arrow">&gt;</span>
             </div>
             <div v-if="historyItems.length" class="quick-access-card__content">
-              <div v-for="item in historyItems.slice(0, 2)" :key="item.id" class="quick-access-card__product">
+              <div
+                v-for="item in historyItems.slice(0, 2)"
+                :key="item.id"
+                class="quick-access-card__product"
+              >
                 <img :src="item.image" class="quick-access-card__product-img" />
                 <div class="quick-access-card__product-info">
                   <span class="quick-access-card__product-name text-truncate">{{ item.name }}</span>
@@ -253,11 +271,7 @@
             <span class="frequent-section__desc">推荐常看商品</span>
           </div>
           <div class="frequent-section__scroll">
-            <div
-              v-for="item in frequentProducts"
-              :key="item.id"
-              class="frequent-product-card"
-            >
+            <div v-for="item in frequentProducts" :key="item.id" class="frequent-product-card">
               <img :src="item.image" class="frequent-product-card__img" />
               <span class="price price-sm">¥{{ item.price }}</span>
               <span class="frequent-product-card__tag">最近浏览</span>
@@ -311,7 +325,11 @@
       <div class="mobile-user__orders-nav">
         <div class="mobile-user__orders-header">
           <span style="font-weight: 600">我的订单</span>
-          <a @click="activeTab = 'orders'" style="font-size: 12px; color: var(--color-text-light); cursor: pointer">查看全部 &gt;</a>
+          <a
+            @click="activeTab = 'orders'"
+            style="font-size: 12px; color: var(--color-text-light); cursor: pointer"
+            >查看全部 &gt;</a
+          >
         </div>
         <div class="mobile-user__orders-items">
           <div
@@ -322,7 +340,9 @@
           >
             <el-icon :size="22"><component :is="status.icon" /></el-icon>
             <span>{{ status.label }}</span>
-            <span v-if="status.count > 0" class="mobile-user__orders-badge">{{ status.count }}</span>
+            <span v-if="status.count > 0" class="mobile-user__orders-badge">{{
+              status.count
+            }}</span>
           </div>
         </div>
       </div>
@@ -411,12 +431,15 @@ const historyItems = computed(() => {
 })
 
 const cartItemCount = computed(() => cartItems.length)
-const cartTotal = computed(() => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0))
+const cartTotal = computed(() =>
+  cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+)
 
 const showDefaultView = computed(() => {
   const tab = activeTab.value
   if (tab === 'default') return true
-  if (['orders', 'coupons', 'history', 'address', 'help', 'settings', 'reviews'].includes(tab)) return false
+  if (['orders', 'coupons', 'history', 'address', 'help', 'settings', 'reviews'].includes(tab))
+    return false
   if (tab.startsWith('order-') || tab.startsWith('settings-')) return false
   return true
 })
@@ -645,7 +668,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #F5F5F5;
+  background: #f5f5f5;
   border-radius: var(--radius-btn);
   padding: 8px 12px;
 }
@@ -1013,7 +1036,7 @@ onMounted(() => {
 .frequent-product-card__tag {
   font-size: 10px;
   color: var(--color-text-light);
-  background: #F5F5F5;
+  background: #f5f5f5;
   border-radius: var(--radius-sm);
   padding: 2px 6px;
   width: fit-content;

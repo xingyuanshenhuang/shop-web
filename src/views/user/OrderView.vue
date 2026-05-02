@@ -4,7 +4,6 @@
     <!-- 头部区域：标题 + 查看全部链接 -->
     <div class="order-view__header">
       <h3>我的订单</h3>
-      <a style="cursor: pointer; font-sie: 12px; color: var(--color-text-light)">查看全部 &gt;</a>
     </div>
 
     <!-- 订单状态导航栏：横向排列5个状态项 -->
