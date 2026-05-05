@@ -50,10 +50,27 @@
           </div>
           <div
             class="sidebar-nav__item"
-            :class="{ active: activeTab === 'history' }"
-            @click="activeTab = 'history'"
+            :class="{ active: activeTab === 'history' || activeTab.startsWith('history-') }"
+            @click="toggleSub('history')"
           >
-            <span>我的足迹</span>
+            <span>足迹收藏</span>
+            <el-icon
+              :size="12"
+              class="sidebar-nav__arrow"
+              :class="{ expanded: expandedMenus.history }"
+              ><ArrowDown
+            /></el-icon>
+          </div>
+          <div v-if="expandedMenus.history" class="sidebar-nav__sub">
+            <div
+              v-for="sub in historySubs"
+              :key="sub.key"
+              class="sidebar-nav__sub-item"
+              :class="{ active: activeTab === sub.key }"
+              @click="activeTab = sub.key"
+            >
+              {{ sub.label }}
+            </div>
           </div>
           <div
             class="sidebar-nav__item"
@@ -286,7 +303,10 @@
         @change-tab="activeTab = $event"
       />
       <CouponView v-if="activeTab === 'coupons'" />
-      <HistoryView v-if="activeTab === 'history'" />
+      <HistoryView
+        v-if="activeTab === 'history' || activeTab.startsWith('history-')"
+        :active-tab="activeTab"
+      />
       <ReviewView v-if="activeTab === 'reviews'" />
       <AddressView v-if="activeTab === 'address' || activeTab === 'settings-address'" />
       <HelpView v-if="activeTab === 'help'" />
@@ -351,7 +371,7 @@
           <el-icon><Ticket /></el-icon> 优惠券
         </div>
         <div class="mobile-user__menu-item" @click="activeTab = 'history'">
-          <el-icon><Clock /></el-icon> 我的足迹
+          <el-icon><Clock /></el-icon> 足迹收藏
         </div>
         <div class="mobile-user__menu-item" @click="activeTab = 'reviews'">
           <el-icon><ChatDotRound /></el-icon> 评价管理
@@ -408,6 +428,7 @@ const activeTab = ref('default')
 
 const expandedMenus = reactive({
   orders: false,
+  history: false,
   settings: false,
 })
 
@@ -415,6 +436,8 @@ function toggleSub(menu) {
   expandedMenus[menu] = !expandedMenus[menu]
   if (menu === 'orders') {
     activeTab.value = 'orders'
+  } else if (menu === 'history') {
+    activeTab.value = 'history'
   } else if (menu === 'settings') {
     activeTab.value = 'settings'
   }
@@ -440,7 +463,8 @@ const showDefaultView = computed(() => {
   if (tab === 'default') return true
   if (['orders', 'coupons', 'history', 'address', 'help', 'settings', 'reviews'].includes(tab))
     return false
-  if (tab.startsWith('order-') || tab.startsWith('settings-')) return false
+  if (tab.startsWith('order-') || tab.startsWith('settings-') || tab.startsWith('history-'))
+    return false
   return true
 })
 
@@ -456,6 +480,12 @@ const orderSubs = [
   { key: 'order-shipped', label: '待收货' },
   { key: 'order-review', label: '待评价' },
   { key: 'order-refund', label: '退换售后' },
+]
+
+const historySubs = [
+  { key: 'history', label: '我的足迹' },
+  { key: 'history-favorites', label: '商品收藏' },
+  { key: 'history-shops', label: '店铺关注' },
 ]
 
 const settingsSubs = [
@@ -479,6 +509,9 @@ onMounted(() => {
   }
   if (activeTab.value === 'orders' || activeTab.value.startsWith('order-')) {
     expandedMenus.orders = true
+  }
+  if (activeTab.value === 'history' || activeTab.value.startsWith('history-')) {
+    expandedMenus.history = true
   }
   if (activeTab.value === 'settings' || activeTab.value.startsWith('settings-')) {
     expandedMenus.settings = true
