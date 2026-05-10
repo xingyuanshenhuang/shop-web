@@ -501,12 +501,6 @@ watch(
     // 导航栏切换时，更新路由参数
     if (currentTab && currentTab !== prevCurrentTab) {
       // console.log(1)
-      if (
-        currentTab.startsWith('order-') ||
-        currentTab.startsWith('settings-') ||
-        currentTab.startsWith('history-')
-      )
-        return
       currentTab === 'cart' ? router.push('/cart') : router.replace({ query: { tab: currentTab } })
     }
     // 路由参数变化时，更新导航栏，修改activeTab.value 导航当前选中的值 为urlTab 路由参数值

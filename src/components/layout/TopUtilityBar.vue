@@ -61,22 +61,19 @@ import { ref } from 'vue'
 import { ArrowDown, User } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
-import { useNavStore } from '@/stores/navState'
-const navStore = useNavStore()
 
 const router = useRouter()
 const userStore = useUserStore()
 const userName = ref(userStore.user.name)
 const showRegion = ref(false)
 const showTheme = ref(false)
+
+// 直接导航到子选项对应的路由参数
 const handleOrderStatusClick = (command) => {
-  router.push('/user?tab=orders')
-  if (command === 'orders') return
-  navStore.updateSelectedStatus(command)
+  router.push(`/user?tab=${command}`)
 }
 const handleFavoriteClick = (command) => {
-  router.push('/user?tab=history')
-  navStore.updateSelectedStatus(command)
+  router.push(`/user?tab=${command}`)
 }
 </script>
 

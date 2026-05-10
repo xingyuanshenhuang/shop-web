@@ -132,60 +132,22 @@
  */
 
 import { ref, computed, watch } from 'vue'
-// Element Plus 图标组件
 import { Wallet, List, Van, ChatDotRound, RefreshLeft } from '@element-plus/icons-vue'
-// 模拟订单数据
 import { orders } from '@/mock/data'
-// 订单状态管理
-import { useNavStore } from '@/stores/navState'
-const navStore = useNavStore()
-// ==================== Props & Emits ====================
 
-/**
- * Props 定义
- * @property {string} activeTab - 当前激活的Tab标识，用于与父组件状态同步
- */
 const props = defineProps({
   activeTab: { type: String, default: 'orders' },
 })
 
-/**
- * Events 定义
- * @event change-tab - 状态切换时触发，通知父组件更新 activeTab
- */
 const emit = defineEmits(['change-tab'])
 
-// ==================== 事件处理函数 ====================
-
-/**
- * 处理状态项点击事件
- * @param {string} key - 点击的状态项key（如 'order-unpaid'）
- *
- * 逻辑：
- * 1. 更新当前选中的状态
- * 2. 触发 change-tab 事件通知父组件
- */
 function handleStatusClick(key) {
   currentStatus.value = key
   emit('change-tab', key)
 }
 
-// ==================== 响应式状态 ====================
-
-/** 当前选中的订单状态筛选，默认为 'orders'（全部订单） */
 const currentStatus = ref(props.activeTab)
-
-/** 当前展开的订单ID，用于控制详情区域的显示/隐藏 */
 const expandedOrder = ref(null)
-
-watch(
-  () => navStore.navSelectedStatus,
-  (newVal) => {
-    if (newVal.startsWith('history-')) return
-    currentStatus.value = newVal
-    emit('change-tab', newVal)
-  },
-)
 
 watch(
   () => props.activeTab,
@@ -194,17 +156,7 @@ watch(
   },
 )
 
-// ==================== 静态配置数据 ====================
-
-/**
- * 订单状态配置列表
- * 定义了5种订单状态及其对应的图标和数量
- *
- * @property {string} key - 状态标识符（用于路由和筛选）
- * @property {string} label - 状态显示名称
- * @property {Component} icon - Element Plus 图标组件
- * @property {number} count - 该状态下的订单数量
- */
+// 订单状态配置
 const orderStatuses = [
   { key: 'orders', label: '全部订单', icon: List, count: 0 },
   { key: 'order-unpaid', label: '待付款', icon: Wallet, count: 0 },
@@ -214,12 +166,7 @@ const orderStatuses = [
   { key: 'order-refund', label: '退换售后', icon: RefreshLeft, count: 0 },
 ]
 
-/**
- * 状态映射表：将状态key映射到中文状态名
- * 用于根据 currentStatus 筛选订单数据
- *
- * 注意：'orders' 不在此表中，表示全部订单
- */
+// 状态key → 中文映射（'orders'表示全部，不在表中）
 const statusMap = {
   'order-unpaid': '待付款',
   'order-unshipped': '待发货',
@@ -228,17 +175,6 @@ const statusMap = {
   'order-refund': '退换售后',
 }
 
-// ==================== 计算属性 ====================
-
-/**
- * 过滤后的订单列表
- *
- * 计算逻辑：
- * - 当 currentStatus 为 'orders' 时，返回全部订单
- * - 否则根据 statusMap 映射，筛选出对应状态的订单
- *
- * 性能优化：使用 computed 缓存结果，只有依赖变化时才重新计算
- */
 const filteredOrders = computed(() => {
   if (currentStatus.value === 'orders') return orders
   const target = statusMap[currentStatus.value]

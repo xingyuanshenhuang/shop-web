@@ -232,9 +232,6 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, Clock, Star, Shop, DeleteFilled } from '@element-plus/icons-vue'
 import { browsingHistory, favoriteProducts, followedShops } from '@/mock/data'
-import { useNavStore } from '@/stores/navState'
-
-const navStore = useNavStore()
 
 // Props & Emits
 const props = defineProps({
@@ -300,15 +297,6 @@ function switchTab(tabKey) {
   const tabMap = { history: 'history', favorites: 'history-favorites', shops: 'history-shops' }
   emit('update:activeTab', tabMap[tabKey])
 }
-
-watch(
-  () => navStore.navSelectedStatus,
-  (newVal) => {
-    if (newVal.startsWith('order-')) return
-    currentTab.value = newVal
-    emit('update:activeTab', newVal)
-  },
-)
 
 // 设置筛选条件
 function setFilter(key) {
