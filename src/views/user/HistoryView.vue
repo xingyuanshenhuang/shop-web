@@ -78,10 +78,6 @@
           <div class="history-group__header">
             <span class="history-group__date">{{ group.date }}</span>
             <span class="history-group__count">（{{ group.products.length }}件宝贝）</span>
-            <div class="history-group__filter-drops">
-              <span class="history-dropdown">宝贝分类 ▼</span>
-              <span class="history-dropdown">收藏时间 ▼</span>
-            </div>
           </div>
           <div class="product-grid">
             <div
@@ -227,36 +223,49 @@
 </template>
 
 <script setup>
+/**
+ * 足迹收藏组件
+ * 功能：展示我的足迹、商品收藏、店铺关注三个Tab，支持搜索、筛选、批量管理
+ */
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, Clock, Star, Shop, DeleteFilled } from '@element-plus/icons-vue'
 import { browsingHistory, favoriteProducts, followedShops } from '@/mock/data'
+import { useNavStore } from '@/stores/navState'
 
+const navStore = useNavStore()
+
+// Props & Emits
 const props = defineProps({
   activeTab: { type: String, default: 'history' },
 })
-
 const emit = defineEmits(['update:activeTab'])
 
 const router = useRouter()
 
-const currentTab = ref('history')
-const searchQuery = ref('')
+// 基础状态
+const currentTab = ref('history') // 当前Tab
+const searchQuery = ref('') // 搜索关键词
+const isBatchMode = ref(false) // 批量管理模式
+const selectedItems = ref([]) // 已选中的商品ID
+const showDeleteDialog = ref(false) // 删除确认弹窗
+const loading = ref(false) // 加载状态
 
+// Tab状态管理（筛选条件、分页）
 const tabState = ref({
   history: { filter: 'all', page: 1 },
   favorites: { filter: 'all', page: 1 },
   shops: { filter: 'all', page: 1 },
 })
 
+// 当前激活的筛选条件
 const activeFilter = computed({
   get: () => tabState.value[currentTab.value]?.filter || 'all',
   set: (val) => {
     tabState.value[currentTab.value].filter = val
   },
 })
-
 const activeShopFilter = computed({
   get: () => tabState.value.shops?.filter || 'all',
   set: (val) => {
@@ -264,11 +273,7 @@ const activeShopFilter = computed({
   },
 })
 
-const isBatchMode = ref(false)
-const selectedItems = ref([])
-const showDeleteDialog = ref(false)
-const loading = ref(false)
-
+// 监听父组件传入的activeTab，同步当前Tab
 watch(
   () => props.activeTab,
   (val) => {
@@ -279,39 +284,45 @@ watch(
   { immediate: true },
 )
 
+// Tab配置
 const tabs = [
   { key: 'history', label: '我的足迹' },
   { key: 'favorites', label: '商品收藏' },
   { key: 'shops', label: '店铺关注' },
 ]
 
+// 切换Tab
 function switchTab(tabKey) {
   if (currentTab.value === tabKey) return
-
   currentTab.value = tabKey
   isBatchMode.value = false
   selectedItems.value = []
-
   const tabMap = { history: 'history', favorites: 'history-favorites', shops: 'history-shops' }
   emit('update:activeTab', tabMap[tabKey])
 }
 
+watch(
+  () => navStore.navSelectedStatus,
+  (newVal) => {
+    if (newVal.startsWith('order-')) return
+    currentTab.value = newVal
+    emit('update:activeTab', newVal)
+  },
+)
+
+// 设置筛选条件
 function setFilter(key) {
   activeFilter.value = key
 }
-
 function setShopFilter(key) {
   activeShopFilter.value = key
 }
-
 function resetFilter() {
-  if (currentTab.value === 'shops') {
-    activeShopFilter.value = 'all'
-  } else {
-    activeFilter.value = 'all'
-  }
+  if (currentTab.value === 'shops') activeShopFilter.value = 'all'
+  else activeFilter.value = 'all'
 }
 
+// 筛选标签配置（根据数据动态计算数量）
 const productFilters = computed(() => {
   const items = currentTab.value === 'history' ? historyItems.value : favoriteItems.value
   const priceDownCount = items.filter((i) => i.status === 'price-down').length
@@ -322,7 +333,6 @@ const productFilters = computed(() => {
     { key: 'off-shelf', label: `失效(${offShelfCount})` },
   ]
 })
-
 const shopFilters = computed(() => {
   const newCount = shops.value.filter((s) => s.hasNew).length
   const couponCount = shops.value.filter((s) => s.hasCoupon).length
@@ -335,13 +345,11 @@ const shopFilters = computed(() => {
   ]
 })
 
+// 数据源
 const historyItems = ref([])
 browsingHistory.forEach((group) => {
-  group.products.forEach((p) => {
-    historyItems.value.push({ ...p, status: 'normal' })
-  })
+  group.products.forEach((p) => historyItems.value.push({ ...p, status: 'normal' }))
 })
-
 const historyGroups = ref(
   JSON.parse(JSON.stringify(browsingHistory)).map((group) => ({
     ...group,
@@ -351,21 +359,35 @@ const historyGroups = ref(
 const favoriteItems = ref([...favoriteProducts])
 const shops = ref([...followedShops])
 
+// 筛选后的数据
 const filteredHistoryGroups = computed(() => {
-  if (activeFilter.value === 'all') return historyGroups.value
-  return historyGroups.value
-    .map((group) => ({
-      ...group,
-      products: group.products.filter((i) => i.status === activeFilter.value),
-    }))
-    .filter((g) => g.products.length > 0)
+  let filtered = historyGroups.value
+  // 搜索过滤
+  if (searchQuery.value) {
+    filtered = filtered
+      .map((group) => ({
+        ...group,
+        products: group.products.filter((p) =>
+          p.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
+        ),
+      }))
+      .filter((g) => g.products.length > 0)
+  }
+  // 状态筛选
+  if (activeFilter.value !== 'all') {
+    filtered = filtered
+      .map((group) => ({
+        ...group,
+        products: group.products.filter((i) => i.status === activeFilter.value),
+      }))
+      .filter((g) => g.products.length > 0)
+  }
+  return filtered
 })
-
 const filteredFavoriteItems = computed(() => {
   if (activeFilter.value === 'all') return favoriteItems.value
   return favoriteItems.value.filter((i) => i.status === activeFilter.value)
 })
-
 const filteredShops = computed(() => {
   if (activeShopFilter.value === 'all') return shops.value
   if (activeShopFilter.value === 'new') return shops.value.filter((s) => s.hasNew)
@@ -374,15 +396,16 @@ const filteredShops = computed(() => {
   return shops.value
 })
 
+// 统计数据
 const currentItemCount = computed(() => {
   if (currentTab.value === 'history')
     return filteredHistoryGroups.value.reduce((sum, g) => sum + g.products.length, 0)
   if (currentTab.value === 'favorites') return filteredFavoriteItems.value.length
   return filteredShops.value.length
 })
-
 const hasMore = ref(false)
 
+// 全选状态
 const isAllSelected = computed(() => {
   if (currentTab.value === 'history') {
     const allIds = filteredHistoryGroups.value.flatMap((g) => g.products.map((p) => p.id))
@@ -392,6 +415,7 @@ const isAllSelected = computed(() => {
   return items.length > 0 && selectedItems.value.length === items.length
 })
 
+// 空状态文案
 const emptyStateText = computed(() => {
   const map = {
     history: '暂无浏览记录',
@@ -401,34 +425,26 @@ const emptyStateText = computed(() => {
   return map[currentTab.value] || '暂无数据'
 })
 
+// 批量操作
 function toggleSelectAll() {
   if (currentTab.value === 'history') {
     const allIds = filteredHistoryGroups.value.flatMap((g) => g.products.map((p) => p.id))
-    if (isAllSelected.value) {
-      selectedItems.value = []
-    } else {
-      selectedItems.value = [...allIds]
-    }
+    selectedItems.value = isAllSelected.value ? [] : [...allIds]
   } else {
     const items = filteredFavoriteItems.value
-    if (isAllSelected.value) {
-      selectedItems.value = []
-    } else {
-      selectedItems.value = items.map((i) => i.id)
-    }
+    selectedItems.value = isAllSelected.value ? [] : items.map((i) => i.id)
   }
 }
-
 function enterBatchMode() {
   isBatchMode.value = true
   selectedItems.value = []
 }
-
 function exitBatchMode() {
   isBatchMode.value = false
   selectedItems.value = []
 }
 
+// 删除操作
 function removeHistoryItem(date, id) {
   const group = historyGroups.value.find((g) => g.date === date)
   if (group) {
@@ -436,22 +452,10 @@ function removeHistoryItem(date, id) {
     if (idx > -1) group.products.splice(idx, 1)
   }
 }
-
 function removeFavoriteItem(id) {
   const idx = favoriteItems.value.findIndex((i) => i.id === id)
   if (idx > -1) favoriteItems.value.splice(idx, 1)
 }
-
-function goToProduct(id) {
-  router.push(`/product/${id}`)
-}
-
-function unfollowShop(id) {
-  const idx = shops.value.findIndex((s) => s.id === id)
-  if (idx > -1) shops.value.splice(idx, 1)
-  ElMessage({ message: '已取消关注', type: 'success', duration: 2000 })
-}
-
 function confirmDelete() {
   if (currentTab.value === 'history') {
     historyGroups.value.forEach((group) => {
@@ -465,6 +469,15 @@ function confirmDelete() {
   ElMessage({ message: '删除成功', type: 'success', duration: 2000 })
 }
 
+// 跳转与操作
+function goToProduct(id) {
+  router.push(`/product/${id}`)
+}
+function unfollowShop(id) {
+  const idx = shops.value.findIndex((s) => s.id === id)
+  if (idx > -1) shops.value.splice(idx, 1)
+  ElMessage({ message: '已取消关注', type: 'success', duration: 2000 })
+}
 function loadMore() {
   loading.value = true
   setTimeout(() => {
@@ -743,12 +756,6 @@ function loadMore() {
   color: var(--color-text-light);
 }
 
-.history-group__filter-drops {
-  margin-left: auto;
-  display: flex;
-  gap: 16px;
-}
-
 .history-dropdown {
   font-size: 12px;
   color: var(--color-text-mid);
@@ -769,7 +776,7 @@ function loadMore() {
 .product-card {
   width: calc(20% - 10px);
   background: var(--color-bg-white);
-  border-radius: 8px;
+  border-radius: var(--radius-btn);
   overflow: hidden;
   cursor: pointer;
   position: relative;

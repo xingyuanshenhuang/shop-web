@@ -306,6 +306,7 @@
       <HistoryView
         v-if="activeTab === 'history' || activeTab.startsWith('history-')"
         :active-tab="activeTab"
+        @update:activeTab="activeTab = $event"
       />
       <ReviewView v-if="activeTab === 'reviews'" />
       <AddressView v-if="activeTab === 'address' || activeTab === 'settings-address'" />
@@ -391,7 +392,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, reactive } from 'vue'
+import { ref, onMounted, computed, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowDown,
@@ -472,6 +473,50 @@ function handleCartClick() {
   activeTab.value = 'cart'
   router.push('/cart')
 }
+
+// 单独监听导航栏切换和路由参数变化
+// watch(
+//   () => activeTab.value,
+//   (newTab) => {
+//     console.log('newTab', newTab)
+//     router.replace({ query: { tab: newTab } })
+//   },
+// )
+// watch(
+//   () => route.query.tab,
+//   (urlTab) => {
+//     console.log('urlTab', urlTab)
+//     activeTab.value = urlTab
+//     router.replace({ query: { tab: urlTab } })
+//   },
+// )
+
+// 同时监听路由参数变化和导航栏切换
+watch(
+  [() => route.query.tab, () => activeTab.value],
+  ([urlTab, currentTab], [prevUrlTab, prevCurrentTab]) => {
+    // console.log('urlTab', urlTab)
+    // console.log('currentTab', currentTab)
+    if (urlTab === currentTab) return
+    // 导航栏切换时，更新路由参数
+    if (currentTab && currentTab !== prevCurrentTab) {
+      // console.log(1)
+      if (
+        currentTab.startsWith('order-') ||
+        currentTab.startsWith('settings-') ||
+        currentTab.startsWith('history-')
+      )
+        return
+      currentTab === 'cart' ? router.push('/cart') : router.replace({ query: { tab: currentTab } })
+    }
+    // 路由参数变化时，更新导航栏，修改activeTab.value 导航当前选中的值 为urlTab 路由参数值
+    if (urlTab && urlTab !== prevUrlTab) {
+      // console.log(2)
+      activeTab.value = urlTab
+      router.replace({ query: { tab: urlTab } })
+    }
+  },
+)
 
 const orderSubs = [
   { key: 'orders', label: '全部订单' },

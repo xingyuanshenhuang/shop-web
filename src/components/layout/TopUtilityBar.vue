@@ -34,14 +34,14 @@
           </template>
         </el-dropdown>
         <span class="top-utility-bar__divider"></span>
-        <el-dropdown trigger="hover">
+        <el-dropdown trigger="hover" @command="handleFavoriteClick">
           <span class="top-utility-bar__link">
             收藏夹 <el-icon :size="10"><ArrowDown /></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item>收藏的宝贝</el-dropdown-item>
-              <el-dropdown-item>收藏的店铺</el-dropdown-item>
+              <el-dropdown-item command="history-favorites">收藏的商品</el-dropdown-item>
+              <el-dropdown-item command="history-shops">收藏的店铺</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -61,8 +61,8 @@ import { ref } from 'vue'
 import { ArrowDown, User } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
-import { useOrderStore } from '@/stores/order'
-const orderStore = useOrderStore()
+import { useNavStore } from '@/stores/navState'
+const navStore = useNavStore()
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -70,10 +70,13 @@ const userName = ref(userStore.user.name)
 const showRegion = ref(false)
 const showTheme = ref(false)
 const handleOrderStatusClick = (command) => {
-  console.log(command)
   router.push('/user?tab=orders')
   if (command === 'orders') return
-  orderStore.updateSelectedStatus(command)
+  navStore.updateSelectedStatus(command)
+}
+const handleFavoriteClick = (command) => {
+  router.push('/user?tab=history')
+  navStore.updateSelectedStatus(command)
 }
 </script>
 

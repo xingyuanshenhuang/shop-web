@@ -137,8 +137,8 @@ import { Wallet, List, Van, ChatDotRound, RefreshLeft } from '@element-plus/icon
 // 模拟订单数据
 import { orders } from '@/mock/data'
 // 订单状态管理
-import { useOrderStore } from '@/stores/order'
-const orderStore = useOrderStore()
+import { useNavStore } from '@/stores/navState'
+const navStore = useNavStore()
 // ==================== Props & Emits ====================
 
 /**
@@ -179,8 +179,9 @@ const currentStatus = ref(props.activeTab)
 const expandedOrder = ref(null)
 
 watch(
-  () => orderStore.orderSelectedStatus,
+  () => navStore.navSelectedStatus,
   (newVal) => {
+    if (newVal.startsWith('history-')) return
     currentStatus.value = newVal
     emit('change-tab', newVal)
   },
