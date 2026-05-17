@@ -1,26 +1,27 @@
 :root {
-  --color-primary: #FF5000;
-  --color-primary-hover: #E04800;
-  --color-deep-orange: #FF8547;
-  --color-success: #52C41A;
-  --color-member-purple: #722ED1;
-  --color-danger: #FF4D4F;
-  --color-bg: #F5F5F5;
-  --color-bg-white: #FFFFFF;
+  --color-primary: #ff5000;
+  --color-primary-hover: #e04800;
+  --color-deep-orange: #ff8547;
+  --color-success: #52c41a;
+  --color-member-purple: #722ed1;
+  --color-danger: #ff4d4f;
+  --color-bg: #f5f5f5;
+  --color-bg-white: #ffffff;
   --color-text-dark: #333333;
   --color-text-mid: #666666;
   --color-text-light: #999999;
-  --color-border: #E8E8E8;
-  --color-border-light: #E0E0E0;
-  --color-light-orange: #FFF1E8;
-  --color-light-yellow: #FFF8F0;
-  --color-light-green: #F0FFF0;
-  --color-light-purple: #F5F0FF;
-  --color-warm-bg: #F5F0EB;
-  --color-warm-border: #E0D6DE;
-  --color-tag-bg: #F5F0EB;
+  --color-border: #e8e8e8;
+  --color-border-light: #e0e0e0;
+  --color-light-orange: #fff1e8;
+  --color-light-yellow: #fff8f0;
+  --color-light-green: #f0fff0;
+  --color-light-purple: #f5f0ff;
+  --color-warm-bg: #f5f0eb;
+  --color-warm-border: #e0d6de;
+  --color-tag-bg: #f5f0eb;
 
-  --font-family: 'PingFang SC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family:
+    'PingFang SC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-price: 'DIN Pro', 'Inter', monospace;
 
   --radius-sm: 4px;

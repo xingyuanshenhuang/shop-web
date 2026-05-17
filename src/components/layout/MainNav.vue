@@ -60,17 +60,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { Search, ShoppingCart, ArrowDown } from '@element-plus/icons-vue'
-import { useCartStore } from '@/stores/cart'
+import { ref, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Search, ShoppingCart, ArrowDown } from '@element-plus/icons-vue';
+import { useCartStore } from '@/stores/cart';
 
-const route = useRoute()
-const router = useRouter()
-const cartStore = useCartStore()
-const cartCount = computed(() => cartStore.totalCount)
-const searchKeyword = ref('')
-const mobileSearchVisible = ref(false)
+const route = useRoute();
+const router = useRouter();
+const cartStore = useCartStore();
+const cartCount = computed(() => cartStore.totalCount);
+const searchKeyword = ref('');
+const mobileSearchVisible = ref(false);
 
 const navCategories = [
   { label: '首页', path: '/' },
@@ -79,16 +79,16 @@ const navCategories = [
   { label: '服饰', path: '/products?category=fashion' },
   { label: '母婴', path: '/products?category=baby' },
   { label: '数码', path: '/products?category=digital' },
-]
+];
 
 function isActive(path) {
-  if (path === '/') return route.path === '/'
-  return route.fullPath.startsWith(path.split('?')[0])
+  if (path === '/') return route.path === '/';
+  return route.fullPath.startsWith(path.split('?')[0]);
 }
 
 function handleSearch() {
   if (searchKeyword.value.trim()) {
-    router.push(`/products?keyword=${encodeURIComponent(searchKeyword.value.trim())}`)
+    router.push(`/products?keyword=${encodeURIComponent(searchKeyword.value.trim())}`);
   }
 }
 </script>

@@ -11,7 +11,13 @@
           clearable
         />
         <template v-if="!isBatchMode">
-          <button class="ghost-btn ghost-btn--primary" @click="enterBatchMode">批量管理</button>
+          <button
+            v-if="currentTab !== 'shops'"
+            class="ghost-btn ghost-btn--primary"
+            @click="enterBatchMode"
+          >
+            批量管理
+          </button>
         </template>
         <template v-else>
           <button
@@ -47,8 +53,50 @@
         @click="setFilter(f.key)"
         >{{ f.label }}</span
       >
-      <span class="filter-dropdown">宝贝分类 ▼</span>
-      <span class="filter-dropdown">收藏时间 ▼</span>
+      <span
+        class="filter-dropdown"
+        @mouseenter="handleDropdownOpen('category')"
+        @mouseleave="handleDropdownClose()"
+        >宝贝分类 <el-icon :size="10"><arrowIcon /></el-icon
+      ></span>
+      <span
+        class="filter-dropdown"
+        @mouseenter="handleDropdownOpen('time')"
+        @mouseleave="handleDropdownClose()"
+        >收藏时间 <el-icon :size="10"><arrowIcon /></el-icon
+      ></span>
+      <!-- 宝贝分类下拉面板 -->
+      <div
+        v-if="hoverDropdown === 'category'"
+        class="filter-dropdown-panel"
+        @mouseenter="openDropdown('category')"
+        @mouseleave="scheduleHideDropdown"
+      >
+        <span
+          v-for="cat in categoryOptions"
+          :key="cat.key"
+          class="filter-panel-option"
+          :class="{ active: activeCategory === cat.key }"
+          @click="selectCategory(cat.key)"
+          >{{ cat.label }}</span
+        >
+      </div>
+      <!-- 收藏时间下拉面板 -->
+      <div
+        v-if="hoverDropdown === 'time'"
+        class="filter-dropdown-panel"
+        @mouseenter="openDropdown('time')"
+        @mouseleave="scheduleHideDropdown"
+      >
+        <span
+          v-for="t in timeOptions"
+          :key="t.key"
+          class="filter-panel-option"
+          :class="{ active: activeTimeRange === t.key }"
+          @click="selectTimeRange(t.key)"
+          >{{ t.label }}</span
+        >
+      </div>
     </div>
 
     <div v-if="currentTab === 'shops'" class="footprint-view__filters">
@@ -75,7 +123,7 @@
     <div v-if="currentTab === 'history'" class="view-content">
       <div v-if="filteredHistoryGroups.length" class="history-groups">
         <div v-for="group in filteredHistoryGroups" :key="group.date" class="history-group">
-          <div class="history-group__header">
+          <div class="history-group__header" v-if="group.products.length">
             <span class="history-group__date">{{ group.date }}</span>
             <span class="history-group__count">（{{ group.products.length }}件宝贝）</span>
           </div>
@@ -96,6 +144,7 @@
                   <span
                     class="batch-checkbox"
                     :class="{ checked: selectedItems.includes(item.id) }"
+                    @click="toggleSelectItem(item.id)"
                   ></span>
                 </div>
                 <span
@@ -141,6 +190,7 @@
               <span
                 class="batch-checkbox"
                 :class="{ checked: selectedItems.includes(item.id) }"
+                @click="toggleSelectItem(item.id)"
               ></span>
             </div>
             <span
@@ -232,6 +282,8 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, Clock, Star, Shop, DeleteFilled } from '@element-plus/icons-vue'
 import { browsingHistory, favoriteProducts, followedShops } from '@/mock/data'
+import { useHoverArrow } from '@/composables/useHoverArrow'
+const { updateHover, arrowIcon } = useHoverArrow()
 
 // Props & Emits
 const props = defineProps({
@@ -248,7 +300,55 @@ const isBatchMode = ref(false) // 批量管理模式
 const selectedItems = ref([]) // 已选中的商品ID
 const showDeleteDialog = ref(false) // 删除确认弹窗
 const loading = ref(false) // 加载状态
+const hoverDropdown = ref(null) // 下拉面板hover状态
 
+// 下拉选项配置
+const categoryOptions = [
+  { key: 'electronics', label: '电子' },
+  { key: 'service', label: '服务' },
+  { key: 'food', label: '食品' },
+]
+const timeOptions = [
+  { key: '7days', label: '7天内' },
+  { key: '30days', label: '30天内' },
+  { key: '90days', label: '90天内' },
+  { key: 'half-year', label: '半年前' },
+  { key: 'one-year', label: '一年前' },
+]
+const activeCategory = ref('all')
+const activeTimeRange = ref('all')
+let hideTimer = null // 隐藏延迟定时器
+
+function openDropdown(type) {
+  clearTimeout(hideTimer)
+  hoverDropdown.value = type
+}
+function scheduleHideDropdown() {
+  clearTimeout(hideTimer)
+  hideTimer = setTimeout(() => {
+    hoverDropdown.value = null
+  }, 1000)
+}
+function hideDropdown() {
+  clearTimeout(hideTimer)
+  hoverDropdown.value = null
+}
+function selectCategory(key) {
+  activeCategory.value = key
+  hideDropdown()
+}
+function selectTimeRange(key) {
+  activeTimeRange.value = key
+  hideDropdown()
+}
+function handleDropdownOpen(open) {
+  openDropdown(open)
+  updateHover(true)
+}
+function handleDropdownClose() {
+  openDropdown()
+  updateHover(false)
+}
 // Tab状态管理（筛选条件、分页）
 const tabState = ref({
   history: { filter: 'all', page: 1 },
@@ -423,6 +523,13 @@ function toggleSelectAll() {
     selectedItems.value = isAllSelected.value ? [] : items.map((i) => i.id)
   }
 }
+
+// 单项选择
+function toggleSelectItem(id) {
+  const index = selectedItems.value.indexOf(id)
+  index > -1 ? selectedItems.value.splice(index, 1) : selectedItems.value.push(id)
+}
+
 function enterBatchMode() {
   isBatchMode.value = true
   selectedItems.value = []
@@ -459,6 +566,7 @@ function confirmDelete() {
 
 // 跳转与操作
 function goToProduct(id) {
+  if (isBatchMode.value) return
   router.push(`/product/${id}`)
 }
 function unfollowShop(id) {
@@ -607,6 +715,7 @@ function loadMore() {
   gap: 16px;
   padding: 12px 0;
   flex-wrap: wrap;
+  position: relative;
 }
 
 .filter-label {
@@ -655,6 +764,43 @@ function loadMore() {
 
 .filter-dropdown + .filter-dropdown {
   margin-left: 16px;
+}
+
+.filter-dropdown-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  /* border: 1px solid var(--color-primary); */
+  border-radius: var(--radius-btn);
+  background: var(--color-bg-white);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 10;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.25);
+}
+
+.filter-panel-option {
+  font-size: 13px;
+  color: var(--color-text-mid);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #ebebeb;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.filter-panel-option:hover {
+  color: var(--color-primary);
+  background: var(--color-light-orange);
+}
+
+.filter-panel-option.active {
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .batch-bar {

@@ -19,8 +19,12 @@
         <span class="top-utility-bar__link">已买到的宝贝</span>
         <span class="top-utility-bar__divider"></span>
         <el-dropdown trigger="hover" @command="handleOrderStatusClick">
-          <span class="top-utility-bar__link">
-            我的订单 <el-icon :size="10"><ArrowDown /></el-icon>
+          <span
+            class="top-utility-bar__link"
+            @mouseenter="updateHover(true)"
+            @mouseleave="updateHover(false)"
+          >
+            我的订单 <el-icon :size="10"><arrowIcon /></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
@@ -35,8 +39,12 @@
         </el-dropdown>
         <span class="top-utility-bar__divider"></span>
         <el-dropdown trigger="hover" @command="handleFavoriteClick">
-          <span class="top-utility-bar__link">
-            收藏夹 <el-icon :size="10"><ArrowDown /></el-icon>
+          <span
+            class="top-utility-bar__link"
+            @mouseenter="updateHover(true)"
+            @mouseleave="updateHover(false)"
+          >
+            收藏夹 <el-icon :size="10"><arrowIcon /></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
@@ -61,6 +69,9 @@ import { ref } from 'vue'
 import { ArrowDown, User } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
+import { useHoverArrow } from '@/composables/useHoverArrow'
+
+const { updateHover, arrowIcon } = useHoverArrow()
 
 const router = useRouter()
 const userStore = useUserStore()
