@@ -81,13 +81,6 @@
           </div>
           <div
             class="sidebar-nav__item"
-            :class="{ active: activeTab === 'address' }"
-            @click="activeTab = 'address'"
-          >
-            <span>收货地址</span>
-          </div>
-          <div
-            class="sidebar-nav__item"
             :class="{ active: activeTab === 'help' }"
             @click="activeTab = 'help'"
           >
@@ -129,14 +122,21 @@
               <img :src="user.avatar" class="user-profile-card__avatar" />
               <div class="user-profile-card__name-area">
                 <h3 class="user-profile-card__name">{{ user.name }}</h3>
-                <span class="user-profile-card__level-tag">{{ user.level }}</span>
+                <div class="user-profile-card__inline-tags">
+                  <span class="user-profile-card__inline-tag is-gold">黄金会员</span>
+                  <span class="user-profile-card__tag-sep">|</span>
+                  <a
+                    class="user-profile-card__inline-tag user-profile-card__inline-link"
+                    @click="activeTab = 'settings-address'"
+                    >地址管理</a
+                  >
+                </div>
               </div>
             </div>
-            <div class="user-profile-card__address-row">
-              <span class="user-profile-card__address-text">收货地址：{{ user.address }}</span>
-              <a class="user-profile-card__address-link" @click="activeTab = 'address'"
-                >收货地址 &gt;</a
-              >
+            <div class="user-profile-card__plus-bar">
+              <span class="user-profile-card__plus-icon">👑</span>
+              <span class="user-profile-card__plus-label">PLUS会员</span>
+              <span class="user-profile-card__plus-desc">权益重磅升级 点击此处开通 &gt;</span>
             </div>
             <div class="user-profile-card__coin-bar">
               <el-icon :size="20" color="#FF5000"><Coin /></el-icon>
@@ -309,13 +309,9 @@
         @update:activeTab="activeTab = $event"
       />
       <ReviewView v-if="activeTab === 'reviews'" />
-      <AddressView v-if="activeTab === 'address' || activeTab === 'settings-address'" />
       <HelpView v-if="activeTab === 'help'" />
       <SettingsView
-        v-if="
-          activeTab === 'settings' ||
-          (activeTab.startsWith('settings-') && activeTab !== 'settings-address')
-        "
+        v-if="activeTab === 'settings' || activeTab.startsWith('settings-')"
         :active-tab="activeTab"
         @change-tab="activeTab = $event"
       />
@@ -377,7 +373,7 @@
         <div class="mobile-user__menu-item" @click="activeTab = 'reviews'">
           <el-icon><ChatDotRound /></el-icon> 评价管理
         </div>
-        <div class="mobile-user__menu-item" @click="activeTab = 'address'">
+        <div class="mobile-user__menu-item" @click="activeTab = 'settings-address'">
           <el-icon><Location /></el-icon> 收货地址
         </div>
         <div class="mobile-user__menu-item" @click="activeTab = 'help'">
@@ -417,7 +413,6 @@ import OrderView from '@/views/user/OrderView.vue'
 import CouponView from '@/views/user/CouponView.vue'
 import HistoryView from '@/views/user/HistoryView.vue'
 import ReviewView from '@/views/user/ReviewView.vue'
-import AddressView from '@/views/user/AddressView.vue'
 import HelpView from '@/views/user/HelpView.vue'
 import SettingsView from '@/views/user/SettingsView.vue'
 
@@ -462,8 +457,7 @@ const cartTotal = computed(() =>
 const showDefaultView = computed(() => {
   const tab = activeTab.value
   if (tab === 'default') return true
-  if (['orders', 'coupons', 'history', 'address', 'help', 'settings', 'reviews'].includes(tab))
-    return false
+  if (['orders', 'coupons', 'history', 'help', 'settings', 'reviews'].includes(tab)) return false
   if (tab.startsWith('order-') || tab.startsWith('settings-') || tab.startsWith('history-'))
     return false
   return true
@@ -698,42 +692,64 @@ onMounted(() => {
 }
 
 .user-profile-card__name {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--color-text-dark);
   margin: 0;
 }
 
-.user-profile-card__level-tag {
-  display: inline-block;
-  background: var(--color-light-orange);
-  color: var(--color-primary);
-  font-size: 10px;
-  border-radius: var(--radius-pill);
-  padding: 2px 10px;
-  width: fit-content;
-}
-
-.user-profile-card__address-row {
+.user-profile-card__inline-tags {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
 }
 
-.user-profile-card__address-text {
+.user-profile-card__inline-tag {
   font-size: 12px;
-  color: var(--color-text-light);
+  color: var(--color-text-mid);
 }
 
-.user-profile-card__address-link {
-  font-size: 12px;
-  color: var(--color-text-light);
+.user-profile-card__inline-tag.is-gold {
+  color: #d4a017;
+}
+
+.user-profile-card__inline-link {
   cursor: pointer;
   transition: color var(--transition-fast);
 }
 
-.user-profile-card__address-link:hover {
+.user-profile-card__inline-link:hover {
   color: var(--color-primary);
+}
+
+.user-profile-card__tag-sep {
+  color: var(--color-text-light);
+  font-size: 10px;
+}
+
+.user-profile-card__plus-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f0eb;
+  border-radius: var(--radius-btn);
+  padding: 6px 12px;
+}
+
+.user-profile-card__plus-icon {
+  font-size: 14px;
+}
+
+.user-profile-card__plus-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-dark);
+}
+
+.user-profile-card__plus-desc {
+  font-size: 11px;
+  color: var(--color-primary);
+  cursor: pointer;
 }
 
 .user-profile-card__coin-bar {

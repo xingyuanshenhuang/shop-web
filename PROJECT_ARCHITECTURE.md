@@ -30,9 +30,8 @@
    - CouponView.vue — 优惠券领取/我的优惠券
    - HistoryView.vue — 按日期分组的浏览历史
    - ReviewView.vue — 评价管理（待评价/已评价Tab、评价弹层）
-   - AddressView.vue — 地址管理（新增/编辑/删除）
    - HelpView.vue — 搜索/快捷入口/FAQ分类
-   - SettingsView.vue — 个人资料/安全设置/关于我们
+   - SettingsView.vue — 个人资料/安全设置/收货地址（新增/编辑/删除）/关于我们
 
 ## 状态管理 (Pinia Stores)
 

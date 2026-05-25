@@ -119,6 +119,85 @@
       </div>
     </div>
 
+    <div v-if="currentTab === 'settings-address'" class="settings-address">
+      <div class="address-header">
+        <el-button type="primary" size="small" @click="addAddress()">新增地址</el-button>
+      </div>
+      <div class="address-list">
+        <div
+          v-for="addr in addresses"
+          :key="addr.id"
+          class="address-card"
+          :class="{ 'is-default': addr.isDefault }"
+        >
+          <div class="address-card__default-tag" v-if="addr.isDefault">默认</div>
+          <div class="address-card__content">
+            <div class="address-card__name">
+              {{ addr.name }} <span style="margin-left: 12px">{{ addr.phone }}</span>
+            </div>
+            <div class="address-card__detail">
+              {{ addr.province }}{{ addr.city }}{{ addr.district }}{{ addr.detail }}
+            </div>
+          </div>
+          <div class="address-card__actions">
+            <el-button text size="small" @click="editAddress(addr)">编辑</el-button>
+            <el-button text size="small" type="danger" @click="confirmDelete(addr)">删除</el-button>
+          </div>
+        </div>
+      </div>
+      <div v-if="!addresses.length" class="address-empty">
+        <el-icon :size="64" color="#E0D6CE"><Message /></el-icon>
+        <p>暂无收货地址</p>
+        <el-button @click="showAddDialog = true">新增收货地址</el-button>
+      </div>
+
+      <el-dialog
+        v-model="showAddDialog"
+        :title="isEditing ? '编辑地址' : '新增收货地址'"
+        width="480px"
+        :close-on-click-modal="false"
+      >
+        <el-form label-width="80px">
+          <el-form-item label="收件人" required
+            ><el-input v-model="formData.name" placeholder="请输入收件人姓名"
+          /></el-form-item>
+          <el-form-item label="手机号" required
+            ><el-input v-model="formData.phone" placeholder="请输入手机号" maxlength="11"
+          /></el-form-item>
+          <el-form-item label="所在地区" required
+            ><el-input v-model="formData.region" placeholder="省/市/区"
+          /></el-form-item>
+          <el-form-item label="详细地址" required
+            ><el-input
+              v-model="formData.detail"
+              type="textarea"
+              placeholder="请输入详细地址"
+              :rows="3"
+              resize="none"
+          /></el-form-item>
+          <el-form-item
+            ><el-checkbox v-model="formData.isDefault">设为默认地址</el-checkbox></el-form-item
+          >
+        </el-form>
+        <template #footer>
+          <el-button type="primary" @click="showAddDialog = false">保存</el-button>
+        </template>
+      </el-dialog>
+
+      <el-dialog
+        v-model="showDeleteDialog"
+        title="确认删除"
+        width="360px"
+        :close-on-click-modal="false"
+      >
+        <p>确定删除该地址吗？</p>
+        <template #footer>
+          <el-button @click="showDeleteDialog = false">取消</el-button>
+          <el-button type="danger" @click="deleteAddress">删除</el-button>
+        </template>
+      </el-dialog>
+    </div>
+
     <div v-if="currentTab === 'settings-about'" class="settings-about">
       <div class="about-brand">
         <div class="about-brand__logo">🛍️</div>
@@ -169,9 +248,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { Lock, Iphone, Message, Link, Monitor, ArrowRight } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { addresses as mockAddresses } from '@/mock/data'
 
 const props = defineProps({
   activeTab: { type: String, default: 'settings' },
@@ -204,11 +284,80 @@ const profileForm = reactive({
   verified: false,
 })
 
+watch(
+  () => props.activeTab,
+  (newVal) => {
+    if (newVal && newVal.startsWith('settings-')) {
+      currentTab.value = newVal
+    }
+  },
+)
+
 onMounted(() => {
   if (props.activeTab && props.activeTab.startsWith('settings-')) {
     currentTab.value = props.activeTab
   }
 })
+
+// 收货地址管理
+// 收货地址列表数据
+const addresses = ref([...mockAddresses])
+// 新增/编辑地址弹窗显示状态
+const showAddDialog = ref(false)
+// 删除地址确认弹窗显示状态
+const showDeleteDialog = ref(false)
+// 是否正在编辑地址
+const isEditing = ref(false)
+// 当前正在编辑的地址对象
+const editingAddress = ref(null)
+// 待删除的地址ID
+const deletingId = ref(null)
+const defaultAddress = ref({
+  name: '', // 收件人姓名
+  phone: '', // 手机号
+  region: '', // 所在地区（省/市/区）
+  detail: '', // 详细地址
+  isDefault: false, // 是否设为默认地址
+})
+
+// 地址表单数据（用于新增/编辑地址）
+const formData = ref({
+  name: '', // 收件人姓名
+  phone: '', // 手机号
+  region: '', // 所在地区（省/市/区）
+  detail: '', // 详细地址
+  isDefault: false, // 是否设为默认地址
+})
+
+function addAddress() {
+  isEditing.value = false
+  formData.value = { ...defaultAddress.value }
+  showAddDialog.value = true
+}
+
+// 编辑地址：将选中地址数据回填到表单并打开编辑弹窗
+function editAddress(addr) {
+  editingAddress.value = addr
+  formData.value.name = addr.name
+  formData.value.phone = addr.phone
+  formData.value.region = addr.province + addr.city + addr.district
+  formData.value.detail = addr.detail
+  formData.value.isDefault = addr.isDefault
+  showAddDialog.value = true
+  isEditing.value = true
+}
+
+// 确认删除：记录待删除地址ID并打开确认弹窗
+function confirmDelete(addr) {
+  deletingId.value = addr.id
+  showDeleteDialog.value = true
+}
+
+// 执行删除：从地址列表中移除指定ID的地址并关闭弹窗
+function deleteAddress() {
+  addresses.value = addresses.value.filter((a) => a.id !== deletingId.value)
+  showDeleteDialog.value = false
+}
 </script>
 
 <style scoped>
@@ -466,5 +615,91 @@ onMounted(() => {
   padding: 16px;
   font-size: 12px;
   color: #ccc;
+}
+
+/* 收货地址样式 */
+.settings-address {
+  flex-direction: column;
+}
+
+.address-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.address-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: var(--color-bg-white);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  transition: box-shadow var(--transition-fast);
+  overflow: hidden;
+}
+
+.address-card:hover {
+  box-shadow: var(--shadow-card);
+}
+
+.address-card__default-tag {
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 2px;
+}
+
+.address-card__content {
+  flex: 1;
+  padding: 16px 24px;
+}
+
+.address-card__name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.address-card__detail {
+  font-size: 12px;
+  color: var(--color-text-mid);
+  line-height: 20px;
+  max-width: 80%;
+}
+
+.address-card__actions {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.address-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 16px;
+}
+
+.address-empty p {
+  font-size: 14px;
+  color: var(--color-text-light);
 }
 </style>

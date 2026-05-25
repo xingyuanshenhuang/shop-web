@@ -55,19 +55,31 @@
       >
       <span
         class="filter-dropdown"
+        :class="{ active: hoverDropdown === 'category' }"
         @mouseenter="handleDropdownOpen('category')"
-        @mouseleave="handleDropdownClose()"
-        >宝贝分类 <el-icon :size="10"><arrowIcon /></el-icon
+        @mouseleave="handleDropdownClose"
+        >{{
+          activeCategory === 'all'
+            ? '宝贝分类'
+            : categoryOptions.find((cat) => cat.key === activeCategory)?.label
+        }}
+        <el-icon :size="10"><arrowIcon /></el-icon
       ></span>
       <span
         class="filter-dropdown"
+        :class="{ active: hoverDropdown === 'time' }"
         @mouseenter="handleDropdownOpen('time')"
-        @mouseleave="handleDropdownClose()"
-        >收藏时间 <el-icon :size="10"><arrowIcon /></el-icon
+        @mouseleave="handleDropdownClose"
+        >{{
+          activeTimeRange === 'all'
+            ? '收藏时间'
+            : timeOptions.find((t) => t.key === activeTimeRange)?.label
+        }}
+        <el-icon :size="10"><arrowIcon /></el-icon
       ></span>
       <!-- 宝贝分类下拉面板 -->
       <div
-        v-if="hoverDropdown === 'category'"
+        v-show="hoverDropdown === 'category'"
         class="filter-dropdown-panel"
         @mouseenter="openDropdown('category')"
         @mouseleave="scheduleHideDropdown"
@@ -83,7 +95,7 @@
       </div>
       <!-- 收藏时间下拉面板 -->
       <div
-        v-if="hoverDropdown === 'time'"
+        v-show="hoverDropdown === 'time'"
         class="filter-dropdown-panel"
         @mouseenter="openDropdown('time')"
         @mouseleave="scheduleHideDropdown"
@@ -315,7 +327,9 @@ const timeOptions = [
   { key: 'half-year', label: '半年前' },
   { key: 'one-year', label: '一年前' },
 ]
+// 当前选中的宝贝分类，默认为 'all'（全部）
 const activeCategory = ref('all')
+// 当前选中的收藏时间范围，默认为 'all'（全部）
 const activeTimeRange = ref('all')
 let hideTimer = null // 隐藏延迟定时器
 
@@ -334,11 +348,19 @@ function hideDropdown() {
   hoverDropdown.value = null
 }
 function selectCategory(key) {
-  activeCategory.value = key
+  if (activeCategory.value === key) {
+    activeCategory.value = 'all'
+  } else {
+    activeCategory.value = key
+  }
   hideDropdown()
 }
 function selectTimeRange(key) {
-  activeTimeRange.value = key
+  if (activeTimeRange.value === key) {
+    activeTimeRange.value = 'all'
+  } else {
+    activeTimeRange.value = key
+  }
   hideDropdown()
 }
 function handleDropdownOpen(open) {
@@ -346,7 +368,7 @@ function handleDropdownOpen(open) {
   updateHover(true)
 }
 function handleDropdownClose() {
-  openDropdown()
+  scheduleHideDropdown()
   updateHover(false)
 }
 // Tab状态管理（筛选条件、分页）
@@ -758,7 +780,8 @@ function loadMore() {
   transition: color var(--transition-fast);
 }
 
-.filter-dropdown:hover {
+.filter-dropdown:hover,
+.filter-dropdown.active {
   color: var(--color-primary);
 }
 
