@@ -180,118 +180,199 @@
           </div>
         </div>
 
-        <div class="order-dashboard">
-          <div class="order-dashboard__header">
-            <span class="order-dashboard__title">我的订单</span>
-            <a class="order-dashboard__link" @click="activeTab = 'orders'">查看全部 &gt;</a>
-          </div>
-          <div class="order-dashboard__status-row">
-            <div
-              v-for="status in orderStatuses"
-              :key="status.key"
-              class="order-dashboard__status-item"
-              :class="{ 'has-pending': status.count > 0 }"
-              @click="activeTab = status.key"
-            >
-              <el-icon :size="24"><component :is="status.icon" /></el-icon>
-              <span class="order-dashboard__status-count">{{ status.count }}</span>
-              <span class="order-dashboard__status-label">{{ status.label }}</span>
+        <div class="dashboard-grid">
+          <div class="dashboard-card dashboard-card--wide" @click="activeTab = 'orders'">
+            <div class="dashboard-card__header">
+              <span class="dashboard-card__title">我的订单</span>
+              <span class="dashboard-card__arrow"
+                ><el-icon><ArrowRight /></el-icon
+              ></span>
+            </div>
+            <div class="dashboard-card__status-row">
+              <div
+                v-for="status in orderStatuses"
+                :key="status.key"
+                class="dashboard-status-item"
+                :class="{ 'has-pending': status.count > 0 }"
+              >
+                <span class="dashboard-status-item__count">{{ status.count }}</span>
+                <span class="dashboard-status-item__label">{{ status.label }}</span>
+              </div>
+            </div>
+            <div v-if="latestOrder" class="dashboard-card__order-preview">
+              <img :src="latestOrder.image" class="dashboard-card__order-img" />
+              <div class="dashboard-card__order-info">
+                <p class="dashboard-card__order-text text-truncate">
+                  {{ latestOrder.text }}
+                </p>
+                <span class="dashboard-card__order-time">{{ latestOrder.time }} 查看物流 &gt;</span>
+              </div>
+              <button class="dashboard-card__order-btn">确认收货</button>
             </div>
           </div>
-          <div class="order-dashboard__footer">
-            <span class="order-dashboard__footer-text">当前暂无物流信息更新</span>
-            <a class="order-dashboard__footer-link" @click="activeTab = 'orders'"
-              >查看全部订单 &gt;</a
+
+          <div class="dashboard-card" @click="activeTab = 'favorites'">
+            <div class="dashboard-card__header">
+              <span class="dashboard-card__title">我的收藏</span>
+              <span class="dashboard-card__arrow"
+                ><el-icon><ArrowRight /></el-icon
+              ></span>
+            </div>
+            <el-carousel
+              v-if="favoriteItems.length"
+              height="170px"
+              :interval="3000"
+              indicator-position="none"
+              arrow="never"
+              trigger="click"
             >
+              <el-carousel-item v-for="item in favoriteItems" :key="item.id">
+                <div class="dashboard-card__product-slide">
+                  <img :src="item.image" class="dashboard-card__product-img" />
+                  <div class="dashboard-card__product-info">
+                    <span class="dashboard-card__product-name text-truncate">{{ item.name }}</span>
+                    <span class="dashboard-card__product-stat">{{ favoriteCount }}人收藏</span>
+                  </div>
+                </div>
+              </el-carousel-item>
+            </el-carousel>
+            <div v-else class="dashboard-card__empty">
+              <span>暂无收藏内容</span>
+            </div>
+          </div>
+
+          <div class="dashboard-card" @click="activeTab = 'history'">
+            <div class="dashboard-card__header">
+              <span class="dashboard-card__title">我的足迹</span>
+              <span class="dashboard-card__arrow"
+                ><el-icon><ArrowRight /></el-icon
+              ></span>
+            </div>
+            <el-carousel
+              v-if="historyItems.length"
+              height="170px"
+              :interval="3000"
+              indicator-position="none"
+              arrow="never"
+              trigger="click"
+            >
+              <el-carousel-item v-for="item in historyItems" :key="item.id">
+                <div class="dashboard-card__product-slide">
+                  <img :src="item.image" class="dashboard-card__product-img" />
+                  <div class="dashboard-card__product-info">
+                    <span class="dashboard-card__product-name text-truncate">{{ item.name }}</span>
+                    <span class="dashboard-card__product-price price-sm">¥{{ item.price }}</span>
+                  </div>
+                </div>
+              </el-carousel-item>
+            </el-carousel>
+            <div v-else class="dashboard-card__empty">
+              <span>暂无浏览记录</span>
+            </div>
+          </div>
+
+          <div class="dashboard-card" @click="handleCartClick">
+            <div class="dashboard-card__header">
+              <span class="dashboard-card__title">购物车</span>
+              <span class="dashboard-card__arrow"
+                ><el-icon><ArrowRight /></el-icon
+              ></span>
+            </div>
+            <el-carousel
+              v-if="cartItemCount > 0"
+              height="170px"
+              :interval="3000"
+              indicator-position="none"
+              arrow="never"
+              trigger="click"
+            >
+              <el-carousel-item v-for="item in cartItems" :key="item.id">
+                <div class="dashboard-card__product-slide">
+                  <img :src="item.image" class="dashboard-card__product-img" />
+                  <div class="dashboard-card__product-info">
+                    <span class="dashboard-card__product-name text-truncate">{{ item.name }}</span>
+                    <span class="dashboard-card__cart-price"
+                      ><em>追加入降</em> ¥{{ (item.price * item.quantity).toFixed(2) }}</span
+                    >
+                  </div>
+                </div>
+              </el-carousel-item>
+            </el-carousel>
+            <div v-else class="dashboard-card__empty">
+              <span>购物车是空的</span>
+            </div>
           </div>
         </div>
 
-        <div class="quick-access-grid">
-          <div class="quick-access-card" @click="activeTab = 'favorites'">
-            <div class="quick-access-card__header">
-              <el-icon :size="20" color="#FF5000"><Star /></el-icon>
-              <span class="quick-access-card__title">我的收藏</span>
-              <span class="quick-access-card__arrow">&gt;</span>
-            </div>
-            <div v-if="favoriteItems.length" class="quick-access-card__content">
-              <div
-                v-for="item in favoriteItems.slice(0, 2)"
-                :key="item.id"
-                class="quick-access-card__product"
-              >
-                <img :src="item.image" class="quick-access-card__product-img" />
-                <div class="quick-access-card__product-info">
-                  <span class="quick-access-card__product-name text-truncate">{{ item.name }}</span>
-                  <span class="price price-sm">¥{{ item.price }}</span>
-                </div>
-              </div>
-            </div>
-            <div v-else class="quick-access-card__empty">
-              <el-icon :size="40" color="#E0D6CE"><Star /></el-icon>
-              <span>暂无内容</span>
-              <a class="quick-access-card__empty-link">去逛逛</a>
-            </div>
-          </div>
-
-          <div class="quick-access-card" @click="activeTab = 'history'">
-            <div class="quick-access-card__header">
-              <el-icon :size="20" color="#FF5000"><Clock /></el-icon>
-              <span class="quick-access-card__title">我的足迹</span>
-              <span class="quick-access-card__arrow">&gt;</span>
-            </div>
-            <div v-if="historyItems.length" class="quick-access-card__content">
-              <div
-                v-for="item in historyItems.slice(0, 2)"
-                :key="item.id"
-                class="quick-access-card__product"
-              >
-                <img :src="item.image" class="quick-access-card__product-img" />
-                <div class="quick-access-card__product-info">
-                  <span class="quick-access-card__product-name text-truncate">{{ item.name }}</span>
-                  <span class="price price-sm">¥{{ item.price }}</span>
-                </div>
-              </div>
-            </div>
-            <div v-else class="quick-access-card__empty">
-              <el-icon :size="40" color="#E0D6CE"><Clock /></el-icon>
-              <span>暂无内容</span>
-              <a class="quick-access-card__empty-link">去逛逛</a>
-            </div>
-          </div>
-
-          <div class="quick-access-card" @click="handleCartClick">
-            <div class="quick-access-card__header">
-              <el-icon :size="20" color="#FF5000"><ShoppingCart /></el-icon>
-              <span class="quick-access-card__title">购物车</span>
-              <span class="quick-access-card__arrow">&gt;</span>
-            </div>
-            <div v-if="cartItemCount > 0" class="quick-access-card__content">
-              <div class="quick-access-card__cart-info">
-                <span class="quick-access-card__cart-count">{{ cartItemCount }}件商品</span>
-                <span class="price">¥{{ cartTotal.toFixed(2) }}</span>
-              </div>
-            </div>
-            <div v-else class="quick-access-card__empty">
-              <el-icon :size="40" color="#E0D6CE"><ShoppingCart /></el-icon>
-              <span>暂无内容</span>
-              <a class="quick-access-card__empty-link">去逛逛</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="frequent-section">
-          <div class="frequent-section__header">
+        <div v-if="showFrequent" class="frequent-section">
+          <div class="frequent-section__sidebar">
             <span class="frequent-section__icon-wrap">
-              <el-icon :size="14" color="#FF5000"><Star /></el-icon>
+              <el-icon :size="20" color="#FF5000"><Star /></el-icon>
             </span>
-            <span class="frequent-section__title">常买常逛</span>
-            <span class="frequent-section__desc">推荐常看商品</span>
+            <span class="frequent-section__title">常卖常逛</span>
+            <span class="frequent-section__desc" @click="refreshFrequent">推荐常看商品</span>
+            <span class="frequent-section__ignore" @click="hideFrequent">不感兴趣</span>
           </div>
-          <div class="frequent-section__scroll">
-            <div v-for="item in frequentProducts" :key="item.id" class="frequent-product-card">
-              <img :src="item.image" class="frequent-product-card__img" />
-              <span class="price price-sm">¥{{ item.price }}</span>
-              <span class="frequent-product-card__tag">最近浏览</span>
+          <div class="frequent-section__viewport">
+            <button
+              class="frequent-section__arrow frequent-section__arrow--left"
+              :class="{ 'is-disabled': !canScrollLeft }"
+              :disabled="!canScrollLeft"
+              @click="scrollLeft"
+            >
+              <el-icon><ArrowLeft /></el-icon>
+            </button>
+            <div ref="scrollContainer" class="frequent-section__scroll">
+              <div v-for="item in frequentList" :key="item.id" class="frequent-product-card">
+                <img :src="item.image" class="frequent-product-card__img" />
+                <span class="price price-sm">¥{{ item.price }}</span>
+                <span class="frequent-product-card__tag">最近浏览</span>
+              </div>
+            </div>
+            <button
+              class="frequent-section__arrow frequent-section__arrow--right"
+              :class="{ 'is-disabled': !canScrollRight }"
+              :disabled="!canScrollRight"
+              @click="scrollRight"
+            >
+              <el-icon><ArrowRight /></el-icon>
+            </button>
+          </div>
+          <div v-if="isRefreshing" class="frequent-section__loading">
+            <el-icon class="is-loading"><RefreshLeft /></el-icon>
+          </div>
+        </div>
+
+        <div class="guess-section">
+          <div class="guess-section__header">
+            <span class="guess-section__title">猜你喜欢</span>
+          </div>
+          <div ref="guessScrollContainer" class="guess-section__grid">
+            <div
+              v-for="item in guessList"
+              :key="item.id"
+              class="guess-product-card"
+              @click="goProduct(item)"
+            >
+              <div class="guess-product-card__img-wrap">
+                <img :src="item.image" class="guess-product-card__img" />
+              </div>
+              <div class="guess-product-card__info">
+                <span class="guess-product-card__name">{{ item.name }}</span>
+                <div class="guess-product-card__tags">
+                  <span
+                    v-for="tag in item.tags"
+                    :key="tag"
+                    class="guess-product-card__tag"
+                    :class="getTagClass(tag)"
+                    >{{ tag }}</span
+                  >
+                </div>
+                <div class="guess-product-card__footer">
+                  <span class="guess-product-card__price price">¥{{ item.price }}</span>
+                  <span class="guess-product-card__sales">{{ item.sales || '1万+' }}人购买</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -405,7 +486,8 @@ import {
   Coin,
   Present,
   Star,
-  ShoppingCart,
+  ArrowRight,
+  ArrowLeft,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { favoriteProducts, frequentProducts, browsingHistory, cartItems } from '@/mock/data'
@@ -450,9 +532,98 @@ const historyItems = computed(() => {
 })
 
 const cartItemCount = computed(() => cartItems.length)
-const cartTotal = computed(() =>
-  cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-)
+
+// 最新订单预览数据
+const latestOrder = ref({
+  image: 'https://picsum.photos/seed/order1/80/80',
+  text: '您的快件已派送成功（美乐佳代点），如有疑问请电快递员【刘吉...',
+  time: '2026-05-18 09:24:58',
+})
+
+// 收藏人数统计
+const favoriteCount = ref(40)
+
+// 常卖常逛模块
+const showFrequent = ref(true)
+const isRefreshing = ref(false)
+const frequentList = ref([...frequentProducts])
+const scrollContainer = ref(null)
+const canScrollLeft = ref(false)
+const canScrollRight = ref(true)
+
+function refreshFrequent() {
+  isRefreshing.value = true
+  setTimeout(() => {
+    frequentList.value = [...frequentProducts].sort(() => Math.random() - 0.5)
+    isRefreshing.value = false
+  }, 600)
+}
+
+function hideFrequent() {
+  showFrequent.value = false
+}
+
+function scrollLeft() {
+  const el = scrollContainer.value
+  if (!el) return
+  el.scrollBy({ left: -140, behavior: 'smooth' })
+}
+
+function scrollRight() {
+  const el = scrollContainer.value
+  if (!el) return
+  el.scrollBy({ left: 140, behavior: 'smooth' })
+}
+
+onMounted(() => {
+  const el = scrollContainer.value
+  if (el) {
+    const checkScroll = () => {
+      canScrollLeft.value = el.scrollLeft > 1
+      canScrollRight.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+    }
+    el.addEventListener('scroll', checkScroll, { passive: true })
+    checkScroll()
+  }
+  generateGuessList()
+})
+
+// 猜你喜欢推荐模块
+const guessList = ref([])
+
+function generateGuessList() {
+  const allProducts = [...favoriteProducts, ...frequentProducts]
+  const shuffled = allProducts.sort(() => Math.random() - 0.5)
+  const salesOptions = ['8000+', '1.2万+', '2万+', '3万+', '5万+', '10万+']
+  guessList.value = shuffled.slice(0, 8).map((p, i) => ({
+    ...p,
+    rating: (4 + Math.random()).toFixed(1),
+    tags: guessTags(p, i),
+    sales: salesOptions[i % salesOptions.length],
+  }))
+}
+
+function guessTags(item, index) {
+  const tags = []
+  if (item.price < 100) tags.push('官方立减')
+  if (index % 2 === 0) tags.push('包邮')
+  if (index % 3 === 0) tags.push('退货宝')
+  if (item.price > 500) tags.push('空气炸锅热销榜第' + ((index % 10) + 1) + '名')
+  return tags
+}
+
+function getTagClass(tag) {
+  if (tag.startsWith('官方')) return 'tag-official'
+  if (tag.includes('包邮')) return 'tag-shipping'
+  if (tag.includes('退货')) return 'tag-return'
+  if (tag.includes('热销')) return 'tag-hot'
+  if (tag.includes('满减')) return 'tag-official'
+  return ''
+}
+
+function goProduct(item) {
+  router.push({ path: '/product', query: { id: item.id } })
+}
 
 const showDefaultView = computed(() => {
   const tab = activeTab.value
@@ -857,155 +1028,93 @@ onMounted(() => {
   background: var(--color-primary-hover);
 }
 
-.order-dashboard {
-  background: var(--color-bg-white);
-  border-radius: var(--radius-card);
-  padding: 16px 24px;
-  box-shadow: var(--shadow-light);
-}
-
-.order-dashboard__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.order-dashboard__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-dark);
-}
-
-.order-dashboard__link {
-  font-size: 12px;
-  color: var(--color-text-light);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-
-.order-dashboard__link:hover {
-  color: var(--color-primary);
-}
-
-.order-dashboard__status-row {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 12px;
-}
-
-.order-dashboard__status-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  padding: 8px 4px;
-  border-radius: var(--radius-btn);
-  transition: all var(--transition-fast);
-  color: var(--color-text-dark);
-}
-
-.order-dashboard__status-item:hover {
-  background: var(--color-light-orange);
-}
-
-.order-dashboard__status-item:hover .order-dashboard__status-label,
-.order-dashboard__status-item:hover .order-dashboard__status-count {
-  color: var(--color-primary);
-}
-
-.order-dashboard__status-item.has-pending .order-dashboard__status-count,
-.order-dashboard__status-item.has-pending .order-dashboard__status-label {
-  color: var(--color-primary);
-}
-
-.order-dashboard__status-count {
-  font-size: 18px;
-  font-weight: 700;
-  font-family: var(--font-price);
-}
-
-.order-dashboard__status-label {
-  font-size: 12px;
-  color: var(--color-text-mid);
-}
-
-.order-dashboard__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 8px;
-}
-
-.order-dashboard__footer-text {
-  font-size: 12px;
-  color: var(--color-text-light);
-}
-
-.order-dashboard__footer-link {
-  font-size: 12px;
-  color: var(--color-primary);
-  cursor: pointer;
-}
-
-.order-dashboard__footer-link:hover {
-  text-decoration: underline;
-}
-
-.quick-access-grid {
+/* 仪表盘卡片网格布局 */
+.dashboard-grid {
   display: flex;
   gap: 12px;
 }
 
-.quick-access-card {
-  flex: 1;
+.dashboard-card {
+  flex: 3;
   background: var(--color-bg-white);
   border-radius: var(--radius-card);
   padding: 16px;
   box-shadow: var(--shadow-light);
-  min-height: 120px;
+  min-width: 0;
   cursor: pointer;
   transition: box-shadow var(--transition-fast);
 }
 
-.quick-access-card:hover {
+.dashboard-card:hover {
   box-shadow: var(--shadow-card);
 }
 
-.quick-access-card__header {
+.dashboard-card--wide {
+  flex: 11;
+  min-width: 320px;
+}
+
+.dashboard-card__header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 12px;
 }
 
-.quick-access-card__title {
+.dashboard-card__title {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-dark);
-  flex: 1;
+  line-height: 1;
 }
 
-.quick-access-card__arrow {
+.dashboard-card__arrow {
   font-size: 12px;
-  color: var(--color-text-light);
+  color: var(--color-text-mid);
+  font-weight: 700;
+  line-height: 1;
 }
 
-.quick-access-card__content {
+.dashboard-card__status-row {
+  display: flex;
+  justify-content: space-around;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 12px;
+}
+
+.dashboard-status-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 2px;
 }
 
-.quick-access-card__product {
+.dashboard-status-item__count {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-price);
+  color: var(--color-text-dark);
+}
+
+.dashboard-status-item__label {
+  font-size: 11px;
+  color: var(--color-text-mid);
+}
+
+.dashboard-status-item.has-pending .dashboard-status-item__count,
+.dashboard-status-item.has-pending .dashboard-status-item__label {
+  color: var(--color-primary);
+}
+
+.dashboard-card__order-preview {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding-top: 8px;
 }
 
-.quick-access-card__product-img {
+.dashboard-card__order-img {
   width: 48px;
   height: 48px;
   border-radius: var(--radius-btn);
@@ -1013,68 +1122,151 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.quick-access-card__product-info {
+.dashboard-card__order-info {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 0;
 }
 
-.quick-access-card__product-name {
-  font-size: 12px;
-  color: var(--color-text-dark);
-}
-
-.quick-access-card__cart-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.quick-access-card__cart-count {
+.dashboard-card__order-text {
   font-size: 12px;
   color: var(--color-text-mid);
+  line-height: 18px;
+  margin: 0;
 }
 
-.quick-access-card__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 0;
-}
-
-.quick-access-card__empty span {
-  font-size: 12px;
-  color: var(--color-text-light);
-}
-
-.quick-access-card__empty-link {
-  font-size: 12px;
+.dashboard-card__order-time {
+  font-size: 11px;
   color: var(--color-primary);
   cursor: pointer;
 }
 
-.frequent-section {
-  background: var(--color-bg-white);
-  border-radius: var(--radius-card);
-  padding: 16px 24px;
-  box-shadow: var(--shadow-light);
+.dashboard-card__order-btn {
+  padding: 4px 14px;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-btn);
+  background: #fff;
+  color: var(--color-text-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
-.frequent-section__header {
+.dashboard-card__order-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.dashboard-card__product-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.dashboard-card__product-img {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-btn);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.dashboard-card .el-carousel__button {
+  display: none;
+}
+
+.dashboard-card .el-carousel__container {
+  height: 100%;
+}
+
+.dashboard-card__product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+  width: 100%;
+  padding: 0 8px;
+}
+
+.dashboard-card__product-name {
+  font-size: 13px;
+  color: var(--color-text-dark);
+  line-height: 20px;
+}
+
+.dashboard-card__product-stat,
+.dashboard-card__product-price {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.dashboard-card__cart-price {
+  font-size: 13px;
+  color: var(--color-text-mid);
+}
+
+.dashboard-card__cart-price em {
+  font-style: normal;
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.dashboard-card__empty {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.dashboard-card__empty span {
+  font-size: 12px;
+  color: var(--color-text-light);
+}
+
+.frequent-section {
+  display: flex;
+  background: var(--color-bg-white);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: var(--shadow-light);
+  gap: 16px;
+  position: relative;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.frequent-section__sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 80px;
+  padding: 16px 8px;
+  border-radius: var(--radius-btn);
+  background: #fff5f0;
+  border: 1px solid #ffe4d9;
 }
 
 .frequent-section__icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--color-light-orange);
 }
@@ -1083,27 +1275,126 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text-dark);
+  text-align: center;
 }
 
 .frequent-section__desc {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-light);
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.frequent-section__desc:hover {
+  color: var(--color-primary);
+}
+
+.frequent-section__ignore {
+  font-size: 10px;
+  color: var(--color-text-light);
+  text-align: center;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.frequent-section__ignore:hover {
+  color: var(--color-deep-orange);
+}
+
+.frequent-section__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-card);
+  z-index: 1;
+}
+
+.frequent-section__loading .is-loading {
+  font-size: 24px;
+  color: var(--color-primary);
+  animation: rotating 1s linear infinite;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.frequent-section__viewport {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
 }
 
 .frequent-section__scroll {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  overflow-y: hidden;
+  padding: 4px 0;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
 }
 
 .frequent-section__scroll::-webkit-scrollbar {
-  height: 4px;
+  display: none;
 }
 
-.frequent-section__scroll::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 2px;
+.frequent-section__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text-mid);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-size: 14px;
+}
+
+.frequent-section__arrow:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255, 80, 0, 0.25);
+}
+
+.frequent-section__arrow:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.frequent-section__arrow--left {
+  left: 6px;
+}
+
+.frequent-section__arrow--right {
+  right: 6px;
+}
+
+.frequent-section__arrow.is-disabled,
+.frequent-section__arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .frequent-product-card {
@@ -1264,5 +1555,148 @@ onMounted(() => {
   .mobile-user {
     display: flex;
   }
+}
+
+/* 猜你喜欢推荐模块 */
+.guess-section {
+  background: var(--color-bg-white);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  box-shadow: var(--shadow-light);
+}
+
+.guess-section__header {
+  margin-bottom: 12px;
+}
+
+.guess-section__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-dark);
+}
+
+.guess-section__subtitle {
+  font-size: 11px;
+  color: var(--color-text-light);
+  margin-left: 8px;
+}
+
+.guess-section__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.guess-section__grid::-webkit-scrollbar {
+  display: none;
+}
+
+.guess-product-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition:
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+  border: 1px solid #f0f0f0;
+}
+
+.guess-product-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  border-color: transparent;
+}
+
+.guess-product-card__img-wrap {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.guess-product-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.guess-product-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.guess-product-card__name {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.guess-product-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.guess-product-card__tag {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.guess-product-card__tag.tag-official {
+  color: #ff5000;
+  background: #fff2ed;
+  border: 1px solid #ffd4c2;
+}
+
+.guess-product-card__tag.tag-shipping {
+  color: #ff5000;
+  background: #fff2ed;
+  border: 1px solid #ffd4c2;
+}
+
+.guess-product-card__tag.tag-return {
+  color: #07c160;
+  background: #e8f8e8;
+  border: 1px solid #b7ebc2;
+}
+
+.guess-product-card__tag.tag-hot {
+  color: #ff5000;
+  background: linear-gradient(135deg, #fff2ed, #ffe8df);
+  border: 1px solid #ff5000;
+  font-weight: 600;
+}
+
+.guess-product-card__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.guess-product-card__price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ff5000;
+  line-height: 1;
+}
+
+.guess-product-card__sales {
+  font-size: 11px;
+  color: #999;
+  flex-shrink: 0;
 }
 </style>
