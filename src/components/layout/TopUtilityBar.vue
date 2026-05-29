@@ -12,11 +12,13 @@
           :width="230"
           :offset="8"
           popper-class="user-popover"
+          @show="updateVisible(true)"
+          @hide="updateVisible(false)"
         >
           <template #reference>
-            <span class="top-utility-bar__link user-trigger">
-              <el-icon :size="14"><User /></el-icon>
+            <span class="top-utility-bar__link user-trigger" @click="handleNavigate('default')">
               {{ userName }}
+              <el-icon :size="10"><arrowIcon /></el-icon>
             </span>
           </template>
           <div class="user-popover__body">
@@ -55,30 +57,20 @@
       <div class="top-utility-bar__right">
         <span class="top-utility-bar__link" @click="$router.push('/')">首页</span>
         <span class="top-utility-bar__divider"></span>
-        <span class="top-utility-bar__link">已买到的宝贝</span>
-        <span class="top-utility-bar__divider"></span>
-        <el-dropdown trigger="hover" @command="handleMyClick">
-          <span
-            class="top-utility-bar__link"
-            @mouseenter="updateHover(true)"
-            @mouseleave="updateHover(false)"
-          >
-            足迹与卡券 <el-icon :size="10"><arrowIcon /></el-icon>
+        <el-dropdown trigger="hover" @command="handleNavigate" @visible-change="updateVisible">
+          <span class="top-utility-bar__link" @click="handleNavigate('default')">
+            我的 <el-icon :size="10"><arrowIcon /></el-icon>
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="my-footprint">我的足迹</el-dropdown-item>
-              <el-dropdown-item command="my-coupons">我的卡券包</el-dropdown-item>
+              <el-dropdown-item command="history">我的足迹</el-dropdown-item>
+              <el-dropdown-item command="coupons">我的卡券包</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
         <span class="top-utility-bar__divider"></span>
-        <el-dropdown trigger="hover" @command="handleOrderStatusClick">
-          <span
-            class="top-utility-bar__link"
-            @mouseenter="updateHover(true)"
-            @mouseleave="updateHover(false)"
-          >
+        <el-dropdown trigger="hover" @command="handleNavigate" @visible-change="updateVisible">
+          <span class="top-utility-bar__link" @click="handleNavigate('orders')">
             我的订单 <el-icon :size="10"><arrowIcon /></el-icon>
           </span>
           <template #dropdown>
@@ -93,12 +85,8 @@
           </template>
         </el-dropdown>
         <span class="top-utility-bar__divider"></span>
-        <el-dropdown trigger="hover" @command="handleFavoriteClick">
-          <span
-            class="top-utility-bar__link"
-            @mouseenter="updateHover(true)"
-            @mouseleave="updateHover(false)"
-          >
+        <el-dropdown trigger="hover" @command="handleNavigate" @visible-change="updateVisible">
+          <span class="top-utility-bar__link" @click="handleNavigate('history-favorites')">
             收藏夹 <el-icon :size="10"><arrowIcon /></el-icon>
           </span>
           <template #dropdown>
@@ -109,7 +97,7 @@
           </template>
         </el-dropdown>
         <span class="top-utility-bar__divider"></span>
-        <span class="top-utility-bar__link">帮助中心</span>
+        <span class="top-utility-bar__link" @click="handleNavigate('help')"> 帮助中心 </span>
         <span class="top-utility-bar__divider"></span>
         <span class="top-utility-bar__link hide-on-tablet" style="color: var(--color-primary)"
           >免费开店</span
@@ -121,7 +109,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { ArrowDown, User } from '@element-plus/icons-vue'
+import { ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { useHoverArrow } from '@/composables/useHoverArrow'
@@ -134,19 +122,24 @@ const userName = ref(userStore.user.name)
 const showRegion = ref(false)
 const showTheme = ref(false)
 
-// 直接导航到子选项对应的路由参数
-const handleOrderStatusClick = (command) => {
-  router.push(`/user?tab=${command}`)
-}
-const handleFavoriteClick = (command) => {
-  router.push(`/user?tab=${command}`)
-}
-const handleMyClick = (command) => {
-  router.push(`/user?tab=${command}`)
-}
 function handleLogout() {
   userStore.logout()
   router.push('/login')
+}
+
+// 直接导航到子选项对应的路由参数
+function handleNavigate(status) {
+  if (status.includes('order-') || status === 'orders') {
+    router.push(`/user?tab=${status}`)
+  } else if (status.includes('history-') || status === 'history') {
+    router.push(`/user?tab=${status}`)
+  } else {
+    router.push(`/user?tab=${status}`)
+  }
+}
+
+function updateVisible(visible) {
+  updateHover(visible)
 }
 </script>
 

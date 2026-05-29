@@ -46,7 +46,7 @@
             :class="{ active: activeTab === 'coupons' }"
             @click="activeTab = 'coupons'"
           >
-            <span>优惠券</span>
+            <span>我的卡券包</span>
           </div>
           <div
             class="sidebar-nav__item"
