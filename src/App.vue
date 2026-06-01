@@ -7,6 +7,7 @@
     </main>
     <FooterBar />
     <FloatingToolbar />
+    <FloatingBackTop />
     <MobileTabBar />
   </div>
 </template>
@@ -16,6 +17,7 @@ import TopUtilityBar from '@/components/layout/TopUtilityBar.vue'
 import MainNav from '@/components/layout/MainNav.vue'
 import FooterBar from '@/components/layout/FooterBar.vue'
 import FloatingToolbar from '@/components/common/FloatingToolbar.vue'
+import FloatingBackTop from '@/components/common/FloatingBackTop.vue'
 import MobileTabBar from '@/components/common/MobileTabBar.vue'
 </script>
 
