@@ -100,6 +100,7 @@ function handleSearch() {
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .main-nav__inner {

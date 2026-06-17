@@ -128,7 +128,7 @@
     </div>
 
     <!-- 结构2: 左筛选栏、中轮播图、右个人中心 -->
-    <div class="screen-outer clearfix undefined">
+    <div class="screen-outer clearfix">
       <div class="screen-left">左筛选栏</div>
       <div class="screen-center">中轮播图</div>
       <div class="screen-right">右个人中心</div>
