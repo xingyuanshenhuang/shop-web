@@ -47,7 +47,7 @@ function isActive(path) {
   left: 0;
   right: 0;
   height: 56px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-top: 1px solid var(--color-border);
   display: flex;
   align-items: center;

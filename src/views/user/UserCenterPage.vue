@@ -732,7 +732,7 @@ onMounted(() => {
 
 .user-center__sidebar {
   width: 200px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-right: 1px solid var(--color-border);
   padding: 16px 0;
   position: sticky;
@@ -826,7 +826,7 @@ onMounted(() => {
 }
 
 .user-profile-card {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 24px;
   box-shadow: var(--shadow-light);
@@ -1036,7 +1036,7 @@ onMounted(() => {
 
 .dashboard-card {
   flex: 3;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px;
   box-shadow: var(--shadow-light);
@@ -1236,7 +1236,7 @@ onMounted(() => {
 
 .frequent-section {
   display: flex;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px;
   box-shadow: var(--shadow-light);
@@ -1458,7 +1458,7 @@ onMounted(() => {
 
 .mobile-user__assets {
   display: flex;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 12px;
   margin-bottom: 16px;
@@ -1475,7 +1475,7 @@ onMounted(() => {
 }
 
 .mobile-user__orders-nav {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px;
   margin-bottom: 16px;
@@ -1533,7 +1533,7 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   padding: 16px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   font-size: 12px;
   color: var(--color-text-mid);
@@ -1559,7 +1559,7 @@ onMounted(() => {
 
 /* 猜你喜欢推荐模块 */
 .guess-section {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px;
   box-shadow: var(--shadow-light);

@@ -104,7 +104,7 @@ function claimCoupon(coupon) {
 
 .coupon-overview {
   display: flex;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 12px 24px;
   box-shadow: var(--shadow-light);

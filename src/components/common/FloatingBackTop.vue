@@ -67,7 +67,7 @@ onUnmounted(() => {
   position: fixed;
   right: 0;
   z-index: 998;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-right: none;
   border-radius: var(--radius-btn) 0 0 var(--radius-btn);
@@ -84,7 +84,7 @@ onUnmounted(() => {
   height: 48px;
   cursor: pointer;
   color: var(--color-text-mid);
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   transition: all var(--transition-fast);
   user-select: none;
 }

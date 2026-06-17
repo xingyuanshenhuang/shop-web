@@ -419,7 +419,7 @@ function deleteAddress() {
 }
 
 .profile-form {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 24px;
 }
@@ -453,7 +453,7 @@ function deleteAddress() {
   display: flex;
   align-items: center;
   gap: 24px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 24px;
   margin-bottom: 16px;
@@ -495,7 +495,7 @@ function deleteAddress() {
 }
 
 .security-list {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
 }
 
@@ -530,7 +530,7 @@ function deleteAddress() {
 .about-brand {
   text-align: center;
   padding: 32px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   margin-bottom: 16px;
 }
@@ -552,7 +552,7 @@ function deleteAddress() {
 }
 
 .about-info {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   margin-bottom: 16px;
 }
@@ -575,7 +575,7 @@ function deleteAddress() {
 }
 
 .about-social {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px 24px;
   margin-bottom: 16px;
@@ -638,7 +638,7 @@ function deleteAddress() {
   position: relative;
   display: flex;
   align-items: stretch;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border);
   transition: box-shadow var(--transition-fast);

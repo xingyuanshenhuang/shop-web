@@ -1,63 +1,141 @@
 <template>
   <div class="homepage">
-    <section class="banner-section">
-      <el-carousel height="400px" :interval="4000" arrow="hover" indicator-position="outside">
-        <el-carousel-item v-for="banner in banners" :key="banner.id">
-          <div class="banner-slide" :style="{ backgroundImage: `url(${banner.image})` }">
-            <div class="banner-overlay"></div>
-            <div class="banner-content">
-              <h1 class="banner-title">{{ banner.title }}</h1>
-              <p class="banner-subtitle">{{ banner.subtitle }}</p>
-              <el-button type="primary" size="large" round @click="$router.push(banner.link)">
-                立即查看
-              </el-button>
+    <!-- ===== 结构1: 搜索栏 ===== -->
+    <div class="search-bar-outer">
+      <div class="search-bar-inner">
+        <!-- 左侧: Logo -->
+        <div class="search-bar-left">
+          <router-link to="/" class="search-logo">
+            <span class="search-logo__main">淘宝</span>
+            <span class="search-logo__sub">Taobao.com</span>
+          </router-link>
+        </div>
+
+        <!-- 中间: 搜索功能主体 -->
+        <div class="search-bar-center" ref="searchCenterRef">
+          <!-- 搜索行: 输入框 + 搜索按钮 + 搜同款 -->
+          <div class="search-row">
+            <div class="search-combo" :class="{ 'is-focused': dropdownVisible }">
+              <div class="search-input-wrapper">
+                <el-input
+                  ref="searchInputRef"
+                  v-model="searchKeyword"
+                  class="search-input"
+                  @focus="handleFocus"
+                  @blur="handleBlur"
+                  @keyup.enter="handleSearch"
+                >
+                  <template #prefix>
+                    <el-icon class="search-input__icon"><Search /></el-icon>
+                  </template>
+                </el-input>
+                <!-- 底纹词：独立标签，有输入时隐藏 -->
+                <span
+                  v-if="!searchKeyword && !dropdownVisible"
+                  class="search-placeholder"
+                  @click="focusInput"
+                >
+                  请输入搜索文字
+                </span>
+              </div>
+              <button class="search-btn" @click="handleSearch">搜索</button>
+            </div>
+            <button class="search-similar-btn" @click="handleSearchSimilar">
+              <el-icon :size="16"><Camera /></el-icon>
+              <span>搜同款</span>
+            </button>
+          </div>
+
+          <!-- 下拉面板 -->
+          <transition name="dropdown-fade">
+            <div
+              v-show="dropdownVisible"
+              class="search-dropdown"
+              @mousedown.prevent
+              @mouseenter="isMouseInDropdown = true"
+              @mouseleave="isMouseInDropdown = false"
+            >
+              <!-- 历史搜索 -->
+              <div v-if="searchHistory.length > 0" class="search-dropdown__section">
+                <div class="search-dropdown__header">
+                  <span class="search-dropdown__title">历史搜索</span>
+                  <button class="search-dropdown__action" @click="clearHistory">清除</button>
+                </div>
+                <div class="search-dropdown__tags">
+                  <span
+                    v-for="(item, idx) in searchHistory"
+                    :key="idx"
+                    class="search-dropdown__tag"
+                    @click="searchFromHistory(item)"
+                  >
+                    {{ item }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- 猜你想搜 -->
+              <div class="search-dropdown__section">
+                <div class="search-dropdown__header">
+                  <span class="search-dropdown__title">猜你想搜</span>
+                  <button class="search-dropdown__action" @click="refreshGuess">换一换</button>
+                </div>
+                <div class="search-dropdown__guess-grid">
+                  <span
+                    v-for="(item, idx) in displayedGuessList"
+                    :key="idx"
+                    class="search-dropdown__guess-item"
+                    @click="searchFromGuess(item)"
+                  >
+                    {{ item }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </transition>
+
+          <!-- 快捷导航 -->
+          <div class="quick-nav">
+            <a
+              v-for="(link, idx) in quickNavLinks"
+              :key="idx"
+              class="quick-nav__link"
+              :class="{ 'quick-nav__link--hot': link.hot }"
+              @click.prevent="$router.push('/products')"
+            >
+              {{ link.label }}
+              <span v-if="link.hot" class="quick-nav__hot-badge">HOT</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 右侧: 天天领红包 -->
+        <div class="search-bar-right">
+          <div class="bonus-entry">
+            <div class="bonus-entry__icon">
+              <img
+                src="https://picsum.photos/seed/bonus/56/56"
+                alt=""
+                class="bonus-entry__avatar"
+              />
+            </div>
+            <div class="bonus-entry__text">
+              <span class="bonus-entry__title">天天领红包</span>
+              <span class="bonus-entry__desc">签到领金币</span>
             </div>
           </div>
-        </el-carousel-item>
-      </el-carousel>
-    </section>
-
-    <section class="category-section">
-      <div class="category-grid">
-        <div
-          v-for="cat in categories"
-          :key="cat.id"
-          class="category-item"
-          @click="$router.push('/products?category=' + cat.name)"
-        >
-          <div class="category-item__icon" :style="{ background: cat.color + '15' }">
-            <span>{{ cat.icon }}</span>
-          </div>
-          <span class="category-item__name">{{ cat.name }}</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section class="flash-sale-section">
-      <div class="flash-sale">
-        <div class="flash-sale__header">
-          <div class="flash-sale__title">
-            <span class="flash-sale__icon">⚡</span>
-            <h2>限时秒杀</h2>
-          </div>
-          <div class="flash-sale__countdown">
-            <span class="flash-sale__countdown-label">距结束</span>
-            <span class="flash-sale__countdown-block">{{ countdown.hours }}</span>
-            <span class="flash-sale__countdown-sep">:</span>
-            <span class="flash-sale__countdown-block">{{ countdown.minutes }}</span>
-            <span class="flash-sale__countdown-sep">:</span>
-            <span class="flash-sale__countdown-block">{{ countdown.seconds }}</span>
-          </div>
-        </div>
-        <div class="flash-sale__products">
-          <div v-for="product in flashSaleProducts" :key="product.id" class="flash-sale__product">
-            <ProductCard :product="product" />
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- 结构2: 左筛选栏、中轮播图、右个人中心 -->
+    <div class="screen-outer clearfix undefined">
+      <div class="screen-left">左筛选栏</div>
+      <div class="screen-center">中轮播图</div>
+      <div class="screen-right">右个人中心</div>
+    </div>
 
-    <section class="recommend-section">
+    <!-- 结构3: 猜你喜欢 -->
+    <div class="layer">
       <div class="recommend-header">
         <h2>为你推荐</h2>
         <router-link to="/products" class="recommend-header__more">查看全部 &gt;</router-link>
@@ -65,313 +143,653 @@
       <div class="recommend-grid">
         <ProductCard v-for="product in products" :key="product.id" :product="product" />
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { banners, categories, flashSaleProducts, products } from '@/mock/data'
+import { useRouter } from 'vue-router'
+import { Search, Camera } from '@element-plus/icons-vue'
+import { products } from '@/mock/data'
 import ProductCard from '@/components/common/ProductCard.vue'
 
-const countdown = ref({ hours: '03', minutes: '12', seconds: '45' })
-let timer = null
+const router = useRouter()
 
-function startCountdown() {
-  let totalSeconds = 3 * 3600 + 12 * 60 + 45
-  timer = setInterval(() => {
-    if (totalSeconds <= 0) {
-      clearInterval(timer)
-      return
-    }
-    totalSeconds--
-    const h = Math.floor(totalSeconds / 3600)
-    const m = Math.floor((totalSeconds % 3600) / 60)
-    const s = totalSeconds % 60
-    countdown.value = {
-      hours: String(h).padStart(2, '0'),
-      minutes: String(m).padStart(2, '0'),
-      seconds: String(s).padStart(2, '0'),
-    }
-  }, 1000)
+// ===== 搜索相关 =====
+const searchKeyword = ref('')
+const dropdownVisible = ref(false)
+const isMouseInDropdown = ref(false)
+const searchCenterRef = ref(null)
+const searchInputRef = ref(null)
+let blurTimer = null
+
+// 猜你想搜词库
+const guessWords = [
+  '电脑游戏本怎么选',
+  '电脑台式',
+  '一体电脑台式套餐',
+  'computer',
+  '联想新平板电脑',
+  '电脑国补显卡',
+  'ddr5电脑内存条',
+  'u盘',
+  '移动固态硬盘1tb',
+  '机械键盘无线',
+]
+
+const displayedGuessList = ref([...guessWords])
+
+function shuffleArray(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a.slice(0, 10)
 }
 
+function refreshGuess() {
+  displayedGuessList.value = shuffleArray(guessWords)
+}
+
+// 历史搜索 (localStorage)
+const STORAGE_KEY = 'taobao_search_history'
+const searchHistory = ref([])
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      searchHistory.value = JSON.parse(raw)
+    }
+  } catch {
+    searchHistory.value = []
+  }
+}
+
+function saveHistory(keyword) {
+  const kw = keyword.trim()
+  if (!kw) return
+  searchHistory.value = searchHistory.value.filter((item) => item !== kw)
+  searchHistory.value.unshift(kw)
+  if (searchHistory.value.length > 10) {
+    searchHistory.value = searchHistory.value.slice(0, 10)
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(searchHistory.value))
+}
+
+function clearHistory() {
+  searchHistory.value = []
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+function handleFocus() {
+  clearTimeout(blurTimer)
+  dropdownVisible.value = true
+}
+
+function handleBlur() {
+  // 延迟关闭：若鼠标仍在面板内（悬停或点击），则保持展开
+  blurTimer = setTimeout(() => {
+    if (!isMouseInDropdown.value) {
+      dropdownVisible.value = false
+    }
+  }, 150)
+}
+
+function focusInput() {
+  searchInputRef.value?.focus()
+}
+
+function handleSearch() {
+  const kw = searchKeyword.value.trim()
+  if (kw) {
+    saveHistory(kw)
+    dropdownVisible.value = false
+    router.push(`/products?keyword=${encodeURIComponent(kw)}`)
+    searchKeyword.value = ''
+  }
+}
+
+function searchFromHistory(keyword) {
+  searchKeyword.value = keyword
+  saveHistory(keyword)
+  dropdownVisible.value = false
+  router.push(`/products?keyword=${encodeURIComponent(keyword)}`)
+  searchKeyword.value = ''
+}
+
+function searchFromGuess(keyword) {
+  searchKeyword.value = keyword
+  saveHistory(keyword)
+  dropdownVisible.value = false
+  router.push(`/products?keyword=${encodeURIComponent(keyword)}`)
+  searchKeyword.value = ''
+}
+
+function handleSearchSimilar() {
+  router.push('/products?feature=image-search')
+}
+
+// 点击外部关闭下拉
+function handleClickOutside(e) {
+  if (searchCenterRef.value && !searchCenterRef.value.contains(e.target)) {
+    dropdownVisible.value = false
+  }
+}
+
+// 快捷导航
+const quickNavLinks = [
+  { label: '券后低7.3折起', hot: false },
+  { label: '新款莫商棉券', hot: false },
+  { label: '补贴官配补贴', hot: false },
+  { label: '世界杯心动满边', hot: true },
+  { label: '多国官方', hot: false },
+  { label: '法拉利法', hot: false },
+  { label: '多国国言', hot: false },
+  { label: '多国国花优品', hot: false },
+  { label: 'douplus', hot: false },
+  { label: '升旗月卡', hot: false },
+]
+
 onMounted(() => {
-  startCountdown()
+  loadHistory()
+  displayedGuessList.value = shuffleArray(guessWords)
+  document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
-  if (timer) clearInterval(timer)
+  clearTimeout(blurTimer)
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
 <style scoped>
-.homepage {
-  padding-bottom: 32px;
-}
-
-.banner-section {
-  max-width: 1440px;
+/* ===== 搜索栏外层 ===== */
+.search-bar-outer {
+  width: 100%;
+  max-width: 1524px;
+  height: 96px;
   margin: 0 auto;
 }
 
-.banner-slide {
-  width: 100%;
-  height: 400px;
-  background-size: cover;
-  background-position: center;
-  position: relative;
+.search-bar-inner {
+  display: flex;
+  align-items: center;
+  padding: 16px 0 8px;
+  height: 100%;
+  gap: 24px;
+}
+
+/* ===== 左侧 Logo ===== */
+.search-bar-left {
+  width: 240px;
+  height: 72px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
 }
 
-.banner-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.1) 100%);
-}
-
-.banner-content {
-  position: relative;
-  z-index: 1;
-  padding-left: 128px;
-  color: #fff;
-}
-
-.banner-title {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.banner-subtitle {
-  font-size: 16px;
-  opacity: 0.8;
-  margin-bottom: 24px;
-}
-
-:deep(.el-carousel__indicator.is-active button) {
-  background-color: var(--color-primary);
-}
-
-:deep(.el-carousel__button) {
-  width: 24px;
-  height: 4px;
-  border-radius: 2px;
-}
-
-.category-section {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 24px 128px;
-}
-
-.category-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: center;
-}
-
-.category-item {
+.search-logo {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.search-logo__main {
+  font-size: 36px;
+  font-weight: 900;
+  color: #ff5000;
+  letter-spacing: 8px;
+}
+
+.search-logo__sub {
+  font-size: 13px;
+  color: #999;
+  letter-spacing: 2px;
+  margin-top: 2px;
+}
+
+/* ===== 中间搜索区域 ===== */
+.search-bar-center {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  max-width: 980px;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+}
+
+/* 搜索输入框 + 搜索按钮组合 */
+.search-combo {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+/* 输入框包装器：用于底纹词定位 */
+.search-input-wrapper {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+}
+
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 12px 0 0 12px;
+  border: 2px solid #ff5000;
+  box-shadow: none;
+  height: 44px;
+  padding: 0 16px;
+  transition: all 0.25s ease;
+  background: #fff;
+}
+
+.search-input :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 2px rgba(255, 80, 0, 0.15);
+}
+
+.search-input :deep(.el-input__inner) {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 移除原生 placeholder，使用独立底纹词 */
+.search-input :deep(.el-input__inner::placeholder) {
+  color: transparent;
+}
+
+.search-input__icon {
+  color: #999;
+  font-size: 16px;
+}
+
+/* 底纹词：独立标签实现 */
+.search-placeholder {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #bbb;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+.search-placeholder:hover {
+  cursor: text;
+}
+
+/* 搜索按钮 */
+.search-btn {
+  width: 72px;
+  height: 44px;
+  flex-shrink: 0;
+  background: #ff5000;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 0 12px 12px 0;
   cursor: pointer;
-  width: 80px;
-  transition: transform var(--transition-fast);
+  transition: background 0.15s ease;
+  line-height: 44px;
+  padding: 0;
+  text-align: center;
 }
 
-.category-item:hover {
-  transform: translateY(-2px);
+.search-btn:hover {
+  background: #e64500;
 }
 
-.category-item__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
+/* 搜同款按钮 */
+.search-similar-btn {
   display: flex;
   align-items: center;
+  gap: 6px;
+  width: 100px;
+  height: 44px;
+  flex-shrink: 0;
+  background: rgb(255, 241, 235);
+  color: rgb(255, 80, 0);
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
   justify-content: center;
-  font-size: 24px;
+  padding: 0;
 }
 
-.category-item__name {
-  font-size: 12px;
-  color: var(--color-text-mid);
-  white-space: nowrap;
+.search-similar-btn:hover {
+  background: rgb(255, 220, 200);
 }
 
-.flash-sale-section {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 128px;
+/* ===== 下拉面板 ===== */
+.search-dropdown {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 112px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 16px 20px;
+  z-index: 200;
 }
 
-.flash-sale {
-  background: var(--color-light-yellow);
-  border-radius: var(--radius-modal);
-  padding: 16px 24px;
-}
-
-.flash-sale__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.search-dropdown__section {
   margin-bottom: 16px;
 }
 
-.flash-sale__title {
+.search-dropdown__section:last-child {
+  margin-bottom: 0;
+}
+
+.search-dropdown__header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.search-dropdown__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.search-dropdown__action {
+  font-size: 12px;
+  color: #999;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.search-dropdown__action:hover {
+  color: #ff5000;
+}
+
+/* 历史搜索标签 */
+.search-dropdown__tags {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.flash-sale__title h2 {
-  font-size: 18px;
-  color: var(--color-primary);
-  font-weight: 700;
+.search-dropdown__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.flash-sale__icon {
-  font-size: 20px;
+.search-dropdown__tag:hover {
+  background: #ffefe7;
+  color: #ff5000;
 }
 
-.flash-sale__countdown {
+/* PC端 hover 效果 */
+@media (hover: hover) {
+  .search-dropdown__tag:hover {
+    background: #ffefe7;
+    color: #ff5000;
+  }
+}
+
+/* 猜你想搜 双栏网格 */
+.search-dropdown__guess-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 24px;
+}
+
+.search-dropdown__guess-item {
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  padding: 3px 0;
+  transition: color 0.15s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-dropdown__guess-item:hover {
+  color: #ff5000;
+  background: rgba(255, 80, 0, 0.04);
+}
+
+/* PC端 hover 效果 */
+@media (hover: hover) {
+  .search-dropdown__guess-item:hover {
+    color: #ff5000;
+    background: rgba(255, 80, 0, 0.04);
+  }
+}
+
+/* 下拉动画 */
+.dropdown-fade-enter-active {
+  transition: all 0.25s ease;
+}
+
+.dropdown-fade-leave-active {
+  transition: all 0.15s ease;
+}
+
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ===== 快捷导航 ===== */
+.quick-nav {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  padding-top: 6px;
+}
+
+.quick-nav__link {
+  font-size: 12px;
+  color: #999;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.flash-sale__countdown-label {
-  font-size: 12px;
-  color: var(--color-text-mid);
-  margin-right: 4px;
+.quick-nav__link:hover {
+  color: #ff5000;
+  text-decoration: underline;
 }
 
-.flash-sale__countdown-block {
+.quick-nav__link--hot {
+  color: #ff5000;
+}
+
+.quick-nav__hot-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: var(--color-primary);
-  color: #fff;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 700;
-  font-family: var(--font-price);
+  color: #ff5000;
+  background: #ffefe7;
+  border-radius: 3px;
+  padding: 1px 3px;
+  line-height: 1;
+  letter-spacing: 0.5px;
 }
 
-.flash-sale__countdown-sep {
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.flash-sale__products {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.recommend-section {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 32px 128px 0;
-}
-
-.recommend-header {
+/* ===== 右侧 天天领红包 ===== */
+.search-bar-right {
+  width: 240px;
+  height: 72px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
 }
 
-.recommend-header h2 {
-  font-size: 24px;
+.bonus-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: 1px solid #ffdfd3;
+  border-radius: 12px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #fff7f3, #fff);
+  transition: box-shadow 0.15s ease;
+}
+
+.bonus-entry:hover {
+  box-shadow: 0 2px 8px rgba(255, 80, 0, 0.12);
+}
+
+.bonus-entry__icon {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.bonus-entry__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffdfd3;
+}
+
+.bonus-entry__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bonus-entry__title {
+  font-size: 16px;
   font-weight: 700;
-  color: var(--color-text-dark);
+  color: #ff5000;
 }
 
-.recommend-header__more {
-  font-size: 14px;
-  color: var(--color-text-light);
-  transition: color var(--transition-fast);
+.bonus-entry__desc {
+  font-size: 12px;
+  color: #999;
 }
 
-.recommend-header__more:hover {
-  color: var(--color-primary);
-}
-
-.recommend-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
+/* ===== 响应式 ===== */
 @media (max-width: 1024px) {
-  .banner-content {
-    padding-left: 32px;
+  .search-bar-left {
+    width: 160px;
   }
-  .category-section {
-    padding: 24px 32px;
+
+  .search-bar-right {
+    display: none;
   }
-  .flash-sale-section {
-    padding: 0 32px;
+
+  .search-dropdown {
+    right: 0;
   }
-  .recommend-section {
-    padding: 32px 32px 0;
+
+  .search-logo__main {
+    font-size: 28px;
+    letter-spacing: 4px;
   }
-  .flash-sale__products {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .recommend-grid {
-    grid-template-columns: repeat(2, 1fr);
+
+  .search-logo__sub {
+    font-size: 11px;
   }
 }
 
 @media (max-width: 768px) {
-  .banner-slide {
-    height: 240px;
+  .search-bar-outer {
+    height: auto;
   }
-  .banner-content {
-    padding-left: 16px;
+
+  .search-bar-inner {
+    flex-wrap: wrap;
+    gap: 8px;
   }
-  .banner-title {
-    font-size: 24px;
+
+  .search-bar-left {
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    padding: 8px 0;
   }
-  .banner-subtitle {
-    font-size: 14px;
-    margin-bottom: 16px;
+
+  .search-bar-center {
+    width: 100%;
+    max-width: 100%;
   }
-  .category-section {
-    padding: 16px;
-  }
-  .category-grid {
-    gap: 12px;
-  }
-  .category-item {
-    width: 60px;
-  }
-  .category-item__icon {
-    width: 40px;
+
+  .search-row {
     height: 40px;
-    font-size: 20px;
+    gap: 8px;
   }
-  .flash-sale-section {
-    padding: 0 16px;
+
+  .search-combo .search-input :deep(.el-input__wrapper) {
+    height: 40px;
   }
-  .flash-sale__products {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+
+  .search-btn {
+    width: 56px;
+    height: 40px;
+    font-size: 14px;
+    line-height: 40px;
   }
-  .recommend-section {
-    padding: 24px 16px 0;
+
+  .search-similar-btn {
+    width: 80px;
+    height: 40px;
+    font-size: 12px;
+    gap: 4px;
   }
-  .recommend-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+
+  .search-dropdown {
+    right: 0;
+  }
+
+  .search-dropdown__guess-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-nav {
+    gap: 4px 10px;
+  }
+
+  .quick-nav__link {
+    font-size: 11px;
   }
 }
 </style>

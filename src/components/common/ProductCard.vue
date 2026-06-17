@@ -61,7 +61,7 @@ function formatSold(num) {
 <style scoped>
 .product-card {
   width: 100%;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border);
   overflow: hidden;

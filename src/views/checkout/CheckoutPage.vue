@@ -217,7 +217,7 @@ function selectAddress(addr) {
 }
 
 .checkout-steps {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 24px 48px;
   margin-bottom: 24px;
@@ -232,7 +232,7 @@ function selectAddress(addr) {
 .checkout-address,
 .checkout-payment,
 .checkout-order {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 24px;
   margin-bottom: 16px;
@@ -359,7 +359,7 @@ function selectAddress(addr) {
 }
 
 .checkout-summary-bar {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px 24px;
   display: flex;
@@ -377,7 +377,7 @@ function selectAddress(addr) {
 .checkout-success {
   text-align: center;
   padding: 60px 0;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
 }
 

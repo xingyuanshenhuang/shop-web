@@ -199,7 +199,7 @@ const filteredOrders = computed(() => {
 /* ==================== 状态导航栏样式 ==================== */
 .order-view__status-bar {
   display: flex;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px 24px;
   margin-bottom: 16px;
@@ -256,7 +256,7 @@ const filteredOrders = computed(() => {
 
 /* ==================== 订单卡片样式 ==================== */
 .order-card {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px 24px;
   border: 1px solid var(--color-border);

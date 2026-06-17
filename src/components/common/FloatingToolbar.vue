@@ -91,7 +91,7 @@ function handleFeedback() {
   z-index: 999;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-right: none;
   border-radius: var(--radius-btn) 0 0 var(--radius-btn);
@@ -108,7 +108,7 @@ function handleFeedback() {
   height: 48px;
   cursor: pointer;
   color: var(--color-text-mid);
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   transition: all var(--transition-fast);
   user-select: none;
 }

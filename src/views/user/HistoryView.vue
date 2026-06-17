@@ -796,7 +796,7 @@ function loadMore() {
   padding: 8px 12px;
   /* border: 1px solid var(--color-primary); */
   border-radius: var(--radius-btn);
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   position: absolute;
   left: 0;
   right: 0;
@@ -932,7 +932,7 @@ function loadMore() {
 
 .product-card {
   width: calc(20% - 10px);
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-btn);
   overflow: hidden;
   cursor: pointer;
@@ -1078,7 +1078,7 @@ function loadMore() {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: 12px;
   padding: 16px 24px;
   border: 1px solid var(--color-border);
@@ -1125,7 +1125,7 @@ function loadMore() {
   border-radius: 6px;
   padding: 0 16px;
   font-size: 13px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
   cursor: pointer;
@@ -1180,7 +1180,7 @@ function loadMore() {
   left: 0;
   right: 0;
   height: 56px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
   align-items: center;
   justify-content: space-between;

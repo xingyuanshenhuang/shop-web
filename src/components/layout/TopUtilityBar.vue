@@ -146,7 +146,6 @@ function updateVisible(visible) {
 <style scoped>
 .top-utility-bar {
   background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
   height: 36px;
   font-size: 12px;
 }

@@ -133,7 +133,7 @@ const allChecked = computed({
 
 .cart-list {
   flex: 1;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border);
   overflow: hidden;
@@ -252,7 +252,7 @@ const allChecked = computed({
 .cart-summary {
   width: 320px;
   flex-shrink: 0;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border);
   padding: 24px;

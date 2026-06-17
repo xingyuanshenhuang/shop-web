@@ -10,6 +10,17 @@
     <FloatingBackTop />
     <MobileTabBar />
   </div>
+  <!-- <div id="app">
+    <TopUtilityBar />
+    <MainNav />
+    <main class="main-content">
+      <router-view />
+    </main>
+    <FooterBar />
+    <FloatingToolbar />
+    <FloatingBackTop />
+    <MobileTabBar />
+  </div> -->
 </template>
 
 <script setup>
@@ -24,12 +35,50 @@ import MobileTabBar from '@/components/common/MobileTabBar.vue'
 <style>
 .main-content {
   min-height: calc(100vh - 100px);
-  padding-bottom: 0;
+  padding: 0 80px;
+}
+
+/* 结构2: 三栏布局 */
+.screen-outer {
+  display: flex;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.screen-left {
+  width: 240px;
+  flex-shrink: 0;
+}
+
+.screen-center {
+  flex: 1;
+  min-width: 0;
+}
+
+.screen-right {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+/* 结构3: 猜你喜欢 */
+.layer {
+  padding: 24px 0;
 }
 
 @media (max-width: 768px) {
   .main-content {
     padding-bottom: 56px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .screen-outer {
+    flex-direction: column;
+  }
+
+  .screen-left,
+  .screen-right {
+    width: 100%;
   }
 }
 </style>

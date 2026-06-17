@@ -30,19 +30,19 @@ const services = [
   { icon: '⚡', title: '极速发货', desc: '48小时内发货' },
   { icon: '↩️', title: '七天退换', desc: '无理由退换货' },
   { icon: '💬', title: '贴心客服', desc: '7×24小时在线' },
-];
+]
 
 const navColumns = [
   { title: '购物指南', links: ['免费注册', '购物流程', '会员介绍', '常见问题'] },
   { title: '配送方式', links: ['上门自提', '快递运输', '配送范围', '海外配送'] },
   { title: '支付方式', links: ['在线支付', '货到付款', '分期付款', '余额支付'] },
   { title: '售后服务', links: ['退换政策', '退款说明', '投诉建议', '售后热线'] },
-];
+]
 </script>
 
 <style scoped>
 .site-footer {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-top: 1px solid var(--color-border);
   margin-top: 32px;
 }
@@ -113,7 +113,6 @@ const navColumns = [
 
 .footer-copyright {
   padding: 24px 128px;
-  background: #f8f6f3;
   text-align: center;
 }
 

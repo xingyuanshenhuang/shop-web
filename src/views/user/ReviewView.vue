@@ -360,7 +360,7 @@ function submitReview() {
 }
 
 .pending-card {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px 24px;
   border: 1px solid var(--color-border);
@@ -421,7 +421,7 @@ function submitReview() {
 }
 
 .reviewed-card {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   padding: 16px 24px;
   border: 1px solid var(--color-border);
@@ -576,7 +576,7 @@ function submitReview() {
   height: 32px;
   border-radius: 6px;
   border: 1px solid var(--color-border);
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   color: var(--color-text-mid);
   font-size: 14px;
   cursor: pointer;

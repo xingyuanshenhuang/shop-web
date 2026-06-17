@@ -626,7 +626,7 @@ function handleAddCart() {
 }
 
 .product-info {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   padding: 16px;
   border-radius: var(--radius-card);
   margin-bottom: 16px;
@@ -803,7 +803,7 @@ function handleAddCart() {
 
 .cta-fav {
   width: 20%;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border: none;
   display: flex;
   flex-direction: column;
@@ -827,7 +827,7 @@ function handleAddCart() {
   right: 0;
   height: 56px;
   display: flex;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
   z-index: 100;
 }

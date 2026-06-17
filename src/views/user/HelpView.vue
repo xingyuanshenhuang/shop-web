@@ -100,7 +100,7 @@ function toggleCategory(name) {
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border);
   cursor: pointer;
@@ -127,7 +127,7 @@ function toggleCategory(name) {
 }
 
 .faq-category {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-radius: var(--radius-card);
   margin-bottom: 8px;
   overflow: hidden;

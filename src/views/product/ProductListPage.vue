@@ -270,7 +270,7 @@ function handleSearch() {
 }
 
 .listing-search-bar {
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -333,7 +333,7 @@ function handleSearch() {
 .listing-same-btn {
   height: 40px;
   padding: 0 16px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-pill);
   color: var(--color-primary);
@@ -422,7 +422,7 @@ function handleSearch() {
   align-items: center;
   height: 44px;
   border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   gap: 32px;
   padding: 0 24px;
 }
@@ -455,7 +455,7 @@ function handleSearch() {
   display: flex;
   align-items: center;
   height: 44px;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-bottom: 1px solid var(--color-border);
   padding: 0 24px;
   gap: 24px;
@@ -614,7 +614,7 @@ function handleSearch() {
 .listing-filter-sidebar {
   width: 320px;
   flex-shrink: 0;
-  background: var(--color-bg-white);
+  background: var(--color-bg);
   border-left: 1px solid var(--color-border);
   margin-left: 16px;
   display: flex;
