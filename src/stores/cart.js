@@ -26,6 +26,14 @@ export const useCartStore = defineStore('cart', () => {
     items.value = items.value.filter((i) => i.id !== id)
   }
 
+  function batchRemove(ids) {
+    if (ids && ids.length > 0) {
+      items.value = items.value.filter((i) => !ids.includes(i.id))
+    } else {
+      items.value = items.value.filter((i) => !i.checked)
+    }
+  }
+
   function toggleCheck(id) {
     const item = items.value.find((i) => i.id === id)
     if (item) item.checked = !item.checked
@@ -37,6 +45,13 @@ export const useCartStore = defineStore('cart', () => {
     })
   }
 
+  function moveToFavorites(ids) {
+    const targetIds = ids && ids.length > 0 ? ids : items.value.filter((i) => i.checked).map((i) => i.id)
+    // 实际项目中应调用收藏接口，这里仅从购物车移除并打印日志
+    console.log('[cart] move to favorites:', targetIds)
+    items.value = items.value.filter((i) => !targetIds.includes(i.id))
+  }
+
   return {
     items,
     totalCount,
@@ -45,7 +60,9 @@ export const useCartStore = defineStore('cart', () => {
     checkedCount,
     updateQuantity,
     removeItem,
+    batchRemove,
     toggleCheck,
     toggleAll,
+    moveToFavorites,
   }
 })

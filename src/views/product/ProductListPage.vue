@@ -1,30 +1,7 @@
 <template>
   <div class="product-listing">
-    <div class="listing-search-bar">
-      <div class="listing-search-bar__inner">
-        <div class="listing-search-bar__logo" @click="$router.push('/')">
-          <span>🛍️</span>
-          <span class="listing-search-bar__logo-text">XX商城</span>
-        </div>
-        <div class="listing-search-bar__search">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索商品/品牌"
-            class="listing-search-input"
-            @keyup.enter="handleSearch"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-          </el-input>
-          <button class="listing-search-btn" @click="handleSearch">搜索</button>
-          <button class="listing-same-btn">
-            <el-icon :size="14"><Camera /></el-icon>
-            搜同款
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- 顶部搜索栏：复用首页搜索栏组件 -->
+    <HomeSearchBar :show-bonus="false" />
 
     <div class="listing-content">
       <div class="listing-breadcrumb">
@@ -35,6 +12,24 @@
         </el-breadcrumb>
       </div>
 
+      <!-- 上部筛选区：类目特定图文选项 -->
+      <div v-if="matchedTopFilter" class="top-category-filter">
+        <div class="top-category-filter__title">{{ matchedTopFilter.label }}</div>
+        <div class="top-category-filter__list">
+          <div
+            v-for="option in matchedTopFilter.options"
+            :key="option.id"
+            class="top-category-filter__item"
+            :class="{ active: selectedTopOption === option.id }"
+            @click="selectTopOption(option.id)"
+          >
+            <img :src="option.image" :alt="option.name" loading="lazy" />
+            <span>{{ option.name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下部筛选区：保持与当前筛选栏基本一致 -->
       <div class="listing-categories">
         <div class="listing-categories__scroll">
           <div
@@ -55,48 +50,20 @@
         </div>
       </div>
 
-      <div class="listing-tabs">
-        <div
-          v-for="tab in tabs"
-          :key="tab"
-          class="listing-tabs__item"
-          :class="{ active: activeTab === tab }"
-          @click="activeTab = tab"
-        >
-          {{ tab }}
-        </div>
-      </div>
-
-      <div class="listing-sort">
-        <div class="listing-sort__left">
-          <span
-            v-for="sort in sortOptions"
-            :key="sort.key"
-            class="listing-sort__item"
-            :class="{ active: activeSort === sort.key }"
-            @click="activeSort = sort.key"
+      <div class="listing-toolbar">
+        <div class="listing-tabs">
+          <div
+            v-for="tab in tabs"
+            :key="tab"
+            class="listing-tabs__item"
+            :class="{ active: activeTab === tab }"
+            @click="activeTab = tab"
           >
-            {{ sort.label }}
-            <el-icon v-if="sort.hasArrow" :size="10"><ArrowDown /></el-icon>
-          </span>
+            {{ tab }}
+          </div>
         </div>
-        <div class="listing-sort__tags">
-          <span
-            v-for="tag in filterTags"
-            :key="tag"
-            class="listing-sort__tag"
-            :class="{ active: activeTags.includes(tag) }"
-            @click="toggleTag(tag)"
-          >
-            {{ tag }}
-          </span>
-        </div>
-        <div class="listing-sort__right">
-          <span class="listing-sort__location">
-            <el-icon :size="12"><Location /></el-icon>
-            发货地 <el-icon :size="10"><ArrowDown /></el-icon>
-          </span>
-          <span class="listing-sort__view">
+        <div class="listing-toolbar__right">
+          <span class="listing-toolbar__view">
             <el-icon :size="16" :color="viewMode === 'grid' ? '#FF5000' : '#CCC'"><Grid /></el-icon>
             <el-icon
               :size="16"
@@ -105,15 +72,15 @@
               ><List
             /></el-icon>
           </span>
-          <span class="listing-sort__filter-btn" @click="showFilter = !showFilter">
+          <span class="listing-toolbar__filter-btn" @click="showFilter = !showFilter">
             <el-icon :size="14"><Filter /></el-icon>
             筛选
             <el-icon :size="10">
               <ArrowUp v-if="showFilter" />
               <ArrowDown v-else />
             </el-icon>
-            <span v-if="activeTags.length" class="listing-sort__filter-badge">{{
-              activeTags.length
+            <span v-if="selectedFilters.length" class="listing-toolbar__filter-badge">{{
+              selectedFilters.length
             }}</span>
           </span>
         </div>
@@ -129,13 +96,7 @@
 
       <div class="listing-main">
         <div class="listing-grid" :class="{ 'with-filter': showFilter }">
-          <ProductCard
-            v-for="product in products"
-            :key="product.id"
-            :product="product"
-            :show-location="true"
-            :show-shop="true"
-          />
+          <ProductCard v-for="product in products" :key="product.id" :product="product" />
         </div>
 
         <transition name="slide-filter">
@@ -207,145 +168,92 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  Search,
-  Camera,
-  ArrowDown,
-  ArrowUp,
-  Location,
-  Grid,
-  List,
-  Filter,
-  Close,
-} from '@element-plus/icons-vue'
-import { products, listingCategories, brandLogos } from '@/mock/data'
+import { Grid, List, Close, Filter, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
+import { products, listingCategories, brandLogos, categoryTopFilters } from '@/mock/data'
 import ProductCard from '@/components/common/ProductCard.vue'
+import HomeSearchBar from '@/components/common/HomeSearchBar.vue'
 
 const route = useRoute()
 const router = useRouter()
-const searchKeyword = ref(route.query.keyword || '家具')
+
 const selectedCat = ref(null)
 const activeTab = ref('全部')
-const activeSort = ref('综合')
-const activeTags = ref([])
 const viewMode = ref('grid')
-const showFilter = ref(false)
 const activeFilterTab = ref('物流')
 const selectedFilters = ref([])
 const currentPage = ref(1)
 
+// 筛选面板展开状态由固定导航栏写入路由查询，页面同步读取
+const showFilter = computed({
+  get() {
+    return route.query.filter === '1'
+  },
+  set(value) {
+    const query = { ...route.query, filter: value ? '1' : undefined }
+    if (!value) delete query.filter
+    router.replace({ query })
+  },
+})
+
+// 顶部类目特定图文筛选
+const selectedTopOption = ref(route.query.subCategory || null)
+
+const matchedTopFilter = computed(() => {
+  const keyword = String(route.query.keyword || '').trim()
+  const category = String(route.query.category || '')
+    .trim()
+    .toLowerCase()
+
+  return (
+    categoryTopFilters.find((item) => {
+      const matchKeyword = keyword && item.keywords.includes(keyword)
+      const matchCategory =
+        category && (item.key.toLowerCase() === category || item.queryCategories.includes(category))
+      return matchKeyword || matchCategory
+    }) || null
+  )
+})
+
+function selectTopOption(optionId) {
+  if (selectedTopOption.value === optionId) {
+    selectedTopOption.value = null
+  } else {
+    selectedTopOption.value = optionId
+  }
+
+  const query = { ...route.query }
+  if (selectedTopOption.value) {
+    query.subCategory = selectedTopOption.value
+  } else {
+    delete query.subCategory
+  }
+  router.push({ path: '/products', query })
+}
+
+// 当搜索关键词或分类变化时，清空已选顶部子选项
+watch(
+  () => [route.query.keyword, route.query.category],
+  (newVal, oldVal) => {
+    if (newVal[0] !== oldVal[0] || newVal[1] !== oldVal[1]) {
+      selectedTopOption.value = null
+    }
+  },
+)
+
 const tabs = ['全部', '天猫', '淘宝', '旗舰店']
-const sortOptions = [
-  { key: '综合', label: '综合', hasArrow: false },
-  { key: '销量', label: '销量', hasArrow: false },
-  { key: '价格', label: '价格', hasArrow: true },
-  { key: '区间', label: '区间', hasArrow: true },
-]
-const filterTags = ['包邮', '新品', '百亿补贴', '淘宝秒杀', '淘金币抵钱', '退货宝']
 const filterTabs = ['物流', '优惠', '品牌', '热门分类']
 const logisticsOptions = ['包邮', '退货宝', '7+天内退货', '24小时内发货', '48小时内发货']
 const promoOptions = ['百亿补贴', '淘宝秒杀', '淘金币抵钱', '优惠券', '会员专享']
 const brandOptions = ['源氏木语', '全友家居', '林氏木业', '顾家家居', '宜家']
 const hotCategoryOptions = ['沙发', '床', '茶几', '书桌', '衣柜', '电视柜']
-
-function toggleTag(tag) {
-  const idx = activeTags.value.indexOf(tag)
-  if (idx > -1) activeTags.value.splice(idx, 1)
-  else activeTags.value.push(tag)
-}
-
-function handleSearch() {
-  if (searchKeyword.value.trim()) {
-    router.push(`/products?keyword=${encodeURIComponent(searchKeyword.value.trim())}`)
-  }
-}
 </script>
 
 <style scoped>
 .product-listing {
   background: var(--color-bg);
   min-height: 100vh;
-}
-
-.listing-search-bar {
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.listing-search-bar__inner {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 8px 24px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  height: 56px;
-}
-
-.listing-search-bar__logo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  flex-shrink: 0;
-  font-size: 20px;
-}
-
-.listing-search-bar__logo-text {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.listing-search-bar__search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.listing-search-input {
-  width: 480px;
-}
-
-.listing-search-input :deep(.el-input__wrapper) {
-  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
-  border: 2px solid var(--color-primary);
-  box-shadow: none;
-}
-
-.listing-search-btn {
-  height: 40px;
-  padding: 0 24px;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  transition: background var(--transition-fast);
-}
-
-.listing-search-btn:hover {
-  background: var(--color-primary-hover);
-}
-
-.listing-same-btn {
-  height: 40px;
-  padding: 0 16px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-pill);
-  color: var(--color-primary);
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: background var(--transition-fast);
-}
-
-.listing-same-btn:hover {
-  background: var(--color-light-orange);
 }
 
 .listing-content {
@@ -356,6 +264,64 @@ function handleSearch() {
 
 .listing-breadcrumb {
   padding: 12px 0;
+}
+
+/* ===== 新增：顶部类目特定图文筛选区 ===== */
+.top-category-filter {
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 0 16px;
+  margin-bottom: 8px;
+}
+
+.top-category-filter__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 12px;
+}
+
+.top-category-filter__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.top-category-filter__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-btn);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.top-category-filter__item:hover,
+.top-category-filter__item.active {
+  border-color: var(--color-primary);
+  background: var(--color-light-orange);
+}
+
+.top-category-filter__item.active span {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.top-category-filter__item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.top-category-filter__item span {
+  font-size: 13px;
+  color: var(--color-text-mid);
+  white-space: nowrap;
 }
 
 .listing-categories {
@@ -417,14 +383,20 @@ function handleSearch() {
   border-radius: var(--radius-sm);
 }
 
+.listing-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 24px;
+}
+
 .listing-tabs {
   display: flex;
   align-items: center;
-  height: 44px;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg);
   gap: 32px;
-  padding: 0 24px;
 }
 
 .listing-tabs__item {
@@ -451,104 +423,49 @@ function handleSearch() {
   background: var(--color-primary);
 }
 
-.listing-sort {
+.listing-toolbar__right {
   display: flex;
   align-items: center;
-  height: 44px;
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
-  padding: 0 24px;
-  gap: 24px;
+  gap: 16px;
 }
 
-.listing-sort__left {
-  display: flex;
-  gap: 24px;
-}
-
-.listing-sort__item {
-  font-size: 14px;
-  color: var(--color-text-mid);
-  cursor: pointer;
+.listing-toolbar__view {
   display: flex;
   align-items: center;
-  gap: 2px;
-  transition: color var(--transition-fast);
-}
-
-.listing-sort__item:hover,
-.listing-sort__item.active {
-  color: var(--color-primary);
-}
-
-.listing-sort__item.active {
-  font-weight: 600;
-}
-
-.listing-sort__tags {
-  display: flex;
-  gap: 12px;
-}
-
-.listing-sort__tag {
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-  font-size: 12px;
-  background: var(--color-warm-bg);
-  color: var(--color-text-mid);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.listing-sort__tag:hover,
-.listing-sort__tag.active {
-  color: var(--color-primary);
-  background: var(--color-light-orange);
-  border: 1px solid var(--color-primary);
-}
-
-.listing-sort__right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-left: auto;
-}
-
-.listing-sort__location,
-.listing-sort__view {
   font-size: 12px;
   color: var(--color-text-mid);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 2px;
 }
 
-.listing-sort__filter-btn {
-  font-size: 12px;
-  color: var(--color-text-mid);
-  cursor: pointer;
-  display: flex;
+.listing-toolbar__filter-btn {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  font-size: 13px;
+  color: var(--color-text-mid);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
   position: relative;
-  transition: color var(--transition-fast);
 }
 
-.listing-sort__filter-btn:hover {
+.listing-toolbar__filter-btn:hover {
   color: var(--color-primary);
+  background: var(--color-light-orange);
 }
 
-.listing-sort__filter-badge {
+.listing-toolbar__filter-badge {
   position: absolute;
   top: -6px;
-  right: -8px;
-  width: 16px;
+  right: -6px;
+  min-width: 16px;
   height: 16px;
+  padding: 0 4px;
   background: var(--color-primary);
   color: #fff;
-  font-size: 10px;
-  border-radius: var(--radius-pill);
+  font-size: 11px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -601,14 +518,14 @@ function handleSearch() {
 
 .listing-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 16px;
   flex: 1;
   transition: all var(--transition-normal);
 }
 
 .listing-grid.with-filter {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
 }
 
 .listing-filter-sidebar {
@@ -723,36 +640,41 @@ function handleSearch() {
   transform: translateX(20px);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1280px) {
   .listing-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
   .listing-grid.with-filter {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
-  .listing-search-input {
-    width: 300px;
+}
+
+@media (max-width: 1024px) {
+  .listing-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .listing-grid.with-filter {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 768px) {
+  .top-category-filter__list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .top-category-filter__list::-webkit-scrollbar {
+    display: none;
+  }
+
   .listing-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   .listing-grid.with-filter {
     grid-template-columns: repeat(2, 1fr);
-  }
-  .listing-search-input {
-    width: 100%;
-  }
-  .listing-search-bar__logo {
-    display: none;
-  }
-  .listing-same-btn {
-    display: none;
-  }
-  .listing-sort__tags {
-    display: none;
   }
   .listing-filter-sidebar {
     width: 100%;

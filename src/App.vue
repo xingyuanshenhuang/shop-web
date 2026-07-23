@@ -35,7 +35,7 @@ import MobileTabBar from '@/components/common/MobileTabBar.vue'
 <style>
 .main-content {
   min-height: calc(100vh - 100px);
-  padding: 0 80px;
+  padding: 0 clamp(0px, calc((100vw - 1524px) / 2), 80px);
 }
 
 /* 结构2: 三栏布局 */

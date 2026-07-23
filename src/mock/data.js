@@ -81,6 +81,7 @@ export const products = [
     tag: '天猫',
     shop: '源氏木语旗舰店',
     location: '上海',
+    promoTags: ['包邮'],
   },
   {
     id: 2,
@@ -92,6 +93,7 @@ export const products = [
     tag: '天猫',
     shop: '联想官方旗舰店',
     location: '北京',
+    promoTags: ['超级立减50%'],
   },
   {
     id: 3,
@@ -103,6 +105,7 @@ export const products = [
     tag: '淘宝',
     shop: '气质女装店',
     location: '杭州',
+    promoTags: ['退货宝', '包邮'],
   },
   {
     id: 4,
@@ -114,6 +117,7 @@ export const products = [
     tag: '天猫',
     shop: '巴拉巴拉旗舰店',
     location: '宁波',
+    promoTags: [],
   },
   {
     id: 5,
@@ -125,6 +129,7 @@ export const products = [
     tag: '天猫',
     shop: '华为官方旗舰店',
     location: '深圳',
+    promoTags: ['键盘热销榜第二名'],
   },
   {
     id: 6,
@@ -136,6 +141,7 @@ export const products = [
     tag: '淘宝',
     shop: '全友家居',
     location: '成都',
+    promoTags: ['包邮', '退货宝'],
   },
   {
     id: 7,
@@ -147,6 +153,7 @@ export const products = [
     tag: '天猫',
     shop: '三只松鼠旗舰店',
     location: '芜湖',
+    promoTags: ['超级立减50%'],
   },
   {
     id: 8,
@@ -158,6 +165,7 @@ export const products = [
     tag: '淘宝',
     shop: '运动前线',
     location: '泉州',
+    promoTags: [],
   },
   {
     id: 9,
@@ -169,6 +177,7 @@ export const products = [
     tag: '天猫',
     shop: 'Nespresso旗舰店',
     location: '上海',
+    promoTags: ['包邮'],
   },
   {
     id: 10,
@@ -180,6 +189,7 @@ export const products = [
     tag: '天猫',
     shop: '乐高官方旗舰店',
     location: '嘉兴',
+    promoTags: ['退货宝'],
   },
   {
     id: 11,
@@ -191,6 +201,7 @@ export const products = [
     tag: '淘宝',
     shop: '皮具世家',
     location: '广州',
+    promoTags: [],
   },
   {
     id: 12,
@@ -202,6 +213,7 @@ export const products = [
     tag: '天猫',
     shop: '外交官旗舰店',
     location: '上海',
+    promoTags: ['包邮', '超级立减50%'],
   },
 ]
 
@@ -773,3 +785,37 @@ export const listingCategories = [
 ]
 
 export const brandLogos = ['源氏木语', '全友家居', '林氏木业', '顾家家居', '宜家']
+
+// 类目特定顶部图文筛选数据（用于 /products 顶部筛选区）
+export const categoryTopFilters = [
+  {
+    key: 'stationery',
+    keywords: ['文具', '笔', '本子', '笔记本', '红笔'],
+    queryCategories: ['stationery', 'wenju'],
+    label: '文具精选',
+    options: [
+      { id: 'notebook', name: '笔记本', image: 'https://picsum.photos/seed/notebook/80/80' },
+      { id: 'red-pen', name: '红笔', image: 'https://picsum.photos/seed/redpen/80/80' },
+      { id: 'blue-pen', name: '蓝笔', image: 'https://picsum.photos/seed/bluepen/80/80' },
+      { id: 'pencil', name: '铅笔', image: 'https://picsum.photos/seed/pencil/80/80' },
+      { id: 'eraser', name: '橡皮', image: 'https://picsum.photos/seed/eraser/80/80' },
+      { id: 'ruler', name: '尺子', image: 'https://picsum.photos/seed/ruler/80/80' },
+      { id: 'folder', name: '文件夹', image: 'https://picsum.photos/seed/folder/80/80' },
+      { id: 'stapler', name: '订书机', image: 'https://picsum.photos/seed/stapler/80/80' },
+    ],
+  },
+  {
+    key: 'jewelry',
+    keywords: ['珠宝', '首饰', '项链', '戒指', '耳环'],
+    queryCategories: ['jewelry', 'zhubao'],
+    label: '珠宝精选',
+    options: [
+      { id: 'necklace', name: '项链', image: 'https://picsum.photos/seed/necklace/80/80' },
+      { id: 'ring', name: '戒指', image: 'https://picsum.photos/seed/ring/80/80' },
+      { id: 'earring', name: '耳环', image: 'https://picsum.photos/seed/earring/80/80' },
+      { id: 'bracelet', name: '手链', image: 'https://picsum.photos/seed/bracelet/80/80' },
+      { id: 'anklet', name: '脚链', image: 'https://picsum.photos/seed/anklet/80/80' },
+      { id: 'brooch', name: '胸针', image: 'https://picsum.photos/seed/brooch/80/80' },
+    ],
+  },
+]

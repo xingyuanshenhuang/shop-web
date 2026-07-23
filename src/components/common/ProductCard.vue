@@ -2,47 +2,45 @@
   <div class="product-card" @click="$router.push(`/product/${product.id}`)">
     <div class="product-card__image-wrap">
       <img :src="product.image" :alt="product.name" class="product-card__image" />
-      <div
-        v-if="product.tag"
-        class="product-card__tag"
-        :class="product.tag === '天猫' ? 'tmall' : 'taobao'"
-      >
-        {{ product.tag }}
-      </div>
       <div class="product-card__fav" @click.stop="toggleFav">
         <el-icon :size="16"><Star /></el-icon>
       </div>
     </div>
     <div class="product-card__info">
       <h3 class="product-card__name text-clamp-2">{{ product.name }}</h3>
-      <div class="product-card__price-row">
-        <span
-          class="product-card__price price"
-          :class="{ 'price-sm': String(product.price).length > 4 }"
-        >
-          ¥{{ product.price }}
-        </span>
-        <span class="product-card__original">¥{{ product.originalPrice }}</span>
-        <span class="product-card__sold">{{ formatSold(product.sold) }}人付款</span>
+      <div class="product-card__promo">
+        <template v-if="hasPromoTags">
+          <span
+            v-for="(label, idx) in promoTags"
+            :key="idx"
+            class="product-card__promo-tag"
+          >
+            {{ label }}
+          </span>
+        </template>
       </div>
-      <div v-if="showLocation && product.location" class="product-card__location">
-        {{ product.location }}
-      </div>
-      <div v-if="showShop && product.shop" class="product-card__shop">
-        {{ product.shop }}
+      <div class="product-card__meta">
+        <div class="product-card__meta-left">
+          <span
+            class="product-card__price price"
+            :class="{ 'price-sm': String(product.price).length > 4 }"
+          >
+            ¥{{ product.price }}
+          </span>
+          <span class="product-card__sold">{{ formatSold(product.sold) }}人购买</span>
+        </div>
+        <span class="product-card__same">同款</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Star } from '@element-plus/icons-vue'
 
-defineProps({
+const props = defineProps({
   product: { type: Object, required: true },
-  showLocation: { type: Boolean, default: false },
-  showShop: { type: Boolean, default: false },
 })
 
 const isFav = ref(false)
@@ -50,6 +48,15 @@ const isFav = ref(false)
 function toggleFav() {
   isFav.value = !isFav.value
 }
+
+const promoTags = computed(() => {
+  const raw = props.product.promoTags
+  if (Array.isArray(raw)) return raw.filter(Boolean)
+  if (typeof raw === 'string' && raw.trim()) return [raw.trim()]
+  return []
+})
+
+const hasPromoTags = computed(() => promoTags.value.length > 0)
 
 function formatSold(num) {
   if (num >= 100000) return '10万+'
@@ -75,10 +82,11 @@ function formatSold(num) {
 
 .product-card__image-wrap {
   position: relative;
-  width: 100%;
   padding-top: 100%;
   overflow: hidden;
-  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  border-radius: 12px;
+  margin: 8px auto 0;
+  width: calc(100% - 16px);
 }
 
 .product-card__image {
@@ -88,25 +96,7 @@ function formatSold(num) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.product-card__tag {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 10px;
-  color: #fff;
-  font-weight: 500;
-}
-
-.product-card__tag.tmall {
-  background: #ff0036;
-}
-
-.product-card__tag.taobao {
-  background: #999;
+  border-radius: 12px;
 }
 
 .product-card__fav {
@@ -129,55 +119,76 @@ function formatSold(num) {
 }
 
 .product-card__info {
-  padding: 12px;
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .product-card__name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--color-text-dark);
-  line-height: 20px;
-  height: 40px;
-  margin-bottom: 8px;
+  line-height: 18px;
+  height: 36px;
+  text-align: center;
 }
 
-.product-card__price-row {
+.product-card__promo {
+  min-height: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-card__promo-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  line-height: 14px;
+  color: #ff0036;
+  border: 1px solid rgba(255, 0, 54, 0.2);
+  border-radius: 2px;
+  padding: 0 3px;
+  white-space: nowrap;
+}
+
+.product-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.product-card__meta-left {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  flex-wrap: nowrap;
+  min-width: 0;
+  flex: 1;
 }
 
 .product-card__price {
-  font-size: 20px;
+  font-size: 18px;
   white-space: nowrap;
 }
 
 .product-card__price.price-sm {
-  font-size: 16px;
-}
-
-.product-card__original {
-  font-size: 12px;
-  color: var(--color-text-light);
-  text-decoration: line-through;
-  white-space: nowrap;
+  font-size: 14px;
 }
 
 .product-card__sold {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-light);
-  margin-left: auto;
   white-space: nowrap;
 }
 
-.product-card__location,
-.product-card__shop {
+.product-card__same {
   font-size: 11px;
   color: var(--color-text-light);
-  margin-top: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 </style>

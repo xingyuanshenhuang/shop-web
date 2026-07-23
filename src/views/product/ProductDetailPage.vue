@@ -28,11 +28,6 @@
             />
             <div v-if="showMagnifier" class="gallery-magnifier__mask" :style="maskStyle"></div>
           </div>
-          <div
-            v-if="showMagnifier"
-            class="gallery-zoom"
-            :style="{ backgroundImage: `url(${detail.images[currentImage]})`, ...zoomBgStyle }"
-          ></div>
         </div>
         <div class="gallery-actions">
           <el-icon :size="16"><Star /></el-icon>
@@ -172,8 +167,14 @@
         </div>
       </div>
 
-      <div class="product-detail__right">
-        <div class="right-sticky">
+      <div class="product-detail__right" ref="rightColRef">
+        <div class="right-sticky" :style="stickyStyle">
+          <div
+            v-if="showMagnifier"
+            ref="zoomEl"
+            class="gallery-zoom"
+            :style="{ backgroundImage: `url(${detail.images[currentImage]})`, ...zoomBgStyle }"
+          ></div>
           <div class="promo-tip">
             <span>您有 50 元消费券待使用</span>
             <span style="color: var(--color-text-light)">距结束 3天12小时</span>
@@ -279,7 +280,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { Star, StarFilled, ShoppingCart, Share } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { productDetail, products as allProducts } from '@/mock/data'
@@ -296,6 +297,28 @@ const quantity = ref(1)
 const activeDetailTab = ref('用户评价')
 const activeReviewTag = ref('全部')
 const maskPos = reactive({ x: 0, y: 0 })
+const mainImg = ref(null)
+const zoomEl = ref(null)
+const zoomSize = reactive({ w: 450, h: 450 })
+
+// ===== 右侧栏固定定位 =====
+// 使用 position: fixed 让右侧商品信息栏始终固定在视口顶部附近
+// 宽度与 right 通过 JS 动态计算，以对齐右侧栏在 flex 布局中的位置
+// top 动态调整：页面顶部时让出 TopUtilityBar（36px）的高度，滚动后贴近视口顶部
+const rightColRef = ref(null)
+const stickyStyle = reactive({ width: '', right: '', top: '60px' })
+let resizeObserver = null
+
+function updateStickyPosition() {
+  if (!rightColRef.value) return
+  const rect = rightColRef.value.getBoundingClientRect()
+  stickyStyle.width = rect.width + 'px'
+  stickyStyle.right = window.innerWidth - rect.right + 'px'
+  // TopUtilityBar 高 36px、static 定位（会随滚动消失）；
+  // 在页面顶部 top=60（36+24 间距）避免遮挡；滚动 36px 后贴顶 24px
+  const scrollTop = window.scrollY || document.documentElement.scrollTop
+  stickyStyle.top = Math.max(24, 60 - scrollTop) + 'px'
+}
 
 const detailTabs = ['用户评价', '参数信息', '图文详情', '本店推荐', '看了又看']
 const reviewTags = [
@@ -313,10 +336,21 @@ const maskStyle = computed(() => ({
   height: '180px',
 }))
 
-const zoomBgStyle = computed(() => ({
-  backgroundPosition: `${-maskPos.x * 2}px ${-maskPos.y * 2}px`,
-  backgroundSize: '900px 900px',
-}))
+const zoomBgStyle = computed(() => {
+  const scaleX = zoomSize.w / 180
+  const scaleY = zoomSize.h / 180
+  return {
+    backgroundPosition: `${-maskPos.x * scaleX}px ${-maskPos.y * scaleY}px`,
+    backgroundSize: `${450 * scaleX}px ${450 * scaleY}px`,
+  }
+})
+
+function updateZoomSize() {
+  if (zoomEl.value) {
+    zoomSize.w = zoomEl.value.clientWidth || 450
+    zoomSize.h = zoomEl.value.clientHeight || 450
+  }
+}
 
 function handleMouseMove(e) {
   const rect = e.currentTarget.getBoundingClientRect()
@@ -327,6 +361,34 @@ function handleMouseMove(e) {
   maskPos.x = x
   maskPos.y = y
 }
+
+watch(showMagnifier, (val) => {
+  if (val) {
+    nextTick(updateZoomSize)
+  }
+})
+
+onMounted(() => {
+  window.addEventListener('resize', updateZoomSize)
+  // 初始化右侧栏固定定位，并监听 scroll/resize/容器尺寸变化
+  updateStickyPosition()
+  window.addEventListener('resize', updateStickyPosition)
+  window.addEventListener('scroll', updateStickyPosition, { passive: true })
+  if (rightColRef.value && window.ResizeObserver) {
+    resizeObserver = new ResizeObserver(updateStickyPosition)
+    resizeObserver.observe(rightColRef.value)
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateZoomSize)
+  window.removeEventListener('resize', updateStickyPosition)
+  window.removeEventListener('scroll', updateStickyPosition)
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+})
 
 function handleAddCart() {
   ElMessage.success('已加入购物车')
@@ -357,8 +419,9 @@ function handleAddCart() {
 }
 
 .right-sticky {
-  position: sticky;
-  top: 88px;
+  position: fixed;
+  top: 24px;
+  z-index: 20;
 }
 
 .product-detail__gallery {
@@ -418,13 +481,19 @@ function handleAddCart() {
 }
 
 .gallery-zoom {
-  width: 450px;
-  height: 450px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  aspect-ratio: 1;
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border);
   background-repeat: no-repeat;
-  margin-left: 12px;
-  flex-shrink: 0;
+  background-color: #fff;
+  z-index: 30;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
 }
 
 .gallery-actions {
