@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-toolbar hide-on-mobile" :style="toolbarStyle">
+  <div v-if="!isCheckout" class="floating-toolbar hide-on-mobile" :style="toolbarStyle">
     <!-- 我的 -->
     <div class="floating-toolbar__item" @click="$router.push('/user')">
       <el-icon :size="20"><User /></el-icon>
@@ -29,7 +29,8 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { ShoppingCart, User, Service, ChatDotSquare } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useCartStore } from '@/stores/cart'
@@ -71,9 +72,11 @@ function calculateToolbarSize(moduleCount) {
 /** 工具栏动态样式：宽度、总高度、模块间隔均由计算结果驱动 */
 const toolbarStyle = reactive(calculateToolbarSize(MODULE_COUNT))
 
-// ==================== cartStore ====================
+// ==================== cartStore & route ====================
 
 const cartStore = useCartStore()
+const route = useRoute()
+const isCheckout = computed(() => route.path === '/checkout')
 
 // ==================== 反馈 ====================
 

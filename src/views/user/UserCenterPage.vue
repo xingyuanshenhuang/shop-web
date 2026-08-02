@@ -490,7 +490,8 @@ import {
   ArrowLeft,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { favoriteProducts, frequentProducts, browsingHistory, cartItems } from '@/mock/data'
+import { useFavoritesStore } from '@/stores/favorites'
+import { frequentProducts, browsingHistory, cartItems } from '@/mock/data'
 import OrderView from '@/views/user/OrderView.vue'
 import CouponView from '@/views/user/CouponView.vue'
 import HistoryView from '@/views/user/HistoryView.vue'
@@ -501,6 +502,7 @@ import SettingsView from '@/views/user/SettingsView.vue'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const favoritesStore = useFavoritesStore()
 const user = ref(userStore.user)
 const activeTab = ref('default')
 
@@ -521,7 +523,7 @@ function toggleSub(menu) {
   }
 }
 
-const favoriteItems = ref([...favoriteProducts])
+const favoriteItems = computed(() => favoritesStore.items)
 
 const historyItems = computed(() => {
   const all = []
@@ -541,7 +543,7 @@ const latestOrder = ref({
 })
 
 // 收藏人数统计
-const favoriteCount = ref(40)
+const favoriteCount = computed(() => favoritesStore.count)
 
 // 常卖常逛模块
 const showFrequent = ref(true)
@@ -592,7 +594,7 @@ onMounted(() => {
 const guessList = ref([])
 
 function generateGuessList() {
-  const allProducts = [...favoriteProducts, ...frequentProducts]
+  const allProducts = [...favoritesStore.items, ...frequentProducts]
   const shuffled = allProducts.sort(() => Math.random() - 0.5)
   const salesOptions = ['8000+', '1.2万+', '2万+', '3万+', '5万+', '10万+']
   guessList.value = shuffled.slice(0, 8).map((p, i) => ({
@@ -727,7 +729,7 @@ onMounted(() => {
 .user-center {
   display: flex;
   min-height: 100vh;
-  background: var(--color-bg);
+  background: var(--color-checkout-bg);
 }
 
 .user-center__sidebar {

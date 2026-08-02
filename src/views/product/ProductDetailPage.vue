@@ -260,12 +260,12 @@
               <el-icon :size="20" color="#fff"><ShoppingCart /></el-icon>
             </button>
             <button class="cta-buy">立即购买</button>
-            <button class="cta-fav" @click="userStore.toggleCollect()">
-              <el-icon :size="20" :color="userStore.isCollected ? '#FF5000' : '#666'">
-                <StarFilled v-if="userStore.isCollected" />
+            <button class="cta-fav" @click="handleToggleFavorite">
+              <el-icon :size="20" :color="favoritesStore.isFavorite(detail.id) ? '#FF5000' : '#666'">
+                <StarFilled v-if="favoritesStore.isFavorite(detail.id)" />
                 <Star v-else />
               </el-icon>
-              <span>{{ userStore.isCollected ? '已收藏' : '收藏' }}</span>
+              <span>{{ favoritesStore.isFavorite(detail.id) ? '已收藏' : '收藏' }}</span>
             </button>
           </div>
         </div>
@@ -285,9 +285,11 @@ import { Star, StarFilled, ShoppingCart, Share } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { productDetail, products as allProducts } from '@/mock/data'
 import { useUserStore } from '@/stores/user'
+import { useFavoritesStore } from '@/stores/favorites'
 import ProductCard from '@/components/common/ProductCard.vue'
 
 const userStore = useUserStore()
+const favoritesStore = useFavoritesStore()
 const detail = reactive({ ...productDetail })
 const currentImage = ref(0)
 const showMagnifier = ref(false)
@@ -392,6 +394,21 @@ onUnmounted(() => {
 
 function handleAddCart() {
   ElMessage.success('已加入购物车')
+}
+
+function handleToggleFavorite() {
+  if (favoritesStore.isFavorite(detail.id)) {
+    favoritesStore.removeFavorite(detail.id)
+    ElMessage.success('已取消收藏')
+  } else {
+    favoritesStore.addFavorite({
+      id: detail.id,
+      name: detail.name,
+      price: detail.price,
+      image: detail.images[0],
+    })
+    ElMessage.success('已添加到收藏夹')
+  }
 }
 </script>
 

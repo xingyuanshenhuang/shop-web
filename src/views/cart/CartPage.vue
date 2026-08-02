@@ -204,33 +204,44 @@
             <h3 class="cart-summary__title">结算明细</h3>
             <p class="cart-summary__tip">实际优惠金额以下单页为准</p>
 
-            <div class="cart-summary__row">
-              <span>商品总价</span>
-              <span>¥{{ cartStore.totalPrice.toFixed(2) }}</span>
+            <div v-if="!cartStore.checkedCount" class="cart-summary__empty">
+              <div class="cart-summary__empty-icon">
+                <el-icon :size="48" color="#E0E0E0"><ShoppingCart /></el-icon>
+                <span class="cart-summary__empty-badge">空</span>
+              </div>
+              <p class="cart-summary__empty-text">选择商品查看实际支付价格</p>
             </div>
-            <div class="cart-summary__row">
-              <span>平台优惠</span>
-              <span class="price price-sm">-¥{{ discountAmount.toFixed(2) }}</span>
-            </div>
-            <div class="cart-summary__row">
-              <span>官方限时补贴</span>
-              <span class="price price-sm">-¥{{ subsidyAmount.toFixed(2) }}</span>
-            </div>
-            <div class="cart-summary__row">
-              <span>红包</span>
-              <span class="price price-sm">-¥{{ redPacketAmount.toFixed(2) }}</span>
-            </div>
-            <el-divider />
-            <div class="cart-summary__discount">
-              <span>优惠共减</span>
-              <span class="price price-sm">-¥{{ totalDiscount.toFixed(2) }}</span>
-            </div>
+
+            <template v-else>
+              <div class="cart-summary__row">
+                <span>商品总价</span>
+                <span>¥{{ cartStore.totalPrice.toFixed(2) }}</span>
+              </div>
+              <div class="cart-summary__row">
+                <span>平台优惠</span>
+                <span class="price price-sm">-¥{{ discountAmount.toFixed(2) }}</span>
+              </div>
+              <div class="cart-summary__row">
+                <span>官方限时补贴</span>
+                <span class="price price-sm">-¥{{ subsidyAmount.toFixed(2) }}</span>
+              </div>
+              <div class="cart-summary__row">
+                <span>红包</span>
+                <span class="price price-sm">-¥{{ redPacketAmount.toFixed(2) }}</span>
+              </div>
+              <el-divider />
+              <div class="cart-summary__discount">
+                <span>优惠共减</span>
+                <span class="price price-sm">-¥{{ totalDiscount.toFixed(2) }}</span>
+              </div>
+            </template>
+
             <div class="cart-summary__total">
               <div class="total-label">
                 <span>合计：</span>
                 <span class="price price-xl">¥{{ finalPrice.toFixed(2) }}</span>
               </div>
-              <div class="total-discount">共减 ¥{{ totalDiscount.toFixed(2) }}</div>
+              <div v-if="cartStore.checkedCount" class="total-discount">共减 ¥{{ totalDiscount.toFixed(2) }}</div>
             </div>
             <el-button
               type="primary"
@@ -896,6 +907,45 @@ function handleMoveSingleToFav(item) {
   border-color: #ccc;
 }
 
+.cart-summary__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 0 24px;
+  gap: 12px;
+}
+
+.cart-summary__empty-icon {
+  position: relative;
+  display: inline-flex;
+}
+
+.cart-summary__empty-icon .el-icon {
+  font-size: 48px;
+}
+
+.cart-summary__empty-badge {
+  position: absolute;
+  top: -4px;
+  right: -10px;
+  width: 22px;
+  height: 22px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-summary__empty-text {
+  font-size: 13px;
+  color: var(--color-primary);
+  margin: 0;
+}
+
 /* 右下角固定结算框（小屏显示） */
 .cart-float-summary {
   display: none;
@@ -971,7 +1021,7 @@ function handleMoveSingleToFav(item) {
 .cart-float-summary__btn {
   height: 44px;
   padding: 0 28px;
-  border-radius: 22px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 700;
   background: var(--color-primary);
@@ -1156,7 +1206,7 @@ function handleMoveSingleToFav(item) {
   .cart-float-summary__btn {
     padding: 0 20px;
     height: 40px;
-    border-radius: 20px;
+    border-radius: 12px;
   }
 
   .cart-toolbar {

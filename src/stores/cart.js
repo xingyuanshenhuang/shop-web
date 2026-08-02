@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { cartItems as mockCart } from '@/mock/data'
+import { useFavoritesStore } from './favorites'
 
 export const useCartStore = defineStore('cart', () => {
   const items = ref([...mockCart])
@@ -47,8 +48,12 @@ export const useCartStore = defineStore('cart', () => {
 
   function moveToFavorites(ids) {
     const targetIds = ids && ids.length > 0 ? ids : items.value.filter((i) => i.checked).map((i) => i.id)
-    // 实际项目中应调用收藏接口，这里仅从购物车移除并打印日志
-    console.log('[cart] move to favorites:', targetIds)
+    // 获取要收藏的商品列表
+    const itemsToFav = items.value.filter((i) => targetIds.includes(i.id))
+    // 调用收藏夹store添加收藏
+    const favoritesStore = useFavoritesStore()
+    favoritesStore.addFromCart(itemsToFav)
+    // 从购物车移除
     items.value = items.value.filter((i) => !targetIds.includes(i.id))
   }
 

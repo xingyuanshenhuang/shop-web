@@ -293,7 +293,8 @@ import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, Clock, Star, Shop, DeleteFilled } from '@element-plus/icons-vue'
-import { browsingHistory, favoriteProducts, followedShops } from '@/mock/data'
+import { browsingHistory, followedShops } from '@/mock/data'
+import { useFavoritesStore } from '@/stores/favorites'
 import { useHoverArrow } from '@/composables/useHoverArrow'
 const { updateHover, arrowIcon } = useHoverArrow()
 
@@ -304,6 +305,7 @@ const props = defineProps({
 const emit = defineEmits(['update:activeTab'])
 
 const router = useRouter()
+const favoritesStore = useFavoritesStore()
 
 // 基础状态
 const currentTab = ref('history') // 当前Tab
@@ -466,7 +468,7 @@ const historyGroups = ref(
     products: group.products.map((p) => ({ ...p, status: 'normal' })),
   })),
 )
-const favoriteItems = ref([...favoriteProducts])
+const favoriteItems = computed(() => favoritesStore.items)
 const shops = ref([...followedShops])
 
 // 筛选后的数据
@@ -570,8 +572,7 @@ function removeHistoryItem(date, id) {
   }
 }
 function removeFavoriteItem(id) {
-  const idx = favoriteItems.value.findIndex((i) => i.id === id)
-  if (idx > -1) favoriteItems.value.splice(idx, 1)
+  favoritesStore.removeFavorite(id)
 }
 function confirmDelete() {
   if (currentTab.value === 'history') {
@@ -579,7 +580,7 @@ function confirmDelete() {
       group.products = group.products.filter((i) => !selectedItems.value.includes(i.id))
     })
   } else if (currentTab.value === 'favorites') {
-    favoriteItems.value = favoriteItems.value.filter((i) => !selectedItems.value.includes(i.id))
+    selectedItems.value.forEach((id) => favoritesStore.removeFavorite(id))
   }
   selectedItems.value = []
   showDeleteDialog.value = false

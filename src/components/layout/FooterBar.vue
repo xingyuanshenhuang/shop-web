@@ -89,6 +89,7 @@ const navColumns = [
   padding: 32px 128px;
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
+  justify-items: center;
 }
 
 .footer-nav__title {

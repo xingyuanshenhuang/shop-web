@@ -1,35 +1,32 @@
 <template>
   <div id="app">
-    <TopUtilityBar />
-    <MainNav />
-    <main class="main-content">
-      <router-view />
-    </main>
-    <FooterBar />
-    <FloatingToolbar />
-    <FloatingBackTop />
-    <MobileTabBar />
+    <router-view v-if="isBlankLayout" />
+    <template v-else>
+      <TopUtilityBar />
+      <MainNav />
+      <main class="main-content">
+        <router-view />
+      </main>
+      <FooterBar />
+      <FloatingToolbar />
+      <FloatingBackTop />
+      <MobileTabBar />
+    </template>
   </div>
-  <!-- <div id="app">
-    <TopUtilityBar />
-    <MainNav />
-    <main class="main-content">
-      <router-view />
-    </main>
-    <FooterBar />
-    <FloatingToolbar />
-    <FloatingBackTop />
-    <MobileTabBar />
-  </div> -->
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import TopUtilityBar from '@/components/layout/TopUtilityBar.vue'
 import MainNav from '@/components/layout/MainNav.vue'
 import FooterBar from '@/components/layout/FooterBar.vue'
 import FloatingToolbar from '@/components/common/FloatingToolbar.vue'
 import FloatingBackTop from '@/components/common/FloatingBackTop.vue'
 import MobileTabBar from '@/components/common/MobileTabBar.vue'
+
+const route = useRoute()
+const isBlankLayout = computed(() => route.meta.layout === 'blank')
 </script>
 
 <style>

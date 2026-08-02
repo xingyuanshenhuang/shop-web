@@ -90,13 +90,6 @@
         </transition>
       </div>
 
-      <!-- 购物车 -->
-      <div class="main-nav__cart" @click="$router.push('/cart')">
-        <el-badge :value="cartCount" :hidden="cartCount === 0" :max="99">
-          <el-icon :size="24" color="#666"><ShoppingCart /></el-icon>
-        </el-badge>
-      </div>
-
       <!-- 移动端图标 -->
       <div class="main-nav__mobile-icons show-on-mobile-only">
         <el-icon :size="22" @click="mobileSearchVisible = !mobileSearchVisible">
@@ -439,6 +432,7 @@ function toggleFilter() {
   height: 64px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 32px;
 }
 
@@ -682,13 +676,6 @@ function toggleFilter() {
   transform: translateY(-8px);
 }
 
-/* 购物车 */
-.main-nav__cart {
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
 .main-nav__mobile-icons {
   display: none;
   align-items: center;
@@ -843,10 +830,6 @@ function toggleFilter() {
   .main-nav__search-similar,
   .main-nav__search-dropdown,
   .main-nav__filter-bar {
-    display: none;
-  }
-
-  .main-nav__cart {
     display: none;
   }
 

@@ -31,6 +31,12 @@ const routes = [
     name: 'UserCenter',
     component: () => import('@/views/user/UserCenterPage.vue'),
   },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/user/LoginPage.vue'),
+    meta: { layout: 'blank' },
+  },
 ]
 
 const router = createRouter({

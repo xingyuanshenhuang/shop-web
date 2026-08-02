@@ -169,6 +169,7 @@ function claimCoupon(coupon) {
   border-radius: var(--radius-card);
   overflow: hidden;
   border: 1px solid var(--color-border);
+  background: var(--color-bg);
 }
 
 .coupon-card.expired,

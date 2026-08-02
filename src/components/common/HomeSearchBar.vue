@@ -110,11 +110,7 @@
       <div v-if="showBonus" class="search-bar-right">
         <div class="bonus-entry">
           <div class="bonus-entry__icon">
-            <img
-              src="https://picsum.photos/seed/bonus/56/56"
-              alt=""
-              class="bonus-entry__avatar"
-            />
+            <img src="https://picsum.photos/seed/bonus/56/56" alt="" class="bonus-entry__avatar" />
           </div>
           <div class="bonus-entry__text">
             <span class="bonus-entry__title">天天领红包</span>
@@ -146,7 +142,7 @@ watch(
   () => route.query.keyword,
   (kw) => {
     searchKeyword.value = kw ? String(kw) : ''
-  }
+  },
 )
 const dropdownVisible = ref(false)
 const isMouseInDropdown = ref(false)
@@ -298,6 +294,9 @@ onUnmounted(() => {
   height: 96px;
   margin: 0 auto;
   container-type: inline-size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-bar-inner {
