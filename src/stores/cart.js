@@ -57,6 +57,28 @@ export const useCartStore = defineStore('cart', () => {
     items.value = items.value.filter((i) => !targetIds.includes(i.id))
   }
 
+  function addItem(product) {
+    // 检查是否已存在相同商品
+    const existing = items.value.find(
+      (i) => i.productId === product.productId && i.spec === product.spec,
+    )
+    if (existing) {
+      existing.quantity += product.quantity || 1
+      existing.checked = true
+    } else {
+      items.value.push({
+        id: Date.now(),
+        productId: product.productId,
+        name: product.name,
+        spec: product.spec,
+        price: product.price,
+        quantity: product.quantity || 1,
+        image: product.image,
+        checked: true,
+      })
+    }
+  }
+
   return {
     items,
     totalCount,
@@ -69,5 +91,6 @@ export const useCartStore = defineStore('cart', () => {
     toggleCheck,
     toggleAll,
     moveToFavorites,
+    addItem,
   }
 })

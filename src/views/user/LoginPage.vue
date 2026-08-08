@@ -1,252 +1,223 @@
 <template>
   <div class="login-page">
-    <!-- 左侧品牌展示区（PC） -->
-    <aside class="login-brand hide-on-mobile" aria-hidden="true">
-      <div class="login-brand__bg"></div>
-      <div class="login-brand__inner">
-        <div class="login-brand__logo">
-          <span class="login-brand__logo-main">淘宝</span>
-          <span class="login-brand__logo-sub">Taobao.com</span>
+    <!-- 顶部导航 -->
+    <header class="login-header">
+      <div class="login-header__inner">
+        <router-link to="/" class="login-header__logo">
+          <span class="login-header__logo-main">淘宝</span>
+          <span class="login-header__logo-sub">Taobao</span>
+        </router-link>
+        <div class="login-header__links">
+          <a class="login-header__link">网站无障碍</a>
+          <a class="login-header__link login-header__link--feedback">
+            <el-icon><ChatDotRound /></el-icon>
+            <span>"登录页面"改进建议</span>
+          </a>
         </div>
-        <h2 class="login-brand__title">淘宝一下，想要就来</h2>
-        <p class="login-brand__desc">
-          千万好物，一键直达。登录账号即可解锁专属优惠、订单跟踪与购物车同步。
-        </p>
-        <img
-          :src="brandImage"
-          alt="购物主题插画"
-          class="login-brand__illustration"
-          loading="lazy"
-          decoding="async"
-        />
-        <ul class="login-brand__features">
-          <li><el-icon><CircleCheckFilled /></el-icon><span>官方正品，假一赔十</span></li>
-          <li><el-icon><CircleCheckFilled /></el-icon><span>7 天无理由退货保障</span></li>
-          <li><el-icon><CircleCheckFilled /></el-icon><span>全站 HTTPS 加密，账号更安全</span></li>
-        </ul>
-        <router-link to="/" class="login-brand__back">返回首页 &gt;</router-link>
       </div>
-    </aside>
+    </header>
 
-    <!-- 右侧登录卡 -->
+    <!-- 主体登录卡 -->
     <main class="login-main">
       <div class="login-card">
-        <div class="login-card__top">
-          <div class="login-card__logo">
-            <span class="login-card__logo-main">淘宝</span>
-            <span class="login-card__logo-sub">Taobao.com</span>
+        <!-- 左侧：扫码登录 -->
+        <section class="login-card__left">
+          <h2 class="login-card__left-title">手机扫码登录</h2>
+          <div class="qr-wrap">
+            <svg viewBox="0 0 145 145" class="qr-code" aria-label="手机扫码登录二维码">
+              <rect width="145" height="145" fill="#fff" />
+              <g v-for="(row, i) in qrModules" :key="'r' + i">
+                <rect
+                  v-for="(cell, j) in row"
+                  v-show="cell"
+                  :key="'c' + j"
+                  :x="j * 5"
+                  :y="i * 5"
+                  width="5"
+                  height="5"
+                  fill="#000"
+                />
+              </g>
+              <circle cx="72.5" cy="72.5" r="16" fill="#fff" />
+              <circle cx="72.5" cy="72.5" r="12" fill="#ff5000" />
+              <text x="72.5" y="77.5" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">淘</text>
+            </svg>
           </div>
-          <router-link to="/" class="login-card__home show-on-mobile-only">返回首页</router-link>
-        </div>
+          <p class="qr-tip">
+            打开<em>淘宝APP</em>—点击左上角扫一扫
+          </p>
+          <a class="qr-help">怎么扫码登录？</a>
+        </section>
 
-        <header class="login-card__header">
-          <h1 class="login-card__title">欢迎登录</h1>
-          <p class="login-card__subtitle">登录后即可享受专属购物体验</p>
-        </header>
-
-        <!-- 账号锁定提示 -->
-        <transition name="fade">
-          <div v-if="isLocked" class="lock-banner" role="alert">
-            <el-icon><WarningFilled /></el-icon>
-            <span>
-              账号已暂时锁定，请 <strong>{{ lockRemaining }}</strong> 秒后重试（连续 5 次错误将触发锁定）。
-            </span>
-          </div>
-        </transition>
-
-        <el-tabs v-model="loginMode" class="login-tabs">
-          <el-tab-pane label="账号登录" name="account" />
-          <el-tab-pane label="短信登录" name="sms" />
-        </el-tabs>
-
-        <!-- 账号登录表单 -->
-        <form class="login-form" @submit.prevent="handleSubmit" v-show="loginMode === 'account'">
-          <div class="account-types" role="tablist" aria-label="账号类型">
+        <!-- 右侧：表单登录 -->
+        <section class="login-card__right">
+          <!-- 登录方式切换 -->
+          <div class="login-tabs" role="tablist" aria-label="登录方式">
             <button
-              v-for="t in accountTypes"
-              :key="t.key"
               type="button"
               role="tab"
-              :aria-selected="accountType === t.key"
-              class="account-types__item"
-              :class="{ active: accountType === t.key }"
-              @click="switchAccountType(t.key)"
+              :aria-selected="loginMode === 'account'"
+              class="login-tabs__item"
+              :class="{ active: loginMode === 'account' }"
+              @click="loginMode = 'account'"
             >
-              {{ t.label }}
+              密码登录
             </button>
-          </div>
-
-          <el-input
-            v-model="account"
-            size="large"
-            clearable
-            autocomplete="username"
-            :placeholder="accountPlaceholder"
-            :aria-invalid="!!accountError"
-            aria-describedby="account-error"
-            @input="accountError = ''"
-            @blur="validateAccount"
-            @keyup.enter="handleSubmit"
-          >
-            <template #prefix>
-              <el-icon>
-                <Iphone v-if="accountType === 'phone'" />
-                <Message v-else-if="accountType === 'email'" />
-                <User v-else />
-              </el-icon>
-            </template>
-          </el-input>
-          <p v-if="accountError" id="account-error" class="field-error" aria-live="polite">
-            {{ accountError }}
-          </p>
-
-          <el-input
-            v-model="password"
-            size="large"
-            autocomplete="new-password"
-            :type="passwordVisible ? 'text' : 'password'"
-            placeholder="请输入密码（6-20 位）"
-            :aria-invalid="!!passwordError"
-            aria-describedby="password-error"
-            @input="passwordError = ''"
-            @blur="validatePassword"
-            @keyup.enter="handleSubmit"
-          >
-            <template #prefix><el-icon><Lock /></el-icon></template>
-            <template #suffix>
-              <el-icon
-                class="pwd-toggle"
-                :aria-label="passwordVisible ? '隐藏密码' : '显示密码'"
-                @click="passwordVisible = !passwordVisible"
-              >
-                <View v-if="!passwordVisible" />
-                <Hide v-else />
-              </el-icon>
-            </template>
-          </el-input>
-          <p v-if="passwordError" id="password-error" class="field-error" aria-live="polite">
-            {{ passwordError }}
-          </p>
-
-          <!-- 密码强度指示器 -->
-          <div v-if="password" class="strength" :data-level="passwordStrength">
-            <div class="strength__bar">
-              <span
-                v-for="i in 3"
-                :key="i"
-                class="strength__seg"
-                :class="{ 'is-active': i <= passwordStrength }"
-              ></span>
-            </div>
-            <span class="strength__label">强度：{{ strengthLabel }}</span>
-          </div>
-
-          <div class="row-between">
-            <el-checkbox v-model="rememberMe">记住我（7 天免登录）</el-checkbox>
-            <a class="link" @click="handleForgotPassword">忘记密码？</a>
-          </div>
-        </form>
-
-        <!-- 短信登录表单 -->
-        <form class="login-form" @submit.prevent="handleSubmit" v-show="loginMode === 'sms'">
-          <el-input
-            v-model="phone"
-            size="large"
-            clearable
-            autocomplete="tel"
-            placeholder="请输入手机号"
-            maxlength="11"
-            :aria-invalid="!!phoneError"
-            aria-describedby="phone-error"
-            @input="phone = phone.replace(/\D/g, ''); phoneError = ''"
-            @blur="validatePhone"
-            @keyup.enter="handleSubmit"
-          >
-            <template #prefix"><el-icon><Iphone /></el-icon></template>
-          </el-input>
-          <p v-if="phoneError" id="phone-error" class="field-error" aria-live="polite">
-            {{ phoneError }}
-          </p>
-
-          <div class="sms-code-row">
-            <el-input
-              v-model="smsCode"
-              size="large"
-              autocomplete="one-time-code"
-              inputmode="numeric"
-              maxlength="6"
-              placeholder="请输入 6 位验证码"
-              :aria-invalid="!!codeError"
-              aria-describedby="code-error"
-              @input="smsCode = smsCode.replace(/\D/g, ''); codeError = ''"
-              @keyup.enter="handleSubmit"
-            >
-              <template #prefix><el-icon><Key /></el-icon></template>
-            </el-input>
             <button
               type="button"
-              class="sms-code-btn"
-              :disabled="smsCountdown > 0 || loading"
-              @click="sendSmsCode"
+              role="tab"
+              :aria-selected="loginMode === 'sms'"
+              class="login-tabs__item"
+              :class="{ active: loginMode === 'sms' }"
+              @click="loginMode = 'sms'"
             >
-              {{ smsCountdown > 0 ? `${smsCountdown}s 后重发` : '获取验证码' }}
+              短信登录
             </button>
           </div>
-          <p v-if="codeError" id="code-error" class="field-error" aria-live="polite">
-            {{ codeError }}
-          </p>
-          <p class="sms-tip">演示验证码：<strong>123456</strong></p>
 
-          <div class="row-between">
-            <el-checkbox v-model="rememberMe">记住我（7 天免登录）</el-checkbox>
-            <a class="link" @click="handleForgotPassword">忘记密码？</a>
-          </div>
-        </form>
+          <!-- 账号锁定提示 -->
+          <transition name="fade">
+            <div v-if="isLocked" class="lock-banner" role="alert">
+              <el-icon><WarningFilled /></el-icon>
+              <span>
+                账号已暂时锁定，请 <strong>{{ lockRemaining }}</strong> 秒后重试（连续 5 次错误将触发锁定）。
+              </span>
+            </div>
+          </transition>
 
-        <!-- 协议勾选 -->
-        <el-checkbox v-model="agreed" class="agreement">
-          我已阅读并同意
-          <a class="link" @click.prevent="openAgreement('用户服务协议')">《用户服务协议》</a>
-          和
-          <a class="link" @click.prevent="openAgreement('隐私政策')">《隐私政策》</a>
-        </el-checkbox>
+          <!-- 密码登录表单 -->
+          <form class="login-form" @submit.prevent="handleSubmit" v-show="loginMode === 'account'">
+            <div class="form-row">
+              <el-input
+                v-model="account"
+                size="large"
+                clearable
+                autocomplete="username"
+                placeholder="账号名/邮箱/手机号"
+                :aria-invalid="!!accountError"
+                aria-describedby="account-error"
+                @input="accountError = ''"
+                @blur="validateAccount"
+                @keyup.enter="handleSubmit"
+              />
+            </div>
+            <p v-if="accountError" id="account-error" class="field-error" aria-live="polite">
+              {{ accountError }}
+            </p>
 
-        <!-- 登录按钮（防重复点击） -->
-        <button
-          type="button"
-          class="login-btn"
-          :disabled="loginBtnDisabled"
-          @click="handleSubmit"
-        >
-          <el-icon v-if="loading" class="spin"><Loading /></el-icon>
-          <span>{{ loginBtnText }}</span>
-        </button>
+            <div class="form-row form-row--password">
+              <el-input
+                v-model="password"
+                size="large"
+                autocomplete="current-password"
+                :type="passwordVisible ? 'text' : 'password'"
+                placeholder="请输入登录密码"
+                :aria-invalid="!!passwordError"
+                aria-describedby="password-error"
+                @input="passwordError = ''"
+                @blur="validatePassword"
+                @keyup.enter="handleSubmit"
+              />
+              <a class="forgot-link" @click="handleForgotPassword">忘记密码</a>
+            </div>
+            <p v-if="passwordError" id="password-error" class="field-error" aria-live="polite">
+              {{ passwordError }}
+            </p>
+          </form>
 
-        <div class="register-row">
-          还没有账号？<a class="link" @click="handleRegister">免费注册</a>
-        </div>
+          <!-- 短信登录表单 -->
+          <form class="login-form" @submit.prevent="handleSubmit" v-show="loginMode === 'sms'">
+            <div class="form-row">
+              <el-input
+                v-model="phone"
+                size="large"
+                clearable
+                autocomplete="tel"
+                placeholder="请输入手机号"
+                maxlength="11"
+                :aria-invalid="!!phoneError"
+                aria-describedby="phone-error"
+                @input="phone = phone.replace(/\D/g, ''); phoneError = ''"
+                @blur="validatePhone"
+                @keyup.enter="handleSubmit"
+              />
+            </div>
+            <p v-if="phoneError" id="phone-error" class="field-error" aria-live="polite">
+              {{ phoneError }}
+            </p>
 
-        <div class="divider"><span>其他登录方式</span></div>
+            <div class="form-row sms-code-row">
+              <el-input
+                v-model="smsCode"
+                size="large"
+                autocomplete="one-time-code"
+                inputmode="numeric"
+                maxlength="6"
+                placeholder="请输入 6 位验证码"
+                :aria-invalid="!!codeError"
+                aria-describedby="code-error"
+                @input="smsCode = smsCode.replace(/\D/g, ''); codeError = ''"
+                @keyup.enter="handleSubmit"
+              />
+              <button
+                type="button"
+                class="sms-code-btn"
+                :disabled="smsCountdown > 0 || loading"
+                @click="sendSmsCode"
+              >
+                {{ smsCountdown > 0 ? `${smsCountdown}s 后重发` : '获取验证码' }}
+              </button>
+            </div>
+            <p v-if="codeError" id="code-error" class="field-error" aria-live="polite">
+              {{ codeError }}
+            </p>
+            <p class="sms-tip">演示验证码：<strong>123456</strong></p>
+          </form>
 
-        <div class="social-row">
+          <!-- 登录按钮 -->
           <button
-            v-for="s in socialProviders"
-            :key="s.name"
             type="button"
-            class="social-btn"
-            :style="{ '--brand': s.color }"
-            :aria-label="`${s.name}登录`"
-            @click="handleThirdParty(s.name)"
+            class="login-btn"
+            :disabled="loginBtnDisabled"
+            @click="handleSubmit"
           >
-            <span class="social-btn__icon" v-html="s.svg"></span>
-            <span class="social-btn__label">{{ s.name }}</span>
+            <el-icon v-if="loading" class="spin"><Loading /></el-icon>
+            <span>{{ loginBtnText }}</span>
           </button>
-        </div>
 
-        <div class="secure-note">
-          <el-icon><Lock /></el-icon>
-          <span>本页面通过 HTTPS 加密传输，保障您的账号信息安全</span>
-        </div>
+          <!-- 第三方 / 辅助链接 -->
+          <div class="login-helpers">
+            <div class="social-login">
+              <button
+                v-for="s in socialProviders"
+                :key="s.name"
+                type="button"
+                class="social-btn"
+                :style="{ '--brand': s.color }"
+                :aria-label="`${s.name}登录`"
+                @click="handleThirdParty(s.name)"
+              >
+                <span class="social-btn__icon" v-html="s.svg"></span>
+              </button>
+            </div>
+            <div class="helper-links">
+              <a class="link" @click="handleForgotAccount">忘记账号</a>
+              <span class="divider-dot">|</span>
+              <a class="link" @click="handleRegister">免费注册</a>
+            </div>
+          </div>
+
+          <!-- 协议勾选 -->
+          <el-checkbox v-model="agreed" class="agreement">
+            <span class="agreement__text">
+              <em>*</em>已阅读并同意以下协议
+              <a class="link" @click.prevent="openAgreement('淘宝平台服务协议')">淘宝平台服务协议</a>、
+              <a class="link" @click.prevent="openAgreement('隐私权政策')">隐私权政策</a>、
+              <a class="link" @click.prevent="openAgreement('法律声明')">法律声明</a>、
+              <a class="link" @click.prevent="openAgreement('支付宝及客户端服务协议')">支付宝及客户端服务协议</a>
+            </span>
+          </el-checkbox>
+        </section>
       </div>
     </main>
 
@@ -287,6 +258,14 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 协议提示弹窗 -->
+    <AgreementPrompt
+      v-model:visible="showAgreementPrompt"
+      scene="login"
+      :agreements="['《淘宝平台服务协议》', '《隐私权政策》', '《法律声明》', '《支付宝及客户端服务协议》']"
+      @agree="handleAgreeAndSubmit"
+    />
   </div>
 </template>
 
@@ -295,6 +274,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import AgreementPrompt from '@/components/common/AgreementPrompt.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -304,23 +284,8 @@ const redirectTarget = computed(() =>
   route.query.redirect ? String(route.query.redirect) : '/',
 )
 
-// ===== 品牌插画（懒加载） =====
-const brandImage =
-  'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=flat%20vector%20illustration%20online%20shopping%20concept%20happy%20young%20people%20with%20shopping%20bags%20gift%20boxes%20and%20smartphone%20warm%20orange%20palette%20modern%20minimal%20e%20commerce%20theme%20soft%20gradients%20clean%20background&image_size=portrait_4_3'
-
 // ===== 登录方式 =====
 const loginMode = ref('account') // account | sms
-const accountType = ref('phone') // phone | email | username
-const accountTypes = [
-  { key: 'phone', label: '手机号' },
-  { key: 'email', label: '邮箱' },
-  { key: 'username', label: '用户名' },
-]
-function switchAccountType(key) {
-  accountType.value = key
-  account.value = ''
-  accountError.value = ''
-}
 
 // ===== 表单字段 =====
 const account = ref('')
@@ -328,7 +293,6 @@ const password = ref('')
 const passwordVisible = ref(false)
 const phone = ref('')
 const smsCode = ref('')
-const rememberMe = ref(false)
 const agreed = ref(false)
 
 // ===== 错误提示 =====
@@ -340,22 +304,20 @@ const codeError = ref('')
 // ===== 校验规则 =====
 const PHONE_RE = /^1[3-9]\d{9}$/
 const EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/
-const USERNAME_RE = /^[A-Za-z0-9_\u4e00-\u9fa5]{2,20}$/
-
-const accountPlaceholder = computed(
-  () => ({ phone: '请输入手机号', email: '请输入邮箱', username: '请输入用户名' })[accountType.value],
-)
 
 function validateAccount() {
   const v = account.value.trim()
-  if (!v) accountError.value = '请输入账号'
-  else if (accountType.value === 'phone' && !PHONE_RE.test(v))
-    accountError.value = '手机号格式不正确'
-  else if (accountType.value === 'email' && !EMAIL_RE.test(v))
-    accountError.value = '邮箱格式不正确'
-  else if (accountType.value === 'username' && !USERNAME_RE.test(v))
-    accountError.value = '用户名需 2-20 位中英文/数字/下划线'
-  else accountError.value = ''
+  if (!v) {
+    accountError.value = '请输入账号名/邮箱/手机号'
+  } else if (/^\d+$/.test(v)) {
+    if (!PHONE_RE.test(v)) accountError.value = '手机号格式不正确'
+    else accountError.value = ''
+  } else if (v.includes('@')) {
+    if (!EMAIL_RE.test(v)) accountError.value = '邮箱格式不正确'
+    else accountError.value = ''
+  } else {
+    accountError.value = ''
+  }
   return !accountError.value
 }
 function validatePassword() {
@@ -374,28 +336,10 @@ function validatePhone() {
   return !phoneError.value
 }
 
-// ===== 密码强度 =====
-function calcStrength(pwd) {
-  if (!pwd || pwd.length < 6) return 0
-  let score = 0
-  if (pwd.length >= 8) score++
-  if (pwd.length >= 12) score++
-  const types = [/[a-z]/.test(pwd), /[A-Z]/.test(pwd), /\d/.test(pwd), /[^a-zA-Z0-9]/.test(pwd)].filter(
-    Boolean,
-  ).length
-  if (types >= 2) score++
-  if (types >= 3) score++
-  if (score <= 2) return 1
-  if (score === 3) return 2
-  return 3
-}
-const passwordStrength = computed(() => calcStrength(password.value))
-const strengthLabel = computed(() => ['', '弱', '中', '强'][passwordStrength.value])
-
 // ===== XSS 输入过滤 =====
 function sanitize(str) {
   return String(str)
-    .replace(/[<>"'`]/g, '')
+    .replace(/[<>'"`]/g, '')
     .replace(/javascript:/gi, '')
     .trim()
 }
@@ -424,7 +368,6 @@ const lockRemaining = computed(() => {
   return Math.max(0, Math.ceil((userStore.lockedUntil - Date.now()) / 1000))
 })
 watch(lockRemaining, (v) => {
-  // 锁定到期后重置错误计数
   if (v <= 0 && userStore.failedAttempts > 0) {
     userStore.resetAttempts()
     stopLockTicker()
@@ -450,6 +393,13 @@ function sendSmsCode() {
   ElMessage.success('验证码已发送，请查收短信（演示验证码：123456）')
 }
 
+// ===== 协议提示弹窗 =====
+const showAgreementPrompt = ref(false)
+function handleAgreeAndSubmit() {
+  agreed.value = true
+  handleSubmit()
+}
+
 // ===== 提交状态 =====
 const loading = ref(false)
 const loginBtnDisabled = computed(() => loading.value || isLocked.value)
@@ -470,25 +420,30 @@ async function handleAccountLogin() {
   const okPassword = validatePassword()
   if (!okAccount || !okPassword) return
   if (!agreed.value) {
-    ElMessage.warning('请先阅读并同意《用户服务协议》和《隐私政策》')
+    showAgreementPrompt.value = true
     return
   }
   loading.value = true
   try {
     const safeAccount = sanitize(account.value)
-    await userStore.login({ account: safeAccount, password: password.value })
-    // 凭证正确：异常场景下触发异地登录安全验证
-    if (userStore.failedAttempts > 0 && !userStore.verifiedInSession) {
+    const res = await userStore.login({ account: safeAccount, password: password.value })
+    if (userStore.failedAttempts > 0) {
       pendingAccount.value = safeAccount
-      pendingRemember.value = rememberMe.value
+      pendingRemember.value = false
+      pendingUserData.value = res.user
       loading.value = false
       showSecurityVerify.value = true
       return
     }
-    finishLogin(safeAccount, rememberMe.value)
+    finishLogin(safeAccount, false, res.user)
   } catch (e) {
     loading.value = false
     if (isLocked.value) startLockTicker()
+    if (e.message?.includes('账号不存在')) {
+      accountError.value = e.message
+    } else if (e.message?.includes('密码错误')) {
+      passwordError.value = e.message
+    }
     ElMessage.error(e.message || '登录失败，请稍后重试')
   }
 }
@@ -502,21 +457,22 @@ async function handleSmsLogin() {
   }
   codeError.value = ''
   if (!agreed.value) {
-    ElMessage.warning('请先阅读并同意《用户服务协议》和《隐私政策》')
+    showAgreementPrompt.value = true
     return
   }
   loading.value = true
   try {
     const safePhone = sanitize(phone.value)
-    await userStore.loginBySms({ phone: safePhone, code: smsCode.value })
-    if (userStore.failedAttempts > 0 && !userStore.verifiedInSession) {
+    const res = await userStore.loginBySms({ phone: safePhone, code: smsCode.value })
+    if (userStore.failedAttempts > 0) {
       pendingAccount.value = safePhone
-      pendingRemember.value = rememberMe.value
+      pendingRemember.value = false
+      pendingUserData.value = res.user
       loading.value = false
       showSecurityVerify.value = true
       return
     }
-    finishLogin(safePhone, rememberMe.value)
+    finishLogin(safePhone, false, res.user)
   } catch (e) {
     loading.value = false
     if (isLocked.value) startLockTicker()
@@ -524,8 +480,8 @@ async function handleSmsLogin() {
   }
 }
 
-function finishLogin(account, remember) {
-  userStore.completeLogin({ account, remember })
+function finishLogin(account, remember, userData) {
+  userStore.completeLogin({ account, remember, userData })
   userStore.markVerified()
   showSecurityVerify.value = false
   loading.value = false
@@ -543,6 +499,7 @@ const sliderVerified = ref(false)
 let dragStartX = 0
 const pendingAccount = ref('')
 const pendingRemember = ref(false)
+const pendingUserData = ref(null)
 
 function onSliderDown(e) {
   if (sliderVerified.value || !sliderTrackRef.value) return
@@ -572,7 +529,10 @@ function onSliderUp() {
   if (sliderPos.value >= sliderMax.value - 2) {
     sliderVerified.value = true
     ElMessage.success('安全验证通过')
-    setTimeout(() => finishLogin(pendingAccount.value, pendingRemember.value), 500)
+    setTimeout(
+      () => finishLogin(pendingAccount.value, pendingRemember.value, pendingUserData.value),
+      500,
+    )
   } else {
     sliderPos.value = 0
   }
@@ -601,12 +561,11 @@ async function handleForgotPassword() {
     /* 用户取消 */
   }
 }
+function handleForgotAccount() {
+  ElMessage.info('请尝试使用注册时的手机号或邮箱找回账号')
+}
 function handleRegister() {
-  ElMessageBox.alert(
-    '注册功能正在建设中，您可暂时使用微信、QQ、支付宝快速登录，或联系客服开通账号。',
-    '注册账号',
-    { confirmButtonText: '我知道了' },
-  )
+  router.push('/register')
 }
 function handleThirdParty(name) {
   ElMessage.info(`即将跳转至${name}完成授权登录...`)
@@ -622,24 +581,72 @@ const socialProviders = [
   {
     name: '微信',
     color: '#07C160',
-    svg: `<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#fff" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.852-.544-3.785-4.735-6.536-9.596-6.536zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.913 2.534 3.687 4.394 6.687 4.394.812 0 1.595-.13 2.332-.357a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.583.583 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89l-.406-.032zm-2.93 3.18c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/></svg>`,
-  },
-  {
-    name: 'QQ',
-    color: '#12B7F5',
-    svg: `<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="#fff" d="M12.003 0c-2.265 0-4.661.232-6.745 1.624-.98.646-2.042 1.528-2.739 2.497-.717.433-1.212.94-1.474 1.52-.13.287-.16.7-.16 1.084.001.255.028.518.053.785l.063.704c.057.684.158 1.472-.156 2.025-.183.318-.485.544-.81.74-.352.21-.65.335-.945.436-.246.085-.46.16-.66.302-.088.062-.198.16-.218.295-.024.16.075.31.196.41.16.13.39.21.61.242.49.07 1.024-.02 1.397-.075.248-.036.426-.057.626-.04.244.02.485.123.71.32.27.236.413.56.494.9.044.187.067.378.092.566.045.337.087.66.243.94.117.21.28.405.42.51.07.05.13.06.17.06.06 0 .12-.02.18-.07.13-.11.18-.29.21-.49.04-.27.06-.55.06-.81.02-.13.06-.24.12-.34.08-.13.18-.21.29-.21.12 0 .23.07.32.18.09.11.16.26.22.42.18.48.36 1.06.62 1.61.24.51.55 1 .93 1.34.36.33.78.55 1.2.7.46.16.95.23 1.43.27.48.04.96.05 1.42.05h.06c.46 0 .94-.01 1.42-.05.48-.04.97-.11 1.43-.27.42-.15.84-.37 1.2-.7.38-.34.69-.83.93-1.34.26-.55.44-1.13.62-1.61.06-.16.13-.31.22-.42.09-.11.2-.18.32-.18.11 0 .21.08.29.21.06.1.1.21.12.34 0 .26.02.54.06.81.03.2.08.38.21.49.06.05.12.07.18.07.04 0 .1-.01.17-.06.14-.105.30-.3.42-.51.156-.28.198-.603.243-.94.025-.188.048-.379.092-.566.081-.34.224-.664.494-.9.225-.197.466-.3.71-.32.2-.017.378.004.626.04.373.055.907.145 1.397.075.22-.032.45-.112.61-.242.121-.1.22-.25.196-.41-.02-.135-.13-.233-.218-.295-.2-.142-.414-.217-.66-.302-.295-.101-.593-.226-.945-.436-.325-.196-.627-.422-.81-.74-.314-.553-.213-1.341-.156-2.025l.063-.704c.025-.267.052-.53.053-.785 0-.384-.03-.797-.16-1.084-.262-.58-.757-1.087-1.474-1.52-.697-.969-1.759-1.851-2.739-2.497C16.664.232 14.268 0 12.003 0z"/></svg>`,
+    svg: `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#fff" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.852-.544-3.785-4.735-6.536-9.596-6.536zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.913 2.534 3.687 4.394 6.687 4.394.812 0 1.595-.13 2.332-.357a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.583.583 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89l-.406-.032zm-2.93 3.18c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/></svg>`,
   },
   {
     name: '支付宝',
     color: '#1677FF',
-    svg: `<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><text x="12" y="17" text-anchor="middle" font-size="15" font-weight="700" fill="#fff" font-family="PingFang SC, sans-serif">支</text></svg>`,
+    svg: `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><text x="12" y="17" text-anchor="middle" font-size="15" font-weight="700" fill="#fff" font-family="PingFang SC, sans-serif">支</text></svg>`,
   },
 ]
+
+// ===== 二维码图案 =====
+const qrModules = computed(() => {
+  const size = 29
+  const modules = Array.from({ length: size }, () => Array(size).fill(0))
+
+  const addFinder = (x, y) => {
+    for (let i = 0; i < 7; i++) {
+      for (let j = 0; j < 7; j++) {
+        if (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4)) {
+          modules[y + i][x + j] = 1
+        }
+      }
+    }
+  }
+  addFinder(0, 0)
+  addFinder(size - 7, 0)
+  addFinder(0, size - 7)
+
+  const addAlignment = (x, y) => {
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        if (i === 0 || i === 4 || j === 0 || j === 4 || (i === 2 && j === 2)) {
+          modules[y + i][x + j] = 1
+        }
+      }
+    }
+  }
+  addAlignment(size - 9, size - 9)
+
+  for (let i = 8; i < size - 8; i++) {
+    modules[6][i] = i % 2 === 0 ? 1 : 0
+    modules[i][6] = i % 2 === 0 ? 1 : 0
+  }
+  modules[size - 8][8] = 1
+
+  let rand = 123456789
+  const random = () => {
+    rand = (rand * 9301 + 49297) % 233280
+    return rand / 233280
+  }
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (modules[i][j] === 0 && random() > 0.5) {
+        modules[i][j] = 1
+      }
+    }
+  }
+  return modules
+})
 
 // ===== 生命周期 =====
 onMounted(() => {
   userStore.loadLock()
   userStore.loadRemembered()
+  if (route.query.registered === '1') {
+    ElMessage.success('注册成功！请使用新账号登录')
+  }
   if (userStore.isLoggedIn) {
     router.replace(redirectTarget.value)
     return
@@ -657,157 +664,179 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* ============================================================
+   淘宝风格登录页 · 参考官方登录页视觉
+   ============================================================ */
+
 .login-page {
-  display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #fff5f0 0%, #ffffff 60%);
-}
-
-/* ===== 左侧品牌区 ===== */
-.login-brand {
-  position: relative;
-  flex: 1.1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.login-brand__bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #ff7a18 0%, #ff5000 55%, #e04800 100%);
-}
-.login-brand__bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.18), transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.12), transparent 45%);
-}
-.login-brand__inner {
-  position: relative;
-  z-index: 1;
-  max-width: 440px;
-  padding: 48px 40px;
-  color: #fff;
-  text-align: center;
-}
-.login-brand__logo {
+  background: #f2f2f2;
   display: flex;
   flex-direction: column;
+}
+
+/* ===== 顶部导航 ===== */
+.login-header {
+  flex-shrink: 0;
+  background: #f2f2f2;
+  padding: 20px 40px;
+}
+.login-header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
   align-items: center;
-  line-height: 1.15;
-  margin-bottom: 24px;
+  justify-content: space-between;
 }
-.login-brand__logo-main {
-  font-size: 32px;
-  font-weight: 900;
-  letter-spacing: 4px;
+.login-header__logo {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  text-decoration: none;
 }
-.login-brand__logo-sub {
-  font-size: 12px;
-  letter-spacing: 1px;
-  opacity: 0.85;
-}
-.login-brand__title {
+.login-header__logo-main {
   font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 12px;
+  font-weight: 900;
+  color: #ff5000;
+  letter-spacing: 2px;
 }
-.login-brand__desc {
-  font-size: 14px;
-  line-height: 1.8;
-  opacity: 0.92;
-  margin-bottom: 24px;
+.login-header__logo-sub {
+  font-size: 13px;
+  color: #ff5000;
+  font-weight: 600;
 }
-.login-brand__illustration {
-  width: 100%;
-  max-width: 360px;
-  height: auto;
-  border-radius: var(--radius-card);
-  margin: 0 auto 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-}
-.login-brand__features {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  text-align: left;
-  margin: 0 auto 24px;
-  width: fit-content;
-}
-.login-brand__features li {
+.login-header__links {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  opacity: 0.95;
+  gap: 20px;
 }
-.login-brand__back {
+.login-header__link {
   font-size: 13px;
-  color: #fff;
-  opacity: 0.9;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-  padding-bottom: 2px;
-  transition: opacity var(--transition-fast);
+  color: #666;
+  cursor: pointer;
+  transition: color 150ms ease;
 }
-.login-brand__back:hover {
-  opacity: 1;
+.login-header__link:hover {
+  color: #ff5000;
+}
+.login-header__link--feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #999;
+}
+.login-header__link--feedback .el-icon {
+  color: #ff5000;
+  font-size: 14px;
 }
 
-/* ===== 右侧登录区 ===== */
+/* ===== 主体区域 ===== */
 .login-main {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px 20px;
+  padding: 40px 20px;
 }
 .login-card {
+  display: flex;
   width: 100%;
-  max-width: 400px;
+  max-width: 880px;
+  min-height: 460px;
   background: #fff;
-  border-radius: var(--radius-modal);
-  box-shadow: var(--shadow-modal);
-  padding: 32px 32px 24px;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
 }
-.login-card__top {
+
+/* ===== 左侧：扫码登录 ===== */
+.login-card__left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  border-right: 1px solid #f0f0f0;
+}
+.login-card__left-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 28px;
+}
+.qr-wrap {
+  width: 180px;
+  height: 180px;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.qr-code {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.qr-tip {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 8px;
+}
+.qr-tip em {
+  color: #ff5000;
+  font-style: normal;
+  font-weight: 500;
+}
+.qr-help {
+  font-size: 13px;
+  color: #999;
+  cursor: pointer;
+}
+.qr-help:hover {
+  color: #ff5000;
+}
+
+/* ===== 右侧：表单登录 ===== */
+.login-card__right {
+  flex: 1;
+  padding: 48px 56px;
+  display: flex;
+  flex-direction: column;
+}
+.login-tabs {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  gap: 24px;
+  margin-bottom: 28px;
 }
-.login-card__logo {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+.login-tabs__item {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: color 150ms ease;
 }
-.login-card__logo-main {
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--color-primary);
-  letter-spacing: 3px;
+.login-tabs__item:hover {
+  color: #ff5000;
 }
-.login-card__logo-sub {
-  font-size: 11px;
-  color: var(--color-text-light);
-}
-.login-card__home {
-  font-size: 12px;
-  color: var(--color-text-mid);
-}
-.login-card__header {
-  margin-bottom: 16px;
-}
-.login-card__title {
-  font-size: 22px;
+.login-tabs__item.active {
+  color: #ff5000;
   font-weight: 700;
-  color: var(--color-text-dark);
 }
-.login-card__subtitle {
-  font-size: 13px;
-  color: var(--color-text-light);
-  margin-top: 4px;
+.login-tabs__item.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 3px;
+  background: #ff5000;
+  border-radius: 2px;
 }
 
 /* ===== 锁定提示 ===== */
@@ -817,209 +846,171 @@ onUnmounted(() => {
   gap: 8px;
   background: #fff2f0;
   border: 1px solid #ffccc7;
-  color: var(--color-danger);
-  padding: 8px 12px;
-  border-radius: var(--radius-btn);
+  color: #ff4d4f;
+  padding: 10px 14px;
+  border-radius: 8px;
   font-size: 12px;
   line-height: 1.6;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  animation: shake-x 0.4s ease;
+}
+@keyframes shake-x {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 .lock-banner .el-icon {
   flex-shrink: 0;
-}
-
-/* ===== 标签页 ===== */
-.login-tabs {
-  margin-bottom: 4px;
-}
-.login-tabs :deep(.el-tabs__header) {
-  margin: 0 0 16px;
-}
-
-/* ===== 账号类型切换 ===== */
-.account-types {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.account-types__item {
-  flex: 1;
-  height: 32px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-border);
-  background: #fff;
-  font-size: 13px;
-  color: var(--color-text-mid);
-  transition: all var(--transition-fast);
-}
-.account-types__item:hover {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-}
-.account-types__item.active {
-  color: #fff;
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  font-weight: 600;
+  font-size: 16px;
 }
 
 /* ===== 表单 ===== */
-.login-form .el-input {
-  margin-bottom: 4px;
+.login-form {
+  margin-bottom: 8px;
+}
+.form-row {
+  margin-bottom: 16px;
+}
+.form-row--password {
+  position: relative;
+}
+.form-row--password .el-input :deep(.el-input__inner) {
+  padding-right: 70px;
+}
+.forgot-link {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #999;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+.forgot-link:hover {
+  color: #ff5000;
 }
 .login-form :deep(.el-input__wrapper) {
-  border-radius: var(--radius-btn);
-  padding: 0 12px;
-  transition: box-shadow var(--transition-fast);
+  border-radius: 8px;
+  padding: 0 14px;
+  height: 44px;
+  background: #f5f5f5;
+  box-shadow: none;
+  transition: background 150ms ease, box-shadow 150ms ease;
+}
+.login-form :deep(.el-input__wrapper:hover) {
+  background: #fff;
+  box-shadow: 0 0 0 1px #e8e8e8 inset;
 }
 .login-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 2px rgba(255, 80, 0, 0.25);
+  background: #fff;
+  box-shadow: 0 0 0 1px #ff5000 inset;
 }
-.pwd-toggle {
-  cursor: pointer;
-  color: var(--color-text-light);
-  transition: color var(--transition-fast);
+.login-form :deep(.el-input__inner) {
+  font-size: 14px;
+  color: #333;
 }
-.pwd-toggle:hover {
-  color: var(--color-primary);
+.login-form :deep(.el-input__inner::placeholder) {
+  color: #999;
 }
 .field-error {
-  font-size: 12px;
-  color: var(--color-danger);
-  margin: 2px 0 10px;
-  line-height: 1.5;
-}
-
-/* 密码强度 */
-.strength {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 4px 0 12px;
-}
-.strength__bar {
-  display: flex;
   gap: 4px;
-  flex: 1;
-}
-.strength__seg {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--color-border);
-  transition: background var(--transition-fast);
-}
-.strength[data-level='1'] .is-active {
-  background: var(--color-danger);
-}
-.strength[data-level='2'] .is-active {
-  background: #faad14;
-}
-.strength[data-level='3'] .is-active {
-  background: var(--color-success);
-}
-.strength__label {
   font-size: 12px;
-  color: var(--color-text-light);
-  white-space: nowrap;
+  color: #ff4d4f;
+  margin: -12px 0 12px;
+  line-height: 1.5;
+  animation: err-in 0.25s ease;
 }
-
-/* 行布局 */
-.row-between {
-  display: flex;
+@keyframes err-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.field-error::before {
+  content: '!';
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  margin: 10px 0 14px;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 /* 短信验证码 */
 .sms-code-row {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
 }
 .sms-code-row .el-input {
   flex: 1;
-  margin-bottom: 0;
 }
 .sms-code-btn {
   flex-shrink: 0;
-  height: 40px;
-  padding: 0 14px;
-  border-radius: var(--radius-btn);
-  border: 1px solid var(--color-primary);
-  background: #fff;
-  color: var(--color-primary);
-  font-size: 13px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #ff5000;
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
-  transition: all var(--transition-fast);
+  cursor: pointer;
+  transition: color 150ms ease;
 }
 .sms-code-btn:hover:not(:disabled) {
-  background: var(--color-light-orange);
+  color: #e04800;
 }
 .sms-code-btn:disabled {
-  border-color: var(--color-border);
-  color: var(--color-text-light);
+  color: #999;
   cursor: not-allowed;
 }
 .sms-tip {
   font-size: 12px;
-  color: var(--color-text-light);
-  margin: 6px 0 10px;
+  color: #999;
+  margin: 8px 0 0;
 }
 .sms-tip strong {
-  color: var(--color-primary);
+  color: #ff5000;
   letter-spacing: 1px;
 }
 
-/* 协议 */
-.agreement {
-  margin: 4px 0 16px;
-  align-items: flex-start;
-}
-.agreement :deep(.el-checkbox__label) {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--color-text-mid);
-  white-space: normal;
-}
-
-/* 链接 */
-.link {
-  color: var(--color-primary);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-}
-.link:hover {
-  color: var(--color-primary-hover);
-  text-decoration: underline;
-}
-
-/* 登录按钮 */
+/* ===== 登录按钮 ===== */
 .login-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
-  height: 44px;
-  border-radius: var(--radius-btn);
-  background: var(--color-primary);
+  height: 48px;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #ff9000 0%, #ff5000 100%);
   color: #fff;
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: 2px;
-  transition: all var(--transition-fast);
+  letter-spacing: 4px;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity 150ms ease, transform 150ms ease;
+  margin-top: 8px;
 }
 .login-btn:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-  box-shadow: 0 6px 16px rgba(255, 80, 0, 0.3);
+  opacity: 0.92;
 }
 .login-btn:active:not(:disabled) {
   transform: scale(0.99);
 }
 .login-btn:disabled {
-  background: var(--color-border-light);
+  background: #e0e0e0;
   color: #fff;
   cursor: not-allowed;
 }
@@ -1027,85 +1018,79 @@ onUnmounted(() => {
   animation: login-spin 0.8s linear infinite;
 }
 @keyframes login-spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-/* 注册 */
-.register-row {
-  text-align: center;
-  font-size: 13px;
-  color: var(--color-text-mid);
-  margin-top: 14px;
-}
-
-/* 分割线 */
-.divider {
+/* ===== 辅助链接 ===== */
+.login-helpers {
   display: flex;
   align-items: center;
-  text-align: center;
-  margin: 20px 0 16px;
-  color: var(--color-text-light);
-  font-size: 12px;
+  justify-content: space-between;
+  margin-top: 16px;
 }
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--color-border);
-}
-.divider span {
-  padding: 0 12px;
-}
-
-/* 第三方登录 */
-.social-row {
+.social-login {
   display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin-bottom: 18px;
+  align-items: center;
+  gap: 12px;
 }
 .social-btn {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  background: none;
-}
-.social-btn__icon {
-  display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--brand);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-  transition: transform var(--transition-fast);
+  cursor: pointer;
+  transition: transform 150ms ease;
 }
-.social-btn__icon :deep(svg) {
-  display: block;
-}
-.social-btn:hover .social-btn__icon {
+.social-btn:hover {
   transform: translateY(-2px);
 }
-.social-btn__label {
-  font-size: 12px;
-  color: var(--color-text-mid);
-}
-
-/* 安全提示 */
-.secure-note {
+.helper-links {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  gap: 12px;
+  font-size: 13px;
+}
+.divider-dot {
+  color: #e0e0e0;
+}
+.link {
+  color: #ff5000;
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+.link:hover {
+  color: #e04800;
+  text-decoration: underline;
+}
+
+/* ===== 协议 ===== */
+.agreement {
+  margin-top: 18px;
+  align-items: flex-start;
+}
+.agreement :deep(.el-checkbox__label) {
+  padding-left: 6px;
+}
+.agreement__text {
   font-size: 12px;
-  color: var(--color-text-light);
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border);
+  line-height: 1.6;
+  color: #999;
+  white-space: normal;
+}
+.agreement__text em {
+  color: #ff5000;
+  font-style: normal;
+  margin-right: 2px;
+}
+.agreement :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background: #ff5000;
+  border-color: #ff5000;
+}
+.agreement :deep(.el-checkbox__inner:hover) {
+  border-color: #ff5000;
 }
 
 /* ===== 滑块验证 ===== */
@@ -1117,38 +1102,39 @@ onUnmounted(() => {
   align-items: flex-start;
   gap: 8px;
   font-size: 13px;
-  color: var(--color-text-mid);
+  color: #666;
   line-height: 1.7;
   margin-bottom: 18px;
 }
 .verify-tip__icon {
-  color: var(--color-deep-orange);
+  color: #ff5000;
   flex-shrink: 0;
   margin-top: 2px;
 }
 .slider-track {
   position: relative;
   width: 100%;
-  height: 44px;
-  border-radius: var(--radius-pill);
+  height: 46px;
+  border-radius: 999px;
   background: #f2f2f2;
-  border: 1px solid var(--color-border);
+  border: 1px solid #e8e8e8;
   overflow: hidden;
   user-select: none;
 }
 .slider-track.is-verified {
-  border-color: var(--color-success);
+  border-color: #52c41a;
 }
 .slider-progress {
   position: absolute;
   left: 0;
   top: 0;
   height: 100%;
-  background: var(--color-light-orange);
-  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, #fff1e8, #ffd4b8);
+  border-radius: 999px;
+  transition: width 150ms ease;
 }
 .slider-track.is-verified .slider-progress {
-  background: var(--color-light-green);
+  background: linear-gradient(90deg, #f0fff0, #d4f4d4);
 }
 .slider-text {
   position: absolute;
@@ -1157,35 +1143,39 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  color: var(--color-text-mid);
+  color: #999;
   pointer-events: none;
 }
 .slider-handle {
   position: absolute;
   left: 0;
   top: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff9000 0%, #ff5000 100%);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: grab;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 8px rgba(255, 80, 0, 0.3);
+  transition: box-shadow 150ms ease;
+}
+.slider-handle:hover {
+  box-shadow: 0 4px 12px rgba(255, 80, 0, 0.4);
 }
 .slider-handle:active {
   cursor: grabbing;
 }
 .slider-track.is-verified .slider-handle {
-  background: var(--color-success);
+  background: linear-gradient(90deg, #6fd66f, #52c41a);
 }
 
 /* 过渡 */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity var(--transition-fast);
+  transition: opacity 150ms ease;
 }
 .fade-enter-from,
 .fade-leave-to {
@@ -1193,29 +1183,49 @@ onUnmounted(() => {
 }
 
 /* ===== 响应式 ===== */
-@media (max-width: 1024px) {
-  .login-brand {
+@media (max-width: 900px) {
+  .login-card {
+    max-width: 460px;
+  }
+  .login-card__left {
+    display: none;
+  }
+  .login-card__right {
+    padding: 36px 32px;
+  }
+}
+@media (max-width: 600px) {
+  .login-header {
+    padding: 16px 20px;
+  }
+  .login-header__links {
     display: none;
   }
   .login-main {
-    padding: 40px 20px;
-  }
-}
-@media (max-width: 768px) {
-  .login-page {
-    background: #fff;
-  }
-  .login-main {
     padding: 24px 16px;
-    align-items: flex-start;
   }
   .login-card {
-    max-width: none;
-    box-shadow: none;
-    padding: 24px 16px;
+    border-radius: 16px;
   }
-  .social-row {
-    gap: 20px;
+  .login-card__right {
+    padding: 28px 24px;
+  }
+  .login-tabs__item {
+    font-size: 16px;
+  }
+  .login-helpers {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 380px) {
+  .login-card__right {
+    padding: 24px 18px;
+  }
+  .sms-code-btn {
+    padding: 0 10px;
+    font-size: 13px;
   }
 }
 </style>

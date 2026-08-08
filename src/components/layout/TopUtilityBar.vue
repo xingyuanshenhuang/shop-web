@@ -7,6 +7,7 @@
         </span>
         <span class="top-utility-bar__divider"></span>
         <el-popover
+          v-if="userStore.isLoggedIn"
           trigger="hover"
           placement="bottom"
           :width="230"
@@ -49,6 +50,10 @@
             </button>
           </div>
         </el-popover>
+        <template v-else>
+          <span class="top-utility-bar__link login-link" @click="$router.push('/login')">请登录</span>
+          <span class="top-utility-bar__link register-link" @click="$router.push('/register')">免费注册</span>
+        </template>
         <span class="top-utility-bar__divider"></span>
         <span class="top-utility-bar__link hide-on-tablet" @click="showTheme = !showTheme">
           选择主题 <el-icon :size="10"><ArrowDown /></el-icon>
@@ -108,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
@@ -118,7 +123,15 @@ const { updateHover, arrowIcon } = useHoverArrow()
 
 const router = useRouter()
 const userStore = useUserStore()
-const userName = ref(userStore.user.name)
+// 响应式读取 store.user.name，避免登录/登出后不刷新
+const userName = computed(() => userStore.user.name)
+watch(
+  () => userStore.user.name,
+  (v) => {
+    /* 响应式已由 computed 保障，此处便于扩展 */
+    v
+  },
+)
 const showRegion = ref(false)
 const showTheme = ref(false)
 
@@ -181,6 +194,14 @@ function updateVisible(visible) {
 }
 
 .top-utility-bar__link:hover {
+  color: var(--color-primary);
+}
+
+.top-utility-bar__link.login-link {
+  color: var(--color-primary);
+}
+
+.top-utility-bar__link.register-link:hover {
   color: var(--color-primary);
 }
 

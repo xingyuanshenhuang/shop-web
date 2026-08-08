@@ -290,7 +290,7 @@ onUnmounted(() => {
 .search-bar-outer {
   width: 100%;
   max-width: 1524px;
-  min-width: 1280px;
+  min-width: 0;
   height: 96px;
   margin: 0 auto;
   container-type: inline-size;
@@ -304,7 +304,7 @@ onUnmounted(() => {
   align-items: center;
   padding: 16px 0 8px;
   height: 100%;
-  gap: clamp(16px, 2cqi, 24px);
+  gap: clamp(24px, 3cqi, 36px);
 }
 
 /* ===== 左侧 Logo ===== */
@@ -700,15 +700,17 @@ onUnmounted(() => {
   }
 
   .search-bar-inner {
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-wrap: nowrap;
+    gap: 16px;
     padding: 8px 0;
     height: auto;
+    justify-content: center;
   }
 
   .search-bar-left {
     width: auto;
     height: auto;
+    flex-shrink: 0;
   }
 
   .search-logo__main {
@@ -720,9 +722,9 @@ onUnmounted(() => {
   }
 
   .search-bar-center {
-    flex: 1 1 100%;
-    max-width: none;
-    order: 3;
+    flex: 1;
+    max-width: 400px;
+    order: unset;
   }
 
   .search-bar-right {
@@ -743,6 +745,77 @@ onUnmounted(() => {
 
   .search-dropdown {
     right: 0;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .search-bar-outer {
+    height: auto;
+    padding: 0 16px;
+  }
+
+  .search-bar-inner {
+    flex-wrap: nowrap;
+    padding: 12px 0;
+    gap: clamp(16px, 2.5cqi, 24px);
+  }
+
+  .search-bar-left {
+    width: clamp(120px, 15cqi, 180px);
+    height: auto;
+  }
+
+  .search-logo__main {
+    font-size: clamp(20px, 2.5cqi, 28px);
+  }
+
+  .search-logo__sub {
+    font-size: clamp(9px, 1.2cqi, 11px);
+    letter-spacing: 1px;
+  }
+
+  .search-bar-center {
+    max-width: 100%;
+  }
+
+  .search-similar-btn {
+    display: none;
+  }
+
+  .search-bar-right {
+    width: clamp(100px, 12cqi, 160px);
+    height: auto;
+  }
+
+  .bonus-entry {
+    padding: clamp(4px, 0.5cqi, 8px) clamp(6px, 0.8cqi, 10px);
+    gap: clamp(4px, 0.5cqi, 8px);
+  }
+
+  .bonus-entry__icon,
+  .bonus-entry__avatar {
+    width: clamp(32px, 4cqi, 44px);
+    height: clamp(32px, 4cqi, 44px);
+  }
+
+  .bonus-entry__title {
+    font-size: clamp(11px, 1.4cqi, 13px);
+  }
+
+  .bonus-entry__desc {
+    font-size: clamp(9px, 1.1cqi, 11px);
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .search-bar-outer {
+    min-width: auto;
+    height: auto;
+    padding: 0 24px;
+  }
+
+  .search-bar-inner {
+    padding: 12px 0;
   }
 }
 </style>

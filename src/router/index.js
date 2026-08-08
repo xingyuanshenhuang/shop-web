@@ -37,6 +37,18 @@ const routes = [
     component: () => import('@/views/user/LoginPage.vue'),
     meta: { layout: 'blank' },
   },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/user/RegisterPage.vue'),
+    meta: { layout: 'blank' },
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: () => import('@/views/user/LoginPage.vue'),
+    meta: { layout: 'blank', page: 'forgot' },
+  },
 ]
 
 const router = createRouter({

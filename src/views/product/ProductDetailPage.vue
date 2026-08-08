@@ -57,125 +57,136 @@
             v-for="tab in detailTabs"
             :key="tab"
             class="detail-tab"
-            :class="{ active: activeDetailTab === tab }"
-            @click="activeDetailTab = tab"
+            :class="{
+              active: activeDetailTab === tab,
+              'tab-click-animate': clickedTab === tab,
+            }"
+            @click="handleTabClick(tab)"
           >
             {{ tab }}
           </div>
         </div>
 
         <div class="product-detail__tab-content">
-          <div v-if="activeDetailTab === '用户评价'" class="review-section">
-            <div class="review-header">
-              <h3>用户评价 {{ detail.reviewCount }}+</h3>
-              <span style="color: var(--color-success); font-size: 12px"
-                >近3个月好评率 {{ detail.goodRate }}</span
-              >
-              <a
-                style="
-                  margin-left: auto;
-                  font-size: 12px;
-                  color: var(--color-text-light);
-                  cursor: pointer;
-                "
-                >查看全部评价 &gt;</a
-              >
-            </div>
-            <div class="review-tags">
-              <span
-                v-for="tag in reviewTags"
-                :key="tag.label"
-                class="review-tag"
-                :class="{ active: activeReviewTag === tag.label }"
-                @click="activeReviewTag = tag.label"
-              >
-                {{ tag.label }}（{{ tag.count }}+）
-              </span>
-            </div>
-            <div v-for="review in detail.reviews" :key="review.id" class="review-card">
-              <div class="review-card__user">
-                <img :src="review.avatar" class="review-card__avatar" />
-                <span class="review-card__name">{{ review.user }}</span>
-                <span class="review-card__date">{{ review.date }}</span>
+          <div id="section-review" class="section-wrapper">
+            <div class="review-section">
+              <div class="review-header">
+                <h3>用户评价 {{ detail.reviewCount }}+</h3>
+                <span style="color: var(--color-success); font-size: 12px"
+                  >近3个月好评率 {{ detail.goodRate }}</span
+                >
+                <a
+                  style="
+                    margin-left: auto;
+                    font-size: 12px;
+                    color: var(--color-text-light);
+                    cursor: pointer;
+                  "
+                  >查看全部评价 &gt;</a
+                >
               </div>
-              <div class="review-card__rating">
-                <el-rate
-                  v-model="review.rating"
-                  disabled
-                  :colors="['#FF8547', '#FF8547', '#FF8547']"
-                  size="small"
-                />
+              <div class="review-tags">
+                <span
+                  v-for="tag in reviewTags"
+                  :key="tag.label"
+                  class="review-tag"
+                  :class="{ active: activeReviewTag === tag.label }"
+                  @click="activeReviewTag = tag.label"
+                >
+                  {{ tag.label }}（{{ tag.count }}+）
+                </span>
               </div>
-              <p class="review-card__content">{{ review.content }}</p>
-              <div v-if="review.images.length" class="review-card__images">
+              <div v-for="review in detail.reviews" :key="review.id" class="review-card">
+                <div class="review-card__user">
+                  <img :src="review.avatar" class="review-card__avatar" />
+                  <span class="review-card__name">{{ review.user }}</span>
+                  <span class="review-card__date">{{ review.date }}</span>
+                </div>
+                <div class="review-card__rating">
+                  <el-rate
+                    v-model="review.rating"
+                    disabled
+                    :colors="['#FF8547', '#FF8547', '#FF8547']"
+                    size="small"
+                  />
+                </div>
+                <p class="review-card__content">{{ review.content }}</p>
+                <div v-if="review.images.length" class="review-card__images">
+                  <img
+                    v-for="(img, idx) in review.images"
+                    :key="idx"
+                    :src="img"
+                    class="review-card__img"
+                  />
+                </div>
+              </div>
+              <div style="text-align: center; padding: 16px">
+                <el-button>查看全部评价</el-button>
+              </div>
+            </div>
+          </div>
+
+          <div id="section-params" class="section-wrapper">
+            <div class="params-section">
+              <div class="params-grid">
+                <div v-for="param in detail.params" :key="param.label" class="params-item">
+                  <span class="params-item__label">{{ param.label }}</span>
+                  <span class="params-item__value">{{ param.value }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="section-detail-images" class="section-wrapper">
+            <div class="detail-images-section">
+              <div class="detail-images-section__block">
+                <h3>品牌故事</h3>
+                <p>源氏木语 — 只做纯实木家具，让每一个家庭都能享受自然之美。</p>
                 <img
-                  v-for="(img, idx) in review.images"
-                  :key="idx"
-                  :src="img"
-                  class="review-card__img"
+                  src="https://picsum.photos/seed/brand/800/400"
+                  style="width: 100%; border-radius: 8px; margin-top: 12px"
+                />
+              </div>
+              <div class="detail-images-section__block">
+                <h3>产品卖点</h3>
+                <img
+                  src="https://picsum.photos/seed/features/800/600"
+                  style="width: 100%; border-radius: 8px"
+                />
+              </div>
+              <div class="detail-images-section__block">
+                <h3>资质认证</h3>
+                <img
+                  src="https://picsum.photos/seed/cert/800/300"
+                  style="width: 100%; border-radius: 8px"
                 />
               </div>
             </div>
-            <div style="text-align: center; padding: 16px">
-              <el-button>查看全部评价</el-button>
-            </div>
           </div>
 
-          <div v-if="activeDetailTab === '参数信息'" class="params-section">
-            <div class="params-grid">
-              <div v-for="param in detail.params" :key="param.label" class="params-item">
-                <span class="params-item__label">{{ param.label }}</span>
-                <span class="params-item__value">{{ param.value }}</span>
+          <div id="section-recommend" class="section-wrapper">
+            <div class="recommend-section">
+              <div class="recommend-grid">
+                <ProductCard
+                  v-for="product in recommendProducts"
+                  :key="product.id"
+                  :product="product"
+                />
               </div>
-            </div>
-          </div>
-
-          <div v-if="activeDetailTab === '图文详情'" class="detail-images-section">
-            <div class="detail-images-section__block">
-              <h3>品牌故事</h3>
-              <p>源氏木语 — 只做纯实木家具，让每一个家庭都能享受自然之美。</p>
-              <img
-                src="https://picsum.photos/seed/brand/800/400"
-                style="width: 100%; border-radius: 8px; margin-top: 12px"
-              />
-            </div>
-            <div class="detail-images-section__block">
-              <h3>产品卖点</h3>
-              <img
-                src="https://picsum.photos/seed/features/800/600"
-                style="width: 100%; border-radius: 8px"
-              />
-            </div>
-            <div class="detail-images-section__block">
-              <h3>资质认证</h3>
-              <img
-                src="https://picsum.photos/seed/cert/800/300"
-                style="width: 100%; border-radius: 8px"
-              />
-            </div>
-          </div>
-
-          <div v-if="activeDetailTab === '本店推荐'" class="recommend-section">
-            <div class="recommend-grid">
-              <ProductCard
-                v-for="product in recommendProducts"
-                :key="product.id"
-                :product="product"
-              />
             </div>
           </div>
         </div>
       </div>
 
       <div class="product-detail__right" ref="rightColRef">
-        <div class="right-sticky" :style="stickyStyle">
+        <div class="right-sticky" :class="{ 'right-sticky--released': isReleased }" :style="stickyStyle" ref="rightStickyRef">
           <div
             v-if="showMagnifier"
             ref="zoomEl"
             class="gallery-zoom"
             :style="{ backgroundImage: `url(${detail.images[currentImage]})`, ...zoomBgStyle }"
           ></div>
-          <div class="promo-tip">
+          <div class="promo-tip" :class="{ 'promo-tip--hidden': isStuck }">
             <span>您有 50 元消费券待使用</span>
             <span style="color: var(--color-text-light)">距结束 3天12小时</span>
           </div>
@@ -259,9 +270,12 @@
             <button class="cta-cart" @click="handleAddCart">
               <el-icon :size="20" color="#fff"><ShoppingCart /></el-icon>
             </button>
-            <button class="cta-buy">立即购买</button>
+            <button class="cta-buy" @click="handleBuyNow">立即购买</button>
             <button class="cta-fav" @click="handleToggleFavorite">
-              <el-icon :size="20" :color="favoritesStore.isFavorite(detail.id) ? '#FF5000' : '#666'">
+              <el-icon
+                :size="20"
+                :color="favoritesStore.isFavorite(detail.id) ? '#FF5000' : '#666'"
+              >
                 <StarFilled v-if="favoritesStore.isFavorite(detail.id)" />
                 <Star v-else />
               </el-icon>
@@ -274,22 +288,89 @@
 
     <div class="mobile-cta show-on-mobile-only">
       <button class="mobile-cta__cart" @click="handleAddCart">加入购物车</button>
-      <button class="mobile-cta__buy">立即购买</button>
+      <button class="mobile-cta__buy" @click="handleBuyNow">立即购买</button>
     </div>
+
+    <!-- 购物车弹窗 -->
+    <el-dialog
+      v-model="cartDialogVisible"
+      :title="cartDialogSuccess ? '添加成功' : '添加失败'"
+      width="360px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+      :lock-scroll="false"
+      append-to-body
+      center
+      class="product-cart-dialog"
+      @open="onDialogOpen"
+      @closed="onDialogClosed"
+    >
+      <div class="cart-dialog__body">
+        <el-icon
+          :size="48"
+          :color="cartDialogSuccess ? '#52C41A' : '#FF5000'"
+          class="cart-dialog__icon"
+        >
+          <CircleCheckFilled v-if="cartDialogSuccess" />
+          <CircleCloseFilled v-else />
+        </el-icon>
+        <p class="cart-dialog__text">
+          {{ cartDialogSuccess ? '商品已成功加入购物车' : '添加购物车失败，请重试' }}
+        </p>
+      </div>
+      <template #footer>
+        <div class="cart-dialog__footer">
+          <template v-if="cartDialogSuccess">
+            <button class="cart-dialog__btn cart-dialog__btn--primary" @click="goToCart">
+              去购物车
+            </button>
+            <button
+              class="cart-dialog__btn cart-dialog__btn--default"
+              @click="cartDialogVisible = false"
+            >
+              继续购物
+            </button>
+          </template>
+          <template v-else>
+            <button class="cart-dialog__btn cart-dialog__btn--primary" @click="retryAddCart">
+              重试
+            </button>
+            <button
+              class="cart-dialog__btn cart-dialog__btn--default"
+              @click="cartDialogVisible = false"
+            >
+              取消
+            </button>
+          </template>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import { Star, StarFilled, ShoppingCart, Share } from '@element-plus/icons-vue'
+import {
+  Star,
+  StarFilled,
+  ShoppingCart,
+  Share,
+  CircleCheckFilled,
+  CircleCloseFilled,
+} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { productDetail, products as allProducts } from '@/mock/data'
 import { useUserStore } from '@/stores/user'
+import { useCartStore } from '@/stores/cart'
 import { useFavoritesStore } from '@/stores/favorites'
+import { useRouter } from 'vue-router'
 import ProductCard from '@/components/common/ProductCard.vue'
 
 const userStore = useUserStore()
+const cartStore = useCartStore()
 const favoritesStore = useFavoritesStore()
+const router = useRouter()
 const detail = reactive({ ...productDetail })
 const currentImage = ref(0)
 const showMagnifier = ref(false)
@@ -304,11 +385,14 @@ const zoomEl = ref(null)
 const zoomSize = reactive({ w: 450, h: 450 })
 
 // ===== 右侧栏固定定位 =====
-// 使用 position: fixed 让右侧商品信息栏始终固定在视口顶部附近
-// 宽度与 right 通过 JS 动态计算，以对齐右侧栏在 flex 布局中的位置
-// top 动态调整：页面顶部时让出 TopUtilityBar（36px）的高度，滚动后贴近视口顶部
+// 使用 position: fixed 让右侧商品信息栏固定在视口顶部附近
+// 当滚动至"本店推荐"区域底部时，自动释放固定定位，随页面流动
+// 向上滚动重新进入视口时，恢复固定定位
 const rightColRef = ref(null)
+const rightStickyRef = ref(null)
 const stickyStyle = reactive({ width: '', right: '', top: '60px' })
+const isStuck = ref(false)
+const isReleased = ref(false)
 let resizeObserver = null
 
 function updateStickyPosition() {
@@ -316,13 +400,90 @@ function updateStickyPosition() {
   const rect = rightColRef.value.getBoundingClientRect()
   stickyStyle.width = rect.width + 'px'
   stickyStyle.right = window.innerWidth - rect.right + 'px'
-  // TopUtilityBar 高 36px、static 定位（会随滚动消失）；
-  // 在页面顶部 top=60（36+24 间距）避免遮挡；滚动 36px 后贴顶 24px
   const scrollTop = window.scrollY || document.documentElement.scrollTop
-  stickyStyle.top = Math.max(24, 60 - scrollTop) + 'px'
+  const STICKY_TOP = 24
+
+  // 计算"本店推荐"区域底部边界
+  const recommendSection = document.getElementById('section-recommend')
+  if (recommendSection && rightStickyRef.value) {
+    const recommendBottom = recommendSection.offsetTop + recommendSection.offsetHeight
+    const rightStickyHeight = rightStickyRef.value.offsetHeight
+    // 固定状态下右侧栏底部在文档中的位置
+    const fixedBottom = scrollTop + STICKY_TOP + rightStickyHeight
+
+    if (fixedBottom >= recommendBottom) {
+      // 释放状态：调整 top 使其随页面流动
+      if (!isReleased.value) {
+        // 状态切换时添加过渡动画
+        rightStickyRef.value.classList.add('right-sticky--transition')
+        setTimeout(() => {
+          rightStickyRef.value?.classList.remove('right-sticky--transition')
+        }, 300)
+      }
+      isReleased.value = true
+      stickyStyle.top = (recommendBottom - scrollTop - rightStickyHeight) + 'px'
+    } else {
+      // 固定状态
+      if (isReleased.value) {
+        // 状态切换时添加过渡动画
+        rightStickyRef.value.classList.add('right-sticky--transition')
+        setTimeout(() => {
+          rightStickyRef.value?.classList.remove('right-sticky--transition')
+        }, 300)
+      }
+      isReleased.value = false
+      stickyStyle.top = Math.max(STICKY_TOP, 60 - scrollTop) + 'px'
+    }
+  } else {
+    // 未找到推荐区域或元素尚未渲染，使用默认行为
+    stickyStyle.top = Math.max(24, 60 - scrollTop) + 'px'
+  }
+  isStuck.value = scrollTop >= 36
 }
 
 const detailTabs = ['用户评价', '参数信息', '图文详情', '本店推荐', '看了又看']
+
+const sectionMap = {
+  用户评价: 'section-review',
+  参数信息: 'section-params',
+  图文详情: 'section-detail-images',
+  本店推荐: 'section-recommend',
+}
+
+const clickedTab = ref('')
+
+function handleTabClick(tab) {
+  // 点击动画反馈
+  clickedTab.value = tab
+  setTimeout(() => {
+    clickedTab.value = ''
+  }, 300)
+
+  activeDetailTab.value = tab
+
+  // 平滑滚动到对应内容区域
+  const sectionId = sectionMap[tab]
+  if (sectionId) {
+    const el = document.getElementById(sectionId)
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 60
+      window.scrollTo({ top, behavior: 'smooth' })
+    }
+  }
+}
+
+function updateActiveTabByScroll() {
+  const scrollY = window.scrollY + 110
+  let active = '用户评价'
+  for (const [name, id] of Object.entries(sectionMap)) {
+    const el = document.getElementById(id)
+    if (el && scrollY >= el.offsetTop) {
+      active = name
+    }
+  }
+  activeDetailTab.value = active
+}
+
 const reviewTags = [
   { label: '全部', count: 300 },
   { label: '有图', count: 200 },
@@ -380,20 +541,89 @@ onMounted(() => {
     resizeObserver = new ResizeObserver(updateStickyPosition)
     resizeObserver.observe(rightColRef.value)
   }
+  // 滚动监听：更新导航选中状态
+  window.addEventListener('scroll', updateActiveTabByScroll, { passive: true })
+  updateActiveTabByScroll()
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateZoomSize)
   window.removeEventListener('resize', updateStickyPosition)
   window.removeEventListener('scroll', updateStickyPosition)
+  window.removeEventListener('scroll', updateActiveTabByScroll)
   if (resizeObserver) {
     resizeObserver.disconnect()
     resizeObserver = null
   }
+  clearAutoCloseTimer()
 })
 
+const cartDialogVisible = ref(false)
+const cartDialogSuccess = ref(true)
+let autoCloseTimer = null
+
+function onDialogOpen() {
+  // 重新计算右侧栏位置，确保无偏移
+  nextTick(updateStickyPosition)
+  // 成功状态5秒后自动关闭
+  if (cartDialogSuccess.value) {
+    autoCloseTimer = setTimeout(() => {
+      cartDialogVisible.value = false
+    }, 5000)
+  }
+}
+
+function onDialogClosed() {
+  clearAutoCloseTimer()
+  nextTick(updateStickyPosition)
+}
+
+function clearAutoCloseTimer() {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+    autoCloseTimer = null
+  }
+}
+
 function handleAddCart() {
-  ElMessage.success('已加入购物车')
+  clearAutoCloseTimer()
+  const success = Math.random() < 0.8
+  cartDialogSuccess.value = success
+  cartDialogVisible.value = true
+  if (success) {
+    cartStore.addItem({
+      productId: detail.id,
+      name: detail.name,
+      spec: `${selectedColor.value} / ${selectedSize.value}`,
+      price: detail.price,
+      image: detail.images[0],
+      quantity: quantity.value,
+    })
+  }
+}
+
+function retryAddCart() {
+  clearAutoCloseTimer()
+  cartDialogVisible.value = false
+  setTimeout(() => handleAddCart(), 300)
+}
+
+function goToCart() {
+  clearAutoCloseTimer()
+  cartDialogVisible.value = false
+  router.push('/cart')
+}
+
+function handleBuyNow() {
+  cartStore.addItem({
+    productId: detail.id,
+    name: detail.name,
+    spec: `${selectedColor.value} / ${selectedSize.value}`,
+    price: detail.price,
+    image: detail.images[0],
+    quantity: quantity.value,
+  })
+  router.push('/checkout')
 }
 
 function handleToggleFavorite() {
@@ -438,7 +668,13 @@ function handleToggleFavorite() {
 .right-sticky {
   position: fixed;
   top: 24px;
-  z-index: 20;
+  z-index: 100;
+  background: var(--color-bg);
+  border-radius: var(--radius-card);
+}
+
+.right-sticky--transition {
+  transition: top 0.3s ease;
 }
 
 .product-detail__gallery {
@@ -545,7 +781,10 @@ function handleToggleFavorite() {
 .product-detail__tabs {
   display: flex;
   height: 44px;
-  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--color-bg);
 }
 
 .detail-tab {
@@ -556,7 +795,28 @@ function handleToggleFavorite() {
   color: var(--color-text-mid);
   cursor: pointer;
   position: relative;
+  user-select: none;
   transition: color var(--transition-fast);
+}
+
+.detail-tab:active {
+  transform: scale(0.95);
+}
+
+.tab-click-animate {
+  animation: tab-pulse 0.3s ease;
+}
+
+@keyframes tab-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .detail-tab:hover,
@@ -576,6 +836,15 @@ function handleToggleFavorite() {
 
 .product-detail__tab-content {
   padding: 24px 0;
+}
+
+.section-wrapper {
+  scroll-margin-top: 80px;
+  margin-bottom: 48px;
+}
+
+.section-wrapper:last-child {
+  margin-bottom: 0;
 }
 
 .review-header {
@@ -709,6 +978,22 @@ function handleToggleFavorite() {
   font-size: 12px;
   color: var(--color-primary);
   margin-bottom: 16px;
+  max-height: 60px;
+  overflow: hidden;
+  opacity: 1;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    margin-bottom 0.3s ease,
+    padding 0.3s ease;
+}
+
+.promo-tip--hidden {
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .product-info {
@@ -982,5 +1267,99 @@ function handleToggleFavorite() {
   .params-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* 购物车弹窗样式（使用 :deep() 确保穿透到被 teleport 到 body 的对话框） */
+.product-cart-dialog :deep(.el-dialog) {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16);
+}
+
+.product-cart-dialog :deep(.el-dialog__header) {
+  padding: 20px 32px 0;
+  margin-right: 0;
+  text-align: center;
+}
+
+.product-cart-dialog :deep(.el-dialog__title) {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+.product-cart-dialog :deep(.el-dialog__body) {
+  padding: 24px 32px 16px;
+  background: #fff;
+}
+
+.product-cart-dialog :deep(.el-dialog__footer) {
+  padding: 16px 32px 24px;
+  background: #fff;
+}
+
+.cart-dialog__body {
+  text-align: center;
+}
+
+.cart-dialog__icon {
+  margin-bottom: 12px;
+}
+
+.cart-dialog__text {
+  font-size: 15px;
+  color: var(--color-text-dark);
+  margin: 0;
+}
+
+.cart-dialog__footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.cart-dialog__btn {
+  padding: 8px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.cart-dialog__btn--primary {
+  background: linear-gradient(135deg, #ff5000, #e04800);
+  color: #fff;
+  border: none;
+}
+
+.cart-dialog__btn--primary:hover {
+  filter: brightness(0.9);
+}
+
+.cart-dialog__btn--default {
+  background: #fff;
+  color: var(--color-text-mid);
+  border-color: var(--color-border);
+}
+
+.cart-dialog__btn--default:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+</style>
+
+<style>
+/* 全局样式：购物车弹窗遮罩层 */
+.product-cart-dialog .el-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 1;
+}
+
+.product-cart-dialog .el-overlay-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

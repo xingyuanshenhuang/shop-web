@@ -1,6 +1,6 @@
 <template>
-  <div class="user-center">
-    <div class="user-center__sidebar hide-on-mobile">
+  <div class="user-center" :class="{ 'mobile-subview': activeTab !== 'default' }">
+    <div class="user-center__sidebar">
       <div class="sidebar-nav">
         <div class="sidebar-nav__group">
           <div
@@ -115,6 +115,10 @@
     </div>
 
     <div class="user-center__content">
+      <div class="mobile-back-bar" v-if="activeTab !== 'default'">
+        <el-icon class="mobile-back-bar__back" @click="activeTab = 'default'"><ArrowLeft /></el-icon>
+        <span class="mobile-back-bar__title">{{ mobileTitle }}</span>
+      </div>
       <div v-if="showDefaultView" class="user-default">
         <div class="user-profile-card">
           <div class="user-profile-card__left">
@@ -398,7 +402,7 @@
       />
     </div>
 
-    <div class="mobile-user show-on-mobile-only">
+    <div class="mobile-user">
       <div class="mobile-user__header">
         <img :src="user.avatar" class="mobile-user__avatar" />
         <div>
@@ -503,7 +507,13 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const favoritesStore = useFavoritesStore()
-const user = ref(userStore.user)
+// 使用 reactive 深拷贝以响应 store.user 的后续变更（登录后 user.value 会被更新）
+const user = reactive({ ...userStore.user })
+watch(
+  () => userStore.user,
+  (v) => Object.assign(user, v),
+  { deep: true },
+)
 const activeTab = ref('default')
 
 const expandedMenus = reactive({
@@ -636,6 +646,18 @@ const showDefaultView = computed(() => {
   return true
 })
 
+// 移动端子视图顶部标题
+const mobileTitle = computed(() => {
+  const tab = activeTab.value
+  if (tab === 'orders' || tab.startsWith('order-')) return '我的订单'
+  if (tab === 'coupons') return '我的卡券包'
+  if (tab === 'history' || tab.startsWith('history-')) return '足迹收藏'
+  if (tab === 'reviews') return '评价管理'
+  if (tab === 'help') return '帮助中心'
+  if (tab === 'settings' || tab.startsWith('settings-')) return '账号设置'
+  return '我的主页'
+})
+
 function handleCartClick() {
   activeTab.value = 'cart'
   router.push('/cart')
@@ -710,6 +732,11 @@ const orderStatuses = [
 ]
 
 onMounted(() => {
+  // 未登录跳转登录页
+  if (!userStore.isLoggedIn) {
+    router.replace({ path: '/login', query: { redirect: '/user' } })
+    return
+  }
   if (route.query.tab) {
     activeTab.value = route.query.tab
   }
@@ -741,6 +768,16 @@ onMounted(() => {
   top: 0;
   height: 100vh;
   overflow-y: auto;
+}
+
+/* 小尺寸笔记本：收窄侧边栏与内容内边距，减少留白 */
+@media (max-width: 1280px) and (min-width: 1025px) {
+  .user-center__sidebar {
+    width: 176px;
+  }
+  .user-center__content {
+    padding: 16px 20px;
+  }
 }
 
 .sidebar-nav__group {
@@ -1426,15 +1463,16 @@ onMounted(() => {
 .mobile-user {
   display: none;
   flex-direction: column;
-  padding: 16px;
+  padding: 12px 16px;
   width: 100%;
+  gap: 12px;
 }
 
 .mobile-user__header {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .mobile-user__avatar {
@@ -1462,8 +1500,8 @@ onMounted(() => {
   display: flex;
   background: var(--color-bg);
   border-radius: var(--radius-card);
-  padding: 12px;
-  margin-bottom: 16px;
+  padding: 10px 12px;
+  margin-bottom: 0;
 }
 
 .mobile-user__asset-item {
@@ -1479,15 +1517,15 @@ onMounted(() => {
 .mobile-user__orders-nav {
   background: var(--color-bg);
   border-radius: var(--radius-card);
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 12px;
+  margin-bottom: 0;
 }
 
 .mobile-user__orders-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .mobile-user__orders-items {
@@ -1504,7 +1542,7 @@ onMounted(() => {
   color: var(--color-text-mid);
   cursor: pointer;
   position: relative;
-  padding: 4px 8px;
+  padding: 4px 6px;
 }
 
 .mobile-user__orders-badge {
@@ -1526,7 +1564,7 @@ onMounted(() => {
 .mobile-user__menu {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 .mobile-user__menu-item {
@@ -1534,7 +1572,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 16px;
+  padding: 12px 8px;
   background: var(--color-bg);
   border-radius: var(--radius-card);
   font-size: 12px;
@@ -1547,15 +1585,75 @@ onMounted(() => {
   background: var(--color-light-orange);
 }
 
-@media (max-width: 768px) {
+/* 平板及以下：隐藏左侧白色侧边栏，启用紧凑布局 */
+@media (max-width: 1024px) {
   .user-center__sidebar {
     display: none;
   }
   .user-center__content {
     display: none;
+    padding: 0 16px 16px;
   }
   .mobile-user {
     display: flex;
+  }
+  .mobile-back-bar {
+    display: flex;
+  }
+  /* 进入子视图时显示内容区、隐藏移动端首页 */
+  .user-center.mobile-subview .user-center__content {
+    display: block;
+  }
+  .user-center.mobile-subview .mobile-user {
+    display: none;
+  }
+  /* 平板宽度下菜单使用 6 列，充分利用横向空间 */
+  .mobile-user__menu {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* 移动端子视图顶部返回栏 */
+.mobile-back-bar {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  padding: 12px 4px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.mobile-back-bar__back {
+  font-size: 20px;
+  color: var(--color-text-dark);
+  cursor: pointer;
+}
+
+.mobile-back-bar__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+}
+
+/* 手机端：进一步收紧间距 */
+@media (max-width: 768px) {
+  .mobile-user {
+    padding: 8px 12px;
+    gap: 10px;
+  }
+  .mobile-user__menu {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .mobile-user__menu-item {
+    padding: 10px 6px;
+  }
+  .user-center__content {
+    padding: 0 12px 16px;
   }
 }
 

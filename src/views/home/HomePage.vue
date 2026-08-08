@@ -443,7 +443,6 @@ onMounted(() => {
 .main-layout {
   width: 100%;
   max-width: 1524px;
-  min-width: 1280px;
   margin: 0 auto;
   padding: 0 16px 16px;
   container-type: inline-size;
@@ -485,7 +484,7 @@ onMounted(() => {
 /* 下部分三栏 */
 .screen-outer {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 16px;
 }
 
@@ -511,11 +510,13 @@ onMounted(() => {
 /* 左侧分类导航 */
 .category-nav {
   width: 100%;
-  height: 320px;
+  height: 100%;
+  min-height: 280px;
   background: #f7f7f7;
   border-radius: 12px;
   padding: 10px 0;
   position: relative;
+  box-sizing: border-box;
 }
 
 .category-nav__item {
@@ -994,7 +995,8 @@ onMounted(() => {
 /* 右侧个人中心 */
 .profile-card {
   width: 100%;
-  height: 332px;
+  height: 100%;
+  min-height: 310px;
   background-image: linear-gradient(
     rgb(255, 241, 232) 0%,
     rgb(252, 249, 247) 50%,
@@ -1013,6 +1015,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+  height: 40px;
 }
 
 .profile-header__avatar {
@@ -1071,6 +1074,7 @@ onMounted(() => {
   gap: 3px;
   cursor: pointer;
   min-width: 0;
+  height: 38px;
 }
 
 .profile-stat__num {
@@ -1089,10 +1093,10 @@ onMounted(() => {
 .profile-assets-card {
   background: #fff;
   border-radius: 12px;
-  padding: 8px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .profile-assets {
@@ -1124,7 +1128,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 8px;
+  padding: 6px 10px;
   border-radius: 10px;
   background: linear-gradient(90deg, #ff5000 0%, #ff7a00 100%);
   color: #fff;
@@ -1151,7 +1155,7 @@ onMounted(() => {
   gap: 8px;
   background: #fff;
   border-radius: 12px;
-  padding: 8px;
+  padding: 10px;
   cursor: pointer;
 }
 
@@ -1224,9 +1228,18 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 5px;
   cursor: pointer;
   color: #666;
+  padding: 4px 2px;
+  border-radius: 8px;
+  height: 52px;
+  transition: background 0.15s ease;
+}
+
+.profile-bottom__item:hover {
+  background: rgba(255, 80, 0, 0.06);
 }
 
 .profile-bottom__item .el-icon {
@@ -1274,13 +1287,184 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 768px) {
+/* 1024px ~ 1279px：隐藏左侧分类导航，适配中小桌面 */
+@media (max-width: 1279px) {
+  .screen-left {
+    display: none;
+  }
+}
+
+/* 768px ~ 1023px：三栏改为上下布局，右侧个人中心自适应 */
+@media (max-width: 1023px) {
+  .screen-outer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .screen-center {
+    width: 100%;
+  }
+  .screen-right {
+    width: 100%;
+  }
+  .category-nav {
+    height: auto;
+  }
+  .profile-card {
+    height: auto;
+    min-height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 12px;
+    gap: 8px;
+  }
+  .profile-header {
+    flex: 0 0 100%;
+    height: auto;
+  }
+  .profile-stats {
+    flex: 0 0 100%;
+  }
+  .profile-stat {
+    height: auto;
+  }
+  .profile-assets-card {
+    flex: 1;
+    min-width: 200px;
+  }
+  .profile-coin {
+    flex: 1;
+    min-width: 200px;
+  }
+  .profile-bottom {
+    flex: 0 0 100%;
+  }
+  .profile-bottom__item {
+    height: auto;
+  }
+  .promo-area {
+    max-width: 100%;
+  }
+}
+
+/* ≤768px：移动端适配 */
+@media (max-width: 767px) {
+  .main-layout {
+    padding: 0 8px 8px;
+  }
+  .channel-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 8px 0;
+    scrollbar-width: none;
+  }
+  .channel-strip::-webkit-scrollbar {
+    display: none;
+  }
+  .channel-item {
+    flex: 0 0 auto;
+    font-size: 13px;
+    padding: 0 12px;
+    height: 32px;
+  }
+  .promo-area {
+    padding: 0 4px;
+  }
+  .promo-top {
+    flex-direction: column;
+    height: auto;
+  }
+  .promo-banner {
+    width: 100%;
+    height: auto;
+  }
+  .promo-banner :deep(.el-carousel__container) {
+    height: 180px !important;
+  }
+  .promo-subsidy {
+    height: auto;
+    padding: 8px;
+  }
+  .subsidy-card__img {
+    width: 60px;
+    height: 60px;
+  }
+  .promo-matrix {
+    flex-wrap: wrap;
+    height: auto;
+  }
+  .matrix-card {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+    height: auto;
+    min-height: 120px;
+  }
+  .profile-card {
+    padding: 10px;
+    gap: 6px;
+  }
+  .profile-assets-card {
+    padding: 8px;
+    gap: 8px;
+  }
+  .profile-coin {
+    padding: 8px;
+  }
+  .profile-bottom {
+    gap: 4px;
+  }
+  .profile-bottom__item {
+    padding: 2px;
+    height: auto;
+  }
+  .profile-stat {
+    height: auto;
+  }
+  .profile-header {
+    height: auto;
+  }
   .recommend-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* ≤375px：极小屏适配 */
+@media (max-width: 375px) {
+  .channel-item {
+    font-size: 11px;
+    padding: 0 8px;
+    height: 28px;
+  }
+  .promo-banner :deep(.el-carousel__container) {
+    height: 140px !important;
+  }
+  .subsidy-card__img {
+    width: 48px;
+    height: 48px;
+  }
+  .profile-card {
+    padding: 8px;
+    gap: 4px;
+  }
+  .profile-assets-card {
+    padding: 6px;
+    gap: 6px;
+  }
+  .profile-coin {
+    padding: 6px;
+  }
+  .profile-bottom__item {
+    padding: 1px;
+    gap: 3px;
+  }
+  .recommend-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
   }
 }
 
 /* ===== 响应式 ===== */
-/* 主体布局与核心促销区已在 1280px~1524px 区间通过 clamp/container query 实现等比缩放；
-   小于 1280px 或大于 1524px 时，由外层 max-width/min-width 保持最大/最小状态。 */
+/* 主体布局在 1280px~1524px 通过 clamp/container query 实现等比缩放；
+   小于 1280px 时通过媒体查询逐级适配。 */
 </style>

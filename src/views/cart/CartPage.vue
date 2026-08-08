@@ -1187,13 +1187,14 @@ function handleMoveSingleToFav(item) {
   }
 
   .cart-page__inner {
-    padding: 16px 12px 100px;
+    padding: 16px 12px 120px;
   }
 
   .cart-float-summary {
     left: 12px;
     right: 12px;
-    bottom: 12px;
+    /* 避开底部 MobileTabBar（56px 高） */
+    bottom: calc(56px + 12px + env(safe-area-inset-bottom));
     min-width: auto;
     border-radius: 20px;
     padding: 12px 16px;

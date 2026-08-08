@@ -829,17 +829,23 @@ function toggleFilter() {
   .main-nav__logo-sub,
   .main-nav__search-similar,
   .main-nav__search-dropdown,
-  .main-nav__filter-bar {
-    display: none;
-  }
-
+  .main-nav__filter-bar,
   .main-nav__mobile-icons {
-    display: flex;
+    display: none;
   }
 
   .main-nav__search-center {
     flex: 1;
     max-width: none;
+  }
+
+  .main-nav__inner {
+    gap: 16px;
+  }
+
+  .main-nav__logo-main {
+    font-size: 20px;
+    letter-spacing: 3px;
   }
 }
 </style>

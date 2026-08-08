@@ -1925,7 +1925,7 @@ onUnmounted(() => {
   }
 
   .checkout-page__inner {
-    padding: 12px 12px 100px;
+    padding: 12px 12px 120px;
   }
 
   .checkout-section {
@@ -1945,10 +1945,16 @@ onUnmounted(() => {
     flex-direction: column;
   }
 
+  /* 列向布局下 flex-basis:0 会覆盖 height，导致按钮塌陷成一条线 */
+  .summary-btn {
+    flex: none;
+  }
+
   .checkout-float-summary {
     left: 12px;
     right: 12px;
-    bottom: 12px;
+    /* 避开底部 MobileTabBar（56px 高） */
+    bottom: calc(56px + 12px + env(safe-area-inset-bottom));
     min-width: auto;
     max-width: none;
     border-radius: 20px;
