@@ -75,19 +75,13 @@
                 <span style="color: var(--color-success); font-size: 12px"
                   >近3个月好评率 {{ detail.goodRate }}</span
                 >
-                <a
-                  style="
-                    margin-left: auto;
-                    font-size: 12px;
-                    color: var(--color-text-light);
-                    cursor: pointer;
-                  "
+                <a class="review-header__more" @click="reviewDrawerVisible = true"
                   >查看全部评价 &gt;</a
                 >
               </div>
               <div class="review-tags">
                 <span
-                  v-for="tag in reviewTags"
+                  v-for="tag in detail.reviewTags"
                   :key="tag.label"
                   class="review-tag"
                   :class="{ active: activeReviewTag === tag.label }"
@@ -96,7 +90,11 @@
                   {{ tag.label }}（{{ tag.count }}+）
                 </span>
               </div>
-              <div v-for="review in detail.reviews" :key="review.id" class="review-card">
+              <div
+                v-for="review in detail.reviews.slice(0, 2)"
+                :key="review.id"
+                class="review-card"
+              >
                 <div class="review-card__user">
                   <img :src="review.avatar" class="review-card__avatar" />
                   <span class="review-card__name">{{ review.user }}</span>
@@ -121,13 +119,14 @@
                 </div>
               </div>
               <div style="text-align: center; padding: 16px">
-                <el-button>查看全部评价</el-button>
+                <el-button @click="reviewDrawerVisible = true">查看全部评价</el-button>
               </div>
             </div>
           </div>
 
           <div id="section-params" class="section-wrapper">
             <div class="params-section">
+              <h2 class="section-title">参数信息</h2>
               <div class="params-grid">
                 <div v-for="param in detail.params" :key="param.label" class="params-item">
                   <span class="params-item__label">{{ param.label }}</span>
@@ -166,6 +165,7 @@
 
           <div id="section-recommend" class="section-wrapper">
             <div class="recommend-section">
+              <h2 class="section-title">本店推荐</h2>
               <div class="recommend-grid">
                 <ProductCard
                   v-for="product in recommendProducts"
@@ -179,7 +179,12 @@
       </div>
 
       <div class="product-detail__right" ref="rightColRef">
-        <div class="right-sticky" :class="{ 'right-sticky--released': isReleased }" :style="stickyStyle" ref="rightStickyRef">
+        <div
+          class="right-sticky"
+          :class="{ 'right-sticky--released': isReleased }"
+          :style="stickyStyle"
+          ref="rightStickyRef"
+        >
           <div
             v-if="showMagnifier"
             ref="zoomEl"
@@ -284,6 +289,13 @@
           </div>
         </div>
       </div>
+
+      <div id="section-see-again" class="product-detail__see-again">
+        <h2 class="section-title section-title--center">看了又看</h2>
+        <div class="see-again-grid">
+          <ProductCard v-for="product in seeAgainProducts" :key="product.id" :product="product" />
+        </div>
+      </div>
     </div>
 
     <div class="mobile-cta show-on-mobile-only">
@@ -346,6 +358,17 @@
         </div>
       </template>
     </el-dialog>
+
+    <ReviewDrawer
+      v-model="reviewDrawerVisible"
+      :total-count="detail.reviewCount"
+      :good-rate="detail.goodRate"
+      :reviews="detail.reviews"
+      :tags="detail.reviewTags"
+      :product-image="detail.images[0]"
+      style-filter-label="颜色分类"
+      :style-options="detail.styleOptions"
+    />
   </div>
 </template>
 
@@ -366,6 +389,7 @@ import { useCartStore } from '@/stores/cart'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useRouter } from 'vue-router'
 import ProductCard from '@/components/common/ProductCard.vue'
+import ReviewDrawer from '@/components/product/ReviewDrawer.vue'
 
 const userStore = useUserStore()
 const cartStore = useCartStore()
@@ -379,6 +403,7 @@ const selectedSize = ref('1.3m')
 const quantity = ref(1)
 const activeDetailTab = ref('用户评价')
 const activeReviewTag = ref('全部')
+const reviewDrawerVisible = ref(false)
 const maskPos = reactive({ x: 0, y: 0 })
 const mainImg = ref(null)
 const zoomEl = ref(null)
@@ -421,7 +446,7 @@ function updateStickyPosition() {
         }, 300)
       }
       isReleased.value = true
-      stickyStyle.top = (recommendBottom - scrollTop - rightStickyHeight) + 'px'
+      stickyStyle.top = recommendBottom - scrollTop - rightStickyHeight + 'px'
     } else {
       // 固定状态
       if (isReleased.value) {
@@ -448,6 +473,7 @@ const sectionMap = {
   参数信息: 'section-params',
   图文详情: 'section-detail-images',
   本店推荐: 'section-recommend',
+  看了又看: 'section-see-again',
 }
 
 const clickedTab = ref('')
@@ -484,13 +510,8 @@ function updateActiveTabByScroll() {
   activeDetailTab.value = active
 }
 
-const reviewTags = [
-  { label: '全部', count: 300 },
-  { label: '有图', count: 200 },
-  { label: '隔音效果好', count: 150 },
-  { label: '舒适', count: 80 },
-]
 const recommendProducts = allProducts.slice(4, 8)
+const seeAgainProducts = allProducts.slice(0, 6)
 
 const maskStyle = computed(() => ({
   left: maskPos.x + 'px',
@@ -654,6 +675,7 @@ function handleToggleFavorite() {
   margin: 0 auto;
   padding: 24px 128px;
   display: flex;
+  flex-wrap: wrap;
   gap: 32px;
 }
 
@@ -663,6 +685,12 @@ function handleToggleFavorite() {
 
 .product-detail__right {
   flex: 0 0 calc(40% - 32px);
+}
+
+.product-detail__see-again {
+  flex: 0 0 100%;
+  margin-top: 48px;
+  scroll-margin-top: 80px;
 }
 
 .right-sticky {
@@ -859,6 +887,18 @@ function handleToggleFavorite() {
   font-weight: 700;
 }
 
+.review-header__more {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.review-header__more:hover {
+  color: var(--color-primary);
+}
+
 .review-tags {
   display: flex;
   gap: 8px;
@@ -966,6 +1006,43 @@ function handleToggleFavorite() {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.section-title--center {
+  text-align: center;
+}
+
+.see-again-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1280px) {
+  .see-again-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .see-again-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 375px) {
+  .see-again-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
 }
 
 .promo-tip {
