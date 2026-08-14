@@ -41,7 +41,6 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: () => import('@/views/user/RegisterPage.vue'),
-    meta: { layout: 'blank' },
   },
   {
     path: '/forgot-password',

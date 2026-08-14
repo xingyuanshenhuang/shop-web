@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { favoriteProducts } from '@/mock/data'
+import { PERSIST_KEYS } from './persistenceConfig'
 
 export const useFavoritesStore = defineStore('favorites', () => {
   const items = ref([...favoriteProducts])
@@ -52,4 +53,4 @@ export const useFavoritesStore = defineStore('favorites', () => {
     addFavorite,
     removeFavorite,
   }
-})
+}, { persist: { key: PERSIST_KEYS.favorites } })

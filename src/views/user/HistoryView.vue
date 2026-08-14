@@ -295,6 +295,7 @@ import { ElMessage } from 'element-plus'
 import { Search, Clock, Star, Shop, DeleteFilled } from '@element-plus/icons-vue'
 import { browsingHistory, followedShops } from '@/mock/data'
 import { useFavoritesStore } from '@/stores/favorites'
+import { useHistoryStore } from '@/stores/history'
 import { useHoverArrow } from '@/composables/useHoverArrow'
 const { updateHover, arrowIcon } = useHoverArrow()
 
@@ -306,6 +307,7 @@ const emit = defineEmits(['update:activeTab'])
 
 const router = useRouter()
 const favoritesStore = useFavoritesStore()
+const historyStore = useHistoryStore()
 
 // 基础状态
 const currentTab = ref('history') // 当前Tab
@@ -457,17 +459,24 @@ const shopFilters = computed(() => {
   ]
 })
 
-// 数据源
-const historyItems = ref([])
-browsingHistory.forEach((group) => {
-  group.products.forEach((p) => historyItems.value.push({ ...p, status: 'normal' }))
+// 数据源：优先使用持久化的浏览历史，无数据时回退 mock
+const historyItems = computed(() => {
+  if (historyStore.groups.length) {
+    return historyStore.groups.flatMap((g) => g.products)
+  }
+  const list = []
+  browsingHistory.forEach((group) => {
+    group.products.forEach((p) => list.push({ ...p, status: 'normal' }))
+  })
+  return list
 })
-const historyGroups = ref(
-  JSON.parse(JSON.stringify(browsingHistory)).map((group) => ({
+const historyGroups = computed(() => {
+  if (historyStore.groups.length) return historyStore.groups
+  return browsingHistory.map((group) => ({
     ...group,
     products: group.products.map((p) => ({ ...p, status: 'normal' })),
-  })),
-)
+  }))
+})
 const favoriteItems = computed(() => favoritesStore.items)
 const shops = ref([...followedShops])
 
@@ -565,20 +574,14 @@ function exitBatchMode() {
 
 // 删除操作
 function removeHistoryItem(date, id) {
-  const group = historyGroups.value.find((g) => g.date === date)
-  if (group) {
-    const idx = group.products.findIndex((p) => p.id === id)
-    if (idx > -1) group.products.splice(idx, 1)
-  }
+  historyStore.removeItem(id)
 }
 function removeFavoriteItem(id) {
   favoritesStore.removeFavorite(id)
 }
 function confirmDelete() {
   if (currentTab.value === 'history') {
-    historyGroups.value.forEach((group) => {
-      group.products = group.products.filter((i) => !selectedItems.value.includes(i.id))
-    })
+    historyStore.removeItems(selectedItems.value)
   } else if (currentTab.value === 'favorites') {
     selectedItems.value.forEach((id) => favoritesStore.removeFavorite(id))
   }

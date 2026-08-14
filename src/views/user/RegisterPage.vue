@@ -1,45 +1,5 @@
 <template>
   <div class="register-page">
-    <!-- 顶部工具栏 -->
-    <div class="register-topbar">
-      <div class="register-topbar__inner">
-        <div class="register-topbar__left">
-          <span class="register-topbar__greeting">亲，请登录</span>
-          <router-link to="/register" class="register-topbar__link active">免费注册</router-link>
-          <a class="register-topbar__link">网页无障碍</a>
-        </div>
-        <div class="register-topbar__right">
-          <a class="register-topbar__link">淘宝网首页</a>
-          <a class="register-topbar__link">已买到的宝贝</a>
-          <a class="register-topbar__link">
-            我的淘宝
-            <el-icon><ArrowDown /></el-icon>
-          </a>
-          <a class="register-topbar__link">
-            <el-icon><ShoppingCart /></el-icon>
-            购物车
-          </a>
-          <a class="register-topbar__link">
-            <el-icon><Star /></el-icon>
-            收藏夹
-            <el-icon><ArrowDown /></el-icon>
-          </a>
-          <a class="register-topbar__link">
-            免费开店
-            <el-icon><ArrowDown /></el-icon>
-          </a>
-          <a class="register-topbar__link">
-            千牛卖家中心
-            <el-icon><ArrowDown /></el-icon>
-          </a>
-          <a class="register-topbar__link">
-            帮助中心
-            <el-icon><ArrowDown /></el-icon>
-          </a>
-        </div>
-      </div>
-    </div>
-
     <!-- 页面头部 -->
     <header class="register-header">
       <div class="register-header__inner">
@@ -96,15 +56,18 @@
               :aria-invalid="!!codeError"
               aria-describedby="err-code"
               @input="smsCode = smsCode.replace(/\D/g, ''); codeError = ''"
-            />
-            <button
-              type="button"
-              class="code-btn"
-              :disabled="smsCountdown > 0 || sendingCode"
-              @click="sendSmsCode"
             >
-              {{ smsCountdown > 0 ? `${smsCountdown}s 后重发` : '获取验证码' }}
-            </button>
+              <template #suffix>
+                <button
+                  type="button"
+                  class="code-btn"
+                  :disabled="smsCountdown > 0 || sendingCode"
+                  @click="sendSmsCode"
+                >
+                  {{ smsCountdown > 0 ? `${smsCountdown}s 后重发` : '获取验证码' }}
+                </button>
+              </template>
+            </el-input>
           </div>
         </div>
         <p v-if="codeError" id="err-code" class="field-error" aria-live="polite">
@@ -208,13 +171,24 @@
               v-model="form.confirmPassword"
               size="large"
               autocomplete="new-password"
-              :type="pwdVisible ? 'text' : 'password'"
+              :type="confirmPwdVisible ? 'text' : 'password'"
               placeholder="再次输入密码"
               :aria-invalid="!!errors.confirmPassword"
               aria-describedby="err-confirm"
               @input="errors.confirmPassword = ''"
               @blur="validateConfirm(true)"
-            />
+            >
+              <template #suffix>
+                <el-icon
+                  class="pwd-toggle"
+                  @click="confirmPwdVisible = !confirmPwdVisible"
+                  :aria-label="confirmPwdVisible ? '隐藏密码' : '显示密码'"
+                >
+                  <View v-if="!confirmPwdVisible" />
+                  <Hide v-else />
+                </el-icon>
+              </template>
+            </el-input>
           </div>
         </div>
         <p v-if="errors.confirmPassword" id="err-confirm" class="field-error" aria-live="polite">
@@ -244,52 +218,6 @@
         </div>
       </form>
     </main>
-
-    <!-- 页脚 -->
-    <footer class="register-footer">
-      <div class="register-footer__nav">
-        <div class="footer-column" v-for="col in footerColumns" :key="col.title">
-          <h4 class="footer-column__title">{{ col.title }}</h4>
-          <a v-for="link in col.links" :key="link" class="footer-column__link">{{ link }}</a>
-        </div>
-      </div>
-      <div class="register-footer__partners">
-        <a v-for="p in partners" :key="p" class="partner-link">{{ p }}</a>
-      </div>
-      <div class="register-footer__copyright">
-        <p class="copyright-line">
-          <a>关于淘宝</a>
-          <a>营销中心</a>
-          <a>廉政举报</a>
-          <a>开放平台</a>
-          <a>诚征英才</a>
-          <a>隐私权政策</a>
-          <a>法律声明</a>
-          <a>知识产权</a>
-          <span>© 2003-现在 Taobao.com 版权所有</span>
-          <span>增值电信业务经营许可证：浙B2-20080224</span>
-          <span>增值电信业务经营许可证（跨地区）：B2-20150210</span>
-        </p>
-        <p class="copyright-line">
-          <span>浙网文（2025）0051-019号</span>
-          <span>浙江省网络食品销售第三方平台提供者备案：浙网食A33010001</span>
-          <span>网络餐饮服务第三方平台备案：浙网餐备2024A330000020</span>
-          <span>互联网药品信息服务资格证书（浙）-经营性-2023-0008</span>
-        </p>
-        <p class="copyright-line">
-          <span>信息网络传播视听许可证：1109364号</span>
-          <span>出版物网络交易平台服务经营备案号：新出发浙备字第2024004号</span>
-          <span>营业性演出许可证：330101120994</span>
-        </p>
-      </div>
-      <div class="register-footer__badges">
-        <span class="badge">营业执照</span>
-        <span class="badge">可信网站</span>
-        <span class="badge">违法和不良信息</span>
-        <span class="badge">国家知识产权公共服务网</span>
-        <span class="badge">中国扫黄打非网</span>
-      </div>
-    </footer>
 
     <!-- 协议提示弹窗 -->
     <AgreementPrompt
@@ -337,6 +265,7 @@ const errors = reactive({
 })
 
 const pwdVisible = ref(false)
+const confirmPwdVisible = ref(false)
 const agreed = ref(false)
 const showAgreementPrompt = ref(false)
 const submitting = ref(false)
@@ -514,35 +443,6 @@ function switchEnterprise() {
   ElMessage.info('企业账号注册功能暂未开放')
 }
 
-// ===== 页脚数据 =====
-const footerColumns = [
-  { title: '规则协议', links: ['淘宝规则', '平台服务协议'] },
-  { title: '新手上路', links: ['0元开店', '天猫开店', '商家服务'] },
-  { title: '付款方式', links: ['快捷支付', '余额宝', '蚂蚁花呗'] },
-  { title: '淘宝特色', links: ['阿里旺旺', '官方客服'] },
-]
-
-const partners = [
-  '阿里巴巴集团',
-  '淘宝',
-  '天猫',
-  '1688',
-  '一淘',
-  '阿里健康',
-  '全球速卖通',
-  '阿里巴巴国际站',
-  '高德',
-  '飞猪',
-  '优酷',
-  '大麦',
-  '阿里影业',
-  '钉钉',
-  '支付宝',
-  '阿里妈妈',
-  '阿里云',
-  'TAO',
-]
-
 onMounted(() => {
   userStore.resetAttempts()
 })
@@ -554,51 +454,8 @@ onMounted(() => {
    ============================================================ */
 
 .register-page {
-  min-height: 100vh;
   background: #fff;
-  display: flex;
-  flex-direction: column;
   font-family: var(--font-family);
-}
-
-/* ===== 顶部工具栏 ===== */
-.register-topbar {
-  background: #f5f5f5;
-  border-bottom: 1px solid #eee;
-}
-.register-topbar__inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 20px;
-  font-size: 12px;
-  color: #6c6c6c;
-}
-.register-topbar__left,
-.register-topbar__right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.register-topbar__greeting {
-  color: #ff5000;
-}
-.register-topbar__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: #6c6c6c;
-  cursor: pointer;
-  transition: color 150ms ease;
-}
-.register-topbar__link:hover,
-.register-topbar__link.active {
-  color: #ff5000;
-}
-.register-topbar__link .el-icon {
-  font-size: 10px;
 }
 
 /* ===== 页面头部 ===== */
@@ -691,26 +548,21 @@ onMounted(() => {
   border-radius: 0 8px 8px 0;
 }
 .form-line__input--code {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-.form-line__input--code .el-input {
-  flex: 1;
+  /* 按钮在 suffix 内部，无需额外布局 */
 }
 .code-btn {
-  flex-shrink: 0;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 8px;
+  height: auto;
+  padding: 0 4px 0 10px;
   border: none;
+  border-left: 1px solid #e8e8e8;
   background: transparent;
   color: #ff5000;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
   transition: color 150ms ease;
+  line-height: 1;
 }
 .code-btn:hover:not(:disabled) {
   color: #e04800;
@@ -743,7 +595,9 @@ onMounted(() => {
 }
 
 /* 国家代码选择器 */
+.country-select :deep(.el-select__wrapper),
 .country-select :deep(.el-input__wrapper) {
+  height: 44px;
   background: #f5f5f5;
   border-radius: 8px 0 0 8px;
   border-right: 1px solid #e8e8e8;
@@ -903,110 +757,7 @@ onMounted(() => {
   font-size: 13px;
 }
 
-/* ===== 页脚 ===== */
-.register-footer {
-  background: #fff;
-  border-top: 1px solid #eee;
-  padding: 40px 20px 30px;
-}
-.register-footer__nav {
-  max-width: 1200px;
-  margin: 0 auto 32px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-}
-.footer-column__title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 12px;
-}
-.footer-column__link {
-  display: block;
-  font-size: 12px;
-  color: #999;
-  line-height: 24px;
-  cursor: pointer;
-  transition: color 150ms ease;
-}
-.footer-column__link:hover {
-  color: #ff5000;
-}
-.register-footer__partners {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 0;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  justify-content: center;
-}
-.partner-link {
-  font-size: 12px;
-  color: #999;
-  cursor: pointer;
-  transition: color 150ms ease;
-}
-.partner-link:hover {
-  color: #ff5000;
-}
-.register-footer__copyright {
-  max-width: 1200px;
-  margin: 24px auto 0;
-}
-.copyright-line {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px 20px;
-  font-size: 12px;
-  color: #999;
-  line-height: 1.8;
-  margin-bottom: 4px;
-}
-.copyright-line a,
-.copyright-line span {
-  cursor: pointer;
-  transition: color 150ms ease;
-}
-.copyright-line a:hover {
-  color: #ff5000;
-}
-.register-footer__badges {
-  max-width: 1200px;
-  margin: 20px auto 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-}
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 4px;
-  background: #f5f5f5;
-  font-size: 12px;
-  color: #666;
-}
-
 /* ===== 响应式 ===== */
-@media (max-width: 900px) {
-  .register-topbar__right {
-    display: none;
-  }
-  .register-footer__nav {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .register-footer__partners {
-    gap: 12px 16px;
-  }
-}
 @media (max-width: 600px) {
   .register-header__inner {
     padding: 16px 20px;
@@ -1055,9 +806,6 @@ onMounted(() => {
   .code-btn {
     padding: 0 10px;
     font-size: 13px;
-  }
-  .register-footer__nav {
-    grid-template-columns: 1fr;
   }
 }
 </style>

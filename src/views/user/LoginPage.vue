@@ -40,12 +40,19 @@
               </g>
               <circle cx="72.5" cy="72.5" r="16" fill="#fff" />
               <circle cx="72.5" cy="72.5" r="12" fill="#ff5000" />
-              <text x="72.5" y="77.5" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">淘</text>
+              <text
+                x="72.5"
+                y="77.5"
+                text-anchor="middle"
+                fill="#fff"
+                font-size="12"
+                font-weight="700"
+              >
+                淘
+              </text>
             </svg>
           </div>
-          <p class="qr-tip">
-            打开<em>淘宝APP</em>—点击左上角扫一扫
-          </p>
+          <p class="qr-tip">打开<em>淘宝APP</em>—点击左上角扫一扫</p>
           <a class="qr-help">怎么扫码登录？</a>
         </section>
 
@@ -80,7 +87,8 @@
             <div v-if="isLocked" class="lock-banner" role="alert">
               <el-icon><WarningFilled /></el-icon>
               <span>
-                账号已暂时锁定，请 <strong>{{ lockRemaining }}</strong> 秒后重试（连续 5 次错误将触发锁定）。
+                账号已暂时锁定，请 <strong>{{ lockRemaining }}</strong> 秒后重试（连续 5
+                次错误将触发锁定）。
               </span>
             </div>
           </transition>
@@ -137,7 +145,7 @@
                 maxlength="11"
                 :aria-invalid="!!phoneError"
                 aria-describedby="phone-error"
-                @input="phone = phone.replace(/\D/g, ''); phoneError = ''"
+                @input="handlePhoneInput"
                 @blur="validatePhone"
                 @keyup.enter="handleSubmit"
               />
@@ -156,16 +164,17 @@
                 placeholder="请输入 6 位验证码"
                 :aria-invalid="!!codeError"
                 aria-describedby="code-error"
-                @input="smsCode = smsCode.replace(/\D/g, ''); codeError = ''"
+                @input="handleSmsCodeInput"
                 @keyup.enter="handleSubmit"
               />
               <button
                 type="button"
                 class="sms-code-btn"
-                :disabled="smsCountdown > 0 || loading"
+                :class="{ 'is-countdown': smsCountdown > 0 }"
+                :disabled="smsCountdown > 0 || sendingSms || loading"
                 @click="sendSmsCode"
               >
-                {{ smsCountdown > 0 ? `${smsCountdown}s 后重发` : '获取验证码' }}
+                {{ smsCountdown > 0 ? `重新获取(${smsCountdown}s)` : '获取验证码' }}
               </button>
             </div>
             <p v-if="codeError" id="code-error" class="field-error" aria-live="polite">
@@ -211,10 +220,12 @@
           <el-checkbox v-model="agreed" class="agreement">
             <span class="agreement__text">
               <em>*</em>已阅读并同意以下协议
-              <a class="link" @click.prevent="openAgreement('淘宝平台服务协议')">淘宝平台服务协议</a>、
-              <a class="link" @click.prevent="openAgreement('隐私权政策')">隐私权政策</a>、
+              <a class="link" @click.prevent="openAgreement('淘宝平台服务协议')">淘宝平台服务协议</a
+              >、 <a class="link" @click.prevent="openAgreement('隐私权政策')">隐私权政策</a>、
               <a class="link" @click.prevent="openAgreement('法律声明')">法律声明</a>、
-              <a class="link" @click.prevent="openAgreement('支付宝及客户端服务协议')">支付宝及客户端服务协议</a>
+              <a class="link" @click.prevent="openAgreement('支付宝及客户端服务协议')"
+                >支付宝及客户端服务协议</a
+              >
             </span>
           </el-checkbox>
         </section>
@@ -235,13 +246,11 @@
           <el-icon class="verify-tip__icon"><WarningFilled /></el-icon>
           检测到本次登录存在异常（如新设备 / 异地），为保障账号安全，请完成滑块验证。
         </p>
-        <div
-          ref="sliderTrackRef"
-          class="slider-track"
-          :class="{ 'is-verified': sliderVerified }"
-        >
+        <div ref="sliderTrackRef" class="slider-track" :class="{ 'is-verified': sliderVerified }">
           <div class="slider-progress" :style="{ width: sliderPos + 44 + 'px' }"></div>
-          <span class="slider-text">{{ sliderVerified ? '验证通过' : '向右滑动滑块完成验证' }}</span>
+          <span class="slider-text">{{
+            sliderVerified ? '验证通过' : '向右滑动滑块完成验证'
+          }}</span>
           <div
             class="slider-handle"
             :style="{ transform: `translateX(${sliderPos}px)` }"
@@ -263,7 +272,12 @@
     <AgreementPrompt
       v-model:visible="showAgreementPrompt"
       scene="login"
-      :agreements="['《淘宝平台服务协议》', '《隐私权政策》', '《法律声明》', '《支付宝及客户端服务协议》']"
+      :agreements="[
+        '《淘宝平台服务协议》',
+        '《隐私权政策》',
+        '《法律声明》',
+        '《支付宝及客户端服务协议》',
+      ]"
       @agree="handleAgreeAndSubmit"
     />
   </div>
@@ -280,9 +294,7 @@ const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 
-const redirectTarget = computed(() =>
-  route.query.redirect ? String(route.query.redirect) : '/',
-)
+const redirectTarget = computed(() => (route.query.redirect ? String(route.query.redirect) : '/'))
 
 // ===== 登录方式 =====
 const loginMode = ref('account') // account | sms
@@ -335,6 +347,14 @@ function validatePhone() {
   else phoneError.value = ''
   return !phoneError.value
 }
+function handlePhoneInput(val) {
+  phone.value = val.replace(/\D/g, '')
+  phoneError.value = ''
+}
+function handleSmsCodeInput(val) {
+  smsCode.value = val.replace(/\D/g, '')
+  codeError.value = ''
+}
 
 // ===== XSS 输入过滤 =====
 function sanitize(str) {
@@ -375,20 +395,54 @@ watch(lockRemaining, (v) => {
 })
 
 // ===== 短信倒计时 =====
+const SMS_COUNTDOWN_SECONDS = 60
+const SMS_COUNTDOWN_KEY = 'sms_code_countdown'
 const smsCountdown = ref(0)
+const sendingSms = ref(false)
 let smsTimer = null
+
 function startSmsCountdown() {
-  smsCountdown.value = 60
+  sendingSms.value = false
+  smsCountdown.value = SMS_COUNTDOWN_SECONDS
+  const endTime = Date.now() + SMS_COUNTDOWN_SECONDS * 1000
+  localStorage.setItem(SMS_COUNTDOWN_KEY, String(endTime))
   smsTimer = setInterval(() => {
-    smsCountdown.value--
-    if (smsCountdown.value <= 0) {
+    const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
+    smsCountdown.value = remaining
+    if (remaining <= 0) {
       clearInterval(smsTimer)
-      smsCountdown.value = 0
+      smsTimer = null
+      localStorage.removeItem(SMS_COUNTDOWN_KEY)
     }
   }, 1000)
 }
+
+function loadSmsCountdown() {
+  const saved = localStorage.getItem(SMS_COUNTDOWN_KEY)
+  if (!saved) return
+  const endTime = parseInt(saved, 10)
+  const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
+  if (remaining <= 0) {
+    localStorage.removeItem(SMS_COUNTDOWN_KEY)
+    smsCountdown.value = 0
+    return
+  }
+  smsCountdown.value = remaining
+  smsTimer = setInterval(() => {
+    const r = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
+    smsCountdown.value = r
+    if (r <= 0) {
+      clearInterval(smsTimer)
+      smsTimer = null
+      localStorage.removeItem(SMS_COUNTDOWN_KEY)
+    }
+  }, 1000)
+}
+
 function sendSmsCode() {
+  if (sendingSms.value || smsCountdown.value > 0) return
   if (!validatePhone()) return
+  sendingSms.value = true
   startSmsCountdown()
   ElMessage.success('验证码已发送，请查收短信（演示验证码：123456）')
 }
@@ -644,6 +698,7 @@ const qrModules = computed(() => {
 onMounted(() => {
   userStore.loadLock()
   userStore.loadRemembered()
+  loadSmsCountdown()
   if (route.query.registered === '1') {
     ElMessage.success('注册成功！请使用新账号登录')
   }
@@ -855,9 +910,16 @@ onUnmounted(() => {
   animation: shake-x 0.4s ease;
 }
 @keyframes shake-x {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 .lock-banner .el-icon {
   flex-shrink: 0;
@@ -896,7 +958,9 @@ onUnmounted(() => {
   height: 44px;
   background: #f5f5f5;
   box-shadow: none;
-  transition: background 150ms ease, box-shadow 150ms ease;
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease;
 }
 .login-form :deep(.el-input__wrapper:hover) {
   background: #fff;
@@ -924,8 +988,14 @@ onUnmounted(() => {
   animation: err-in 0.25s ease;
 }
 @keyframes err-in {
-  from { opacity: 0; transform: translateY(-2px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .field-error::before {
   content: '!';
@@ -944,33 +1014,45 @@ onUnmounted(() => {
 
 /* 短信验证码 */
 .sms-code-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  position: relative;
 }
-.sms-code-row .el-input {
-  flex: 1;
+.sms-code-row :deep(.el-input__inner) {
+  padding-right: 100px;
 }
 .sms-code-btn {
-  flex-shrink: 0;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 8px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 6px;
   border: none;
   background: transparent;
   color: #ff5000;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: color 150ms ease;
+  z-index: 1;
+  transition:
+    color 150ms ease,
+    background 150ms ease,
+    opacity 150ms ease;
 }
 .sms-code-btn:hover:not(:disabled) {
   color: #e04800;
 }
+.sms-code-btn.is-countdown {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 .sms-code-btn:disabled {
   color: #999;
   cursor: not-allowed;
+  opacity: 0.5;
 }
 .sms-tip {
   font-size: 12px;
@@ -991,7 +1073,7 @@ onUnmounted(() => {
   gap: 8px;
   width: 100%;
   height: 48px;
-  border-radius: 24px;
+  border-radius: 8px;
   background: linear-gradient(90deg, #ff9000 0%, #ff5000 100%);
   color: #fff;
   font-size: 16px;
@@ -1000,7 +1082,9 @@ onUnmounted(() => {
   border: none;
   cursor: pointer;
   overflow: hidden;
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
   margin-top: 8px;
 }
 .login-btn:hover:not(:disabled) {
@@ -1018,7 +1102,9 @@ onUnmounted(() => {
   animation: login-spin 0.8s linear infinite;
 }
 @keyframes login-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===== 辅助链接 ===== */
@@ -1224,8 +1310,8 @@ onUnmounted(() => {
     padding: 24px 18px;
   }
   .sms-code-btn {
-    padding: 0 10px;
-    font-size: 13px;
+    font-size: 12px;
+    padding: 0 8px;
   }
 }
 </style>

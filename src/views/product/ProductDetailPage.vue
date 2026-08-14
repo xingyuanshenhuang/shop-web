@@ -30,8 +30,13 @@
           </div>
         </div>
         <div class="gallery-actions">
-          <el-icon :size="16"><Star /></el-icon>
-          <span>收藏</span>
+          <div class="gallery-actions__item" @click="handleGalleryFavorite">
+            <el-icon :size="16">
+              <StarFilled v-if="favoritesStore.isFavorite(detail.id)" />
+              <Star v-else />
+            </el-icon>
+            <span>{{ favoritesStore.isFavorite(detail.id) ? '已收藏' : '收藏' }}</span>
+          </div>
           <el-divider direction="vertical" />
           <el-icon :size="16"><Share /></el-icon>
           <span>分享</span>
@@ -369,6 +374,38 @@
       style-filter-label="颜色分类"
       :style-options="detail.styleOptions"
     />
+
+    <!-- 登录提示弹窗 -->
+    <el-dialog
+      v-model="loginPromptVisible"
+      width="360px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+      :lock-scroll="false"
+      append-to-body
+      center
+      class="login-prompt-dialog"
+    >
+      <div class="login-prompt__body">
+        <el-icon :size="48" color="#FF5000"><WarningFilled /></el-icon>
+        <p class="login-prompt__text">您还未登录，请先登录账号</p>
+        <p class="login-prompt__sub">登录后可收藏商品并享受快捷购买</p>
+      </div>
+      <template #footer>
+        <div class="login-prompt__footer">
+          <button class="login-prompt__btn login-prompt__btn--primary" @click="goToLogin">
+            立即登录
+          </button>
+          <button
+            class="login-prompt__btn login-prompt__btn--default"
+            @click="loginPromptVisible = false"
+          >
+            取消
+          </button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -381,20 +418,24 @@ import {
   Share,
   CircleCheckFilled,
   CircleCloseFilled,
+  WarningFilled,
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { productDetail, products as allProducts } from '@/mock/data'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { useFavoritesStore } from '@/stores/favorites'
-import { useRouter } from 'vue-router'
+import { useHistoryStore } from '@/stores/history'
+import { useRouter, useRoute } from 'vue-router'
 import ProductCard from '@/components/common/ProductCard.vue'
 import ReviewDrawer from '@/components/product/ReviewDrawer.vue'
 
 const userStore = useUserStore()
 const cartStore = useCartStore()
 const favoritesStore = useFavoritesStore()
+const historyStore = useHistoryStore()
 const router = useRouter()
+const route = useRoute()
 const detail = reactive({ ...productDetail })
 const currentImage = ref(0)
 const showMagnifier = ref(false)
@@ -408,6 +449,10 @@ const maskPos = reactive({ x: 0, y: 0 })
 const mainImg = ref(null)
 const zoomEl = ref(null)
 const zoomSize = reactive({ w: 450, h: 450 })
+
+// ===== 登录提示弹窗 =====
+const loginPromptVisible = ref(false)
+const pendingAction = ref('') // 'buyNow' | 'favorite' | 'galleryFavorite'
 
 // ===== 右侧栏固定定位 =====
 // 使用 position: fixed 让右侧商品信息栏固定在视口顶部附近
@@ -565,6 +610,26 @@ onMounted(() => {
   // 滚动监听：更新导航选中状态
   window.addEventListener('scroll', updateActiveTabByScroll, { passive: true })
   updateActiveTabByScroll()
+
+  // 检查登录后是否有待执行操作
+  const pendingActionStr = sessionStorage.getItem('product_pending_action')
+  if (pendingActionStr && userStore.isLoggedIn) {
+    sessionStorage.removeItem('product_pending_action')
+    nextTick(() => {
+      if (pendingActionStr === 'buyNow') {
+        handleBuyNow()
+      } else if (pendingActionStr === 'favorite' || pendingActionStr === 'galleryFavorite') {
+        handleToggleFavorite()
+      }
+    })
+  }
+  // 记录浏览历史
+  historyStore.recordView({
+    id: detail.id,
+    name: detail.name,
+    price: detail.price,
+    image: detail.images[0],
+  })
 })
 
 onUnmounted(() => {
@@ -636,6 +701,11 @@ function goToCart() {
 }
 
 function handleBuyNow() {
+  if (!userStore.isLoggedIn) {
+    pendingAction.value = 'buyNow'
+    loginPromptVisible.value = true
+    return
+  }
   cartStore.addItem({
     productId: detail.id,
     name: detail.name,
@@ -648,6 +718,11 @@ function handleBuyNow() {
 }
 
 function handleToggleFavorite() {
+  if (!userStore.isLoggedIn) {
+    pendingAction.value = 'favorite'
+    loginPromptVisible.value = true
+    return
+  }
   if (favoritesStore.isFavorite(detail.id)) {
     favoritesStore.removeFavorite(detail.id)
     ElMessage.success('已取消收藏')
@@ -660,6 +735,21 @@ function handleToggleFavorite() {
     })
     ElMessage.success('已添加到收藏夹')
   }
+}
+
+function handleGalleryFavorite() {
+  handleToggleFavorite()
+}
+
+function goToLogin() {
+  loginPromptVisible.value = false
+  // 存储待执行操作，登录完成后自动继续
+  if (pendingAction.value) {
+    sessionStorage.setItem('product_pending_action', pendingAction.value)
+    pendingAction.value = ''
+  }
+  const currentPath = route.fullPath
+  router.push(`/login?redirect=${encodeURIComponent(currentPath)}`)
 }
 </script>
 
@@ -784,7 +874,18 @@ function handleToggleFavorite() {
   padding: 12px 0;
   font-size: 12px;
   color: var(--color-text-light);
+}
+
+.gallery-actions__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.gallery-actions__item:hover {
+  color: var(--color-primary);
 }
 
 .product-detail__shop-bar {
@@ -1435,6 +1536,92 @@ function handleToggleFavorite() {
 }
 
 .product-cart-dialog .el-overlay-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 登录提示弹窗样式 */
+.login-prompt-dialog :deep(.el-dialog) {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16);
+}
+
+.login-prompt-dialog :deep(.el-dialog__header) {
+  display: none;
+}
+
+.login-prompt-dialog :deep(.el-dialog__body) {
+  padding: 32px 32px 16px;
+  background: #fff;
+}
+
+.login-prompt-dialog :deep(.el-dialog__footer) {
+  padding: 16px 32px 24px;
+  background: #fff;
+}
+
+.login-prompt__body {
+  text-align: center;
+}
+
+.login-prompt__text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin: 12px 0 6px;
+}
+
+.login-prompt__sub {
+  font-size: 13px;
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.login-prompt__footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.login-prompt__btn {
+  padding: 8px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.login-prompt__btn--primary {
+  background: linear-gradient(135deg, #ff5000, #e04800);
+  color: #fff;
+  border: none;
+}
+
+.login-prompt__btn--primary:hover {
+  filter: brightness(0.9);
+}
+
+.login-prompt__btn--default {
+  background: #fff;
+  color: var(--color-text-mid);
+  border-color: var(--color-border);
+}
+
+.login-prompt__btn--default:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.login-prompt-dialog .el-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 1;
+}
+
+.login-prompt-dialog .el-overlay-dialog {
   display: flex;
   align-items: center;
   justify-content: center;
