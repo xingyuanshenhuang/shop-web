@@ -19,6 +19,13 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 app.use(pinia)
+
+// 提前恢复登录态，确保路由守卫能正确判断
+import { useUserStore } from '@/stores/user'
+const userStore = useUserStore()
+userStore.loadRemembered()
+userStore.loadLock()
+
 app.use(router)
 app.use(ElementPlus, { locale: zhCn })
 

@@ -732,11 +732,6 @@ const orderStatuses = [
 ]
 
 onMounted(() => {
-  // 未登录跳转登录页
-  if (!userStore.isLoggedIn) {
-    router.replace({ path: '/login', query: { redirect: '/user' } })
-    return
-  }
   if (route.query.tab) {
     activeTab.value = route.query.tab
   }

@@ -58,4 +58,28 @@ const router = createRouter({
   },
 })
 
+// 路由前置守卫：拦截未登录用户访问需要登录的页面
+router.beforeEach(async (to, from, next) => {
+  // 需要登录才能访问的路由路径前缀
+  const protectedRoutes = ['/user', '/cart', '/checkout']
+
+  const requiresAuth = protectedRoutes.some((path) => {
+    if (to.path === path) return true
+    // 支持子路径匹配，如 /user/orders
+    if (to.path.startsWith(path + '/')) return true
+    return false
+  })
+
+  if (requiresAuth) {
+    // 动态导入 userStore，确保 Pinia 已初始化
+    const { useUserStore } = await import('@/stores/user')
+    const userStore = useUserStore()
+    if (!userStore.isLoggedIn) {
+      // 未登录，重定向到登录页，并携带 redirect 参数供登录后跳回
+      return next({ path: '/login', query: { redirect: to.fullPath } })
+    }
+  }
+  next()
+})
+
 export default router

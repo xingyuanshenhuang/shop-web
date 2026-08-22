@@ -469,7 +469,7 @@ function updateStickyPosition() {
   if (!rightColRef.value) return
   const rect = rightColRef.value.getBoundingClientRect()
   stickyStyle.width = rect.width + 'px'
-  stickyStyle.right = window.innerWidth - rect.right + 'px'
+  stickyStyle.right = document.documentElement.clientWidth - rect.right + 'px'
   const scrollTop = window.scrollY || document.documentElement.scrollTop
   const STICKY_TOP = 24
 
@@ -1398,6 +1398,18 @@ function goToLogin() {
 .mobile-cta__buy {
   background: linear-gradient(135deg, #ff5000, #e04800);
   color: #fff;
+}
+
+@media (min-width: 1025px) and (max-width: 1075px) {
+  .product-detail__inner {
+    padding: 24px 64px;
+  }
+  .product-detail__left {
+    flex: 1 1 60%;
+  }
+  .product-detail__right {
+    flex: 0 1 calc(40% - 32px);
+  }
 }
 
 @media (max-width: 1024px) {

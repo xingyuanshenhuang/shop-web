@@ -164,80 +164,51 @@
           <div class="profile-card">
             <!-- 1. 用户信息区 -->
             <div class="profile-header">
-              <img
-                src="https://picsum.photos/seed/taogongzi/36/36?grayscale"
-                alt=""
-                class="profile-header__avatar"
-              />
+              <div class="profile-header__avatar">
+                <span class="profile-header__avatar-text">淘</span>
+              </div>
               <div class="profile-header__info">
-                <span class="profile-header__name">{{ userInfo.name }}</span>
+                <span class="profile-header__greeting">晚上好</span>
                 <div class="profile-header__actions">
-                  <span @click="$router.push('/products')">关注店铺</span>
+                  <span @click="$router.push('/login')">注册</span>
                   <span class="profile-header__divider">|</span>
-                  <span @click="$router.push('/products')">收货地址</span>
+                  <span class="profile-header__open-shop" @click="$router.push('/products')">开店</span>
                 </div>
               </div>
             </div>
 
-            <!-- 2. 订单状态区 -->
-            <div class="profile-stats">
-              <div
-                v-for="(stat, idx) in orderStats"
-                :key="idx"
-                class="profile-stat"
-                @click="$router.push('/products')"
-              >
-                <span class="profile-stat__num">{{ stat.num }}</span>
-                <span class="profile-stat__label">{{ stat.label }}</span>
-              </div>
+            <!-- 2. 登录引导区 -->
+            <div class="profile-login-guide">
+              <h3 class="profile-login-guide__title">登录淘宝后更多精彩</h3>
+              <p class="profile-login-guide__desc">嘿！更懂你的推荐，更便捷的搜索</p>
+              <button class="profile-login-guide__btn" @click="$router.push('/login')">立即登录</button>
             </div>
 
-            <!-- 3. 资产优惠卡片区 -->
-            <div class="profile-assets-card">
-              <div class="profile-assets">
-                <div class="asset-item">
-                  <span class="asset-item__num">{{ userInfo.redPacket }}</span>
-                  <span class="asset-item__label">红包</span>
-                </div>
-                <div class="asset-item">
-                  <span class="asset-item__num">{{ userInfo.coupon }}张</span>
-                  <span class="asset-item__label">优惠券</span>
-                </div>
-                <div class="asset-item">
-                  <span class="asset-item__num">{{ userInfo.coin }}</span>
-                  <span class="asset-item__label">淘金币抵</span>
-                </div>
-              </div>
-              <div class="profile-coupon-bar" @click="$router.push('/products')">
-                <el-icon :size="14"><Present /></el-icon>
-                <span>3元红包仅剩 8小时</span>
-                <el-icon :size="12"><ArrowRight /></el-icon>
-              </div>
-            </div>
-
-            <!-- 4. 淘金币领取区 -->
-            <div class="profile-coin" @click="$router.push('/products')">
-              <div class="profile-coin__icon">
-                <el-icon :size="18"><Coin /></el-icon>
-                <span class="profile-coin__tag">省钱</span>
-              </div>
-              <div class="profile-coin__text">
-                <span class="profile-coin__title">淘金币购物抵钱用</span>
-                <span class="profile-coin__desc">100金币抵1元</span>
-              </div>
-              <button class="profile-coin__btn">领取</button>
-            </div>
-
-            <!-- 5. 功能入口区 -->
-            <div class="profile-bottom">
+            <!-- 3. 快捷操作区 -->
+            <div class="profile-actions">
               <div
                 v-for="(item, idx) in bottomEntries"
                 :key="idx"
-                class="profile-bottom__item"
+                class="profile-actions__item"
                 @click="$router.push('/products')"
               >
                 <el-icon :size="20"><component :is="item.icon" /></el-icon>
                 <span>{{ item.label }}</span>
+              </div>
+            </div>
+
+            <!-- 4. 营销活动区 -->
+            <div class="profile-promo">
+              <div class="profile-promo__left">
+                <span class="profile-promo__title">淘金币购物抵钱用</span>
+                <span class="profile-promo__desc">100金币抵1元</span>
+                <button class="profile-promo__btn" @click="$router.push('/products')">立即领取</button>
+              </div>
+              <div class="profile-promo__coin">
+                <div class="profile-promo__coin-circle">
+                  <span class="profile-promo__coin-char">币</span>
+                  <span class="profile-promo__coin-tag">省钱</span>
+                </div>
               </div>
             </div>
           </div>
@@ -268,8 +239,6 @@ import {
   Shop,
   Clock,
   CircleCheckFilled,
-  Coin,
-  Present,
 } from '@element-plus/icons-vue'
 import { products } from '@/mock/data'
 import ProductCard from '@/components/common/ProductCard.vue'
@@ -413,19 +382,6 @@ const subsidySingle = { img: 'https://picsum.photos/seed/guobu/140/100', price: 
 const seckillSingle = { img: 'https://picsum.photos/seed/miaosha/140/100', price: '57.1' }
 
 // ===== 个人中心 =====
-const userInfo = {
-  name: 'tb64***',
-  redPacket: '¥71',
-  coupon: '2',
-  coin: '¥2.57',
-}
-const orderStats = [
-  { num: '0', label: '购物车' },
-  { num: '0', label: '待收货' },
-  { num: '0', label: '待发货' },
-  { num: '0', label: '待付款' },
-  { num: '1', label: '待评价' },
-]
 const bottomEntries = [
   { label: '已买到', icon: Goods },
   { label: '收藏夹', icon: Collection },
@@ -997,17 +953,13 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   min-height: 310px;
-  background-image: linear-gradient(
-    rgb(255, 241, 232) 0%,
-    rgb(252, 249, 247) 50%,
-    rgb(252, 249, 247) 100%
-  );
+  background: #f7f7f7;
   border-radius: 12px;
-  padding: 12px;
+  padding: 12px 12px 20px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
 }
 
 /* 1. 用户信息区 */
@@ -1015,16 +967,24 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 40px;
+  padding-bottom: 12px;
 }
 
 .profile-header__avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  object-fit: cover;
-  background: #f0f0f0;
+  background: #ff5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.profile-header__avatar-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
 }
 
 .profile-header__info {
@@ -1034,10 +994,11 @@ onMounted(() => {
   min-width: 0;
 }
 
-.profile-header__name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #333;
+.profile-header__greeting {
+  font-size: 16px;
+  font-weight: 800;
+  color: #222;
+  line-height: 1.2;
 }
 
 .profile-header__actions {
@@ -1057,198 +1018,172 @@ onMounted(() => {
   color: #ff5000;
 }
 
+.profile-header__open-shop {
+  color: #ff5000 !important;
+}
+
 .profile-header__divider {
   color: #e0e0e0;
+  cursor: default !important;
 }
 
-/* 2. 订单状态区 */
-.profile-stats {
-  display: flex;
-  justify-content: space-between;
-}
-
-.profile-stat {
+/* 2. 登录引导区 */
+.profile-login-guide {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  text-align: center;
+  padding: 16px 0;
+  border-top: 1px solid #e8e8e8;
+}
+
+.profile-login-guide__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+
+.profile-login-guide__desc {
+  font-size: 11px;
+  color: #999;
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.profile-login-guide__btn {
+  width: 100%;
+  height: 36px;
+  border: none;
+  border-radius: 18px;
+  background: #ff5000;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  min-width: 0;
-  height: 38px;
+  transition: background 0.15s ease;
 }
 
-.profile-stat__num {
-  font-size: 16px;
-  font-weight: 800;
-  color: #333;
+.profile-login-guide__btn:hover {
+  background: #e64500;
 }
 
-.profile-stat__label {
-  font-size: 10px;
-  color: #666;
-  white-space: nowrap;
-}
-
-/* 3. 资产优惠卡片区 */
-.profile-assets-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.profile-assets {
+/* 3. 快捷操作区 */
+.profile-actions {
   display: flex;
   justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid #e8e8e8;
 }
 
-.asset-item {
+.profile-actions__item {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px 2px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
 }
 
-.asset-item__num {
-  font-size: 14px;
-  font-weight: 800;
+.profile-actions__item:hover {
+  background: rgba(255, 80, 0, 0.06);
+}
+
+.profile-actions__item .el-icon {
   color: #333;
 }
 
-.asset-item__label {
+.profile-actions__item span {
+  font-size: 10px;
+  color: #666;
+}
+
+/* 4. 营销活动区 */
+.profile-promo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.profile-promo__left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.profile-promo__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #222;
+}
+
+.profile-promo__desc {
   font-size: 10px;
   color: #999;
 }
 
-.profile-coupon-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+.profile-promo__btn {
+  margin-top: 4px;
+  width: fit-content;
+  border: none;
   border-radius: 10px;
-  background: linear-gradient(90deg, #ff5000 0%, #ff7a00 100%);
+  background: #ff5000;
   color: #fff;
   font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
-.profile-coupon-bar span {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.profile-promo__btn:hover {
+  background: #e64500;
 }
 
-.profile-coupon-bar .el-icon {
+.profile-promo__coin {
   flex-shrink: 0;
+  margin-left: 12px;
 }
 
-/* 4. 淘金币领取区 */
-.profile-coin {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 10px;
-  cursor: pointer;
-}
-
-.profile-coin__icon {
+.profile-promo__coin-circle {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffaa00, #ffcc00);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffaa00;
-  border-radius: 50%;
-  color: #fff;
-  flex-shrink: 0;
 }
 
-.profile-coin__tag {
+.profile-promo__coin-char {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.profile-promo__coin-tag {
   position: absolute;
   top: -4px;
-  left: -4px;
-  padding: 1px 3px;
+  right: -4px;
+  padding: 1px 4px;
   background: #ff0036;
   color: #fff;
   font-size: 9px;
   font-weight: 700;
   border-radius: 4px;
-  line-height: 1;
-}
-
-.profile-coin__text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.profile-coin__title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-}
-
-.profile-coin__desc {
-  font-size: 10px;
-  color: #999;
-}
-
-.profile-coin__btn {
-  flex-shrink: 0;
-  background: linear-gradient(90deg, #ff5000 0%, #ff7a00 100%);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* 5. 功能入口区 */
-.profile-bottom {
-  display: flex;
-  justify-content: space-between;
-}
-
-.profile-bottom__item {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  cursor: pointer;
-  color: #666;
-  padding: 4px 2px;
-  border-radius: 8px;
-  height: 52px;
-  transition: background 0.15s ease;
-}
-
-.profile-bottom__item:hover {
-  background: rgba(255, 80, 0, 0.06);
-}
-
-.profile-bottom__item .el-icon {
-  color: #333;
-}
-
-.profile-bottom__item span {
-  font-size: 10px;
-  color: #666;
+  line-height: 1.3;
 }
 
 /* ===== 为你推荐 ===== */
@@ -1315,31 +1250,23 @@ onMounted(() => {
     flex-direction: row;
     flex-wrap: wrap;
     padding: 12px;
-    gap: 8px;
+    gap: 0;
   }
   .profile-header {
     flex: 0 0 100%;
     height: auto;
   }
-  .profile-stats {
+  .profile-login-guide {
     flex: 0 0 100%;
   }
-  .profile-stat {
-    height: auto;
-  }
-  .profile-assets-card {
-    flex: 1;
-    min-width: 200px;
-  }
-  .profile-coin {
-    flex: 1;
-    min-width: 200px;
-  }
-  .profile-bottom {
+  .profile-actions {
     flex: 0 0 100%;
   }
-  .profile-bottom__item {
+  .profile-actions__item {
     height: auto;
+  }
+  .profile-promo {
+    flex: 0 0 100%;
   }
   .promo-area {
     max-width: 100%;
@@ -1401,26 +1328,12 @@ onMounted(() => {
   }
   .profile-card {
     padding: 10px;
-    gap: 6px;
-  }
-  .profile-assets-card {
-    padding: 8px;
-    gap: 8px;
-  }
-  .profile-coin {
-    padding: 8px;
-  }
-  .profile-bottom {
-    gap: 4px;
-  }
-  .profile-bottom__item {
-    padding: 2px;
-    height: auto;
-  }
-  .profile-stat {
-    height: auto;
   }
   .profile-header {
+    height: auto;
+  }
+  .profile-actions__item {
+    padding: 2px;
     height: auto;
   }
   .recommend-grid {
@@ -1445,16 +1358,8 @@ onMounted(() => {
   }
   .profile-card {
     padding: 8px;
-    gap: 4px;
   }
-  .profile-assets-card {
-    padding: 6px;
-    gap: 6px;
-  }
-  .profile-coin {
-    padding: 6px;
-  }
-  .profile-bottom__item {
+  .profile-actions__item {
     padding: 1px;
     gap: 3px;
   }
