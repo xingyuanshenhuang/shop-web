@@ -17,7 +17,9 @@
     </div>
     <div class="help-quick">
       <div v-for="entry in quickEntries" :key="entry.title" class="help-quick__item">
-        <span class="help-quick__icon">{{ entry.icon }}</span>
+        <el-icon :size="30" class="help-quick__icon" color="var(--color-primary)"
+          ><component :is="entry.icon" /></el-icon
+        >
         <div>
           <div class="help-quick__title">{{ entry.title }}</div>
           <div class="help-quick__desc">{{ entry.desc }}</div>
@@ -27,7 +29,10 @@
     <div class="help-faq">
       <div v-for="cat in faqCategories" :key="cat.name" class="faq-category">
         <div class="faq-category__header" @click="toggleCategory(cat.name)">
-          <span>{{ cat.icon }} {{ cat.name }}</span>
+          <span class="faq-category__name">
+            <el-icon :size="16"><component :is="faqIcon(cat.icon)" /></el-icon>
+            {{ cat.name }}
+          </span>
           <el-icon :class="{ rotated: expandedCategories.includes(cat.name) }"
             ><ArrowDown
           /></el-icon>
@@ -49,7 +54,20 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Search, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
+import {
+  Search,
+  ArrowDown,
+  ArrowRight,
+  ChatDotRound,
+  Phone,
+  Message,
+  ShoppingCart,
+  CreditCard,
+  Van,
+  RefreshLeft,
+  Lock,
+  Present,
+} from '@element-plus/icons-vue'
 import { faqCategories } from '@/mock/data'
 
 const searchKeyword = ref('')
@@ -57,10 +75,23 @@ const expandedCategories = ref(['购物流程'])
 const selectedQuestion = ref('')
 
 const quickEntries = [
-  { icon: '💬', title: '在线客服', desc: '平均响应时间 < 30秒' },
-  { icon: '📞', title: '电话客服', desc: '400-XXX-XXXX' },
-  { icon: '✉️', title: '投诉建议', desc: '我们会尽快处理' },
+  { icon: ChatDotRound, title: '在线客服', desc: '平均响应时间 < 30秒' },
+  { icon: Phone, title: '电话客服', desc: '400-XXX-XXXX' },
+  { icon: Message, title: '投诉建议', desc: '我们会尽快处理' },
 ]
+
+// FAQ 分类图标映射：data.js 中以图标名（字符串）标识，此处解析为组件
+const faqIconMap = {
+  ShoppingCart,
+  CreditCard,
+  Van,
+  RefreshLeft,
+  Lock,
+  Present,
+}
+function faqIcon(name) {
+  return faqIconMap[name] || RefreshLeft
+}
 
 function toggleCategory(name) {
   const idx = expandedCategories.value.indexOf(name)
@@ -112,7 +143,13 @@ function toggleCategory(name) {
 }
 
 .help-quick__icon {
-  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.faq-category__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .help-quick__title {

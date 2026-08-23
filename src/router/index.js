@@ -59,7 +59,7 @@ const router = createRouter({
 })
 
 // 路由前置守卫：拦截未登录用户访问需要登录的页面
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   // 需要登录才能访问的路由路径前缀
   const protectedRoutes = ['/user', '/cart', '/checkout']
 
@@ -76,10 +76,9 @@ router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
     if (!userStore.isLoggedIn) {
       // 未登录，重定向到登录页，并携带 redirect 参数供登录后跳回
-      return next({ path: '/login', query: { redirect: to.fullPath } })
+      return { path: '/login', query: { redirect: to.fullPath } }
     }
   }
-  next()
 })
 
 export default router

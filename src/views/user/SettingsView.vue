@@ -223,7 +223,9 @@
 
     <div v-if="currentTab === 'settings-about'" class="settings-about">
       <div class="about-brand">
-        <div class="about-brand__logo">🛍️</div>
+        <div class="about-brand__logo">
+          <el-icon :size="48" color="var(--color-primary)"><ShoppingCart /></el-icon>
+        </div>
         <h2>XX商城</h2>
         <p>品质购物，尽享生活</p>
       </div>
@@ -454,7 +456,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch, onUnmounted } from 'vue'
-import { Lock, Iphone, Message, Link, Monitor, ArrowRight, WarningFilled } from '@element-plus/icons-vue'
+import { Lock, Iphone, Message, Link, Monitor, ArrowRight, WarningFilled, ShoppingCart } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { addresses as mockAddresses } from '@/mock/data'
@@ -1406,6 +1408,8 @@ function deleteAddress() {
 .about-brand__logo {
   font-size: 48px;
   margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
 }
 
 .about-brand h2 {

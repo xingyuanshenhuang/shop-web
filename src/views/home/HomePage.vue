@@ -246,6 +246,10 @@ import HomeSearchBar from '@/components/common/HomeSearchBar.vue'
 
 const router = useRouter()
 
+// Pexels 免费商用授权图库，通过 query 参数裁剪尺寸以匹配布局
+const px = (id, w, h) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&h=${h}&fit=crop`
+
 // ===== 频道列表 =====
 const channelList = [
   { label: '司法拍卖', query: { category: 'auction' } },
@@ -341,32 +345,32 @@ const bannerList = [
   {
     tag: '聚划算 × 淘宝百亿补贴',
     title: '百亿补贴\n限时加补5折起',
-    desc: '精选好物超值抢购',
+    desc: '精选好物 低至5折 先到先得',
     bg: 'linear-gradient(135deg, #ff0036 0%, #ff5000 100%)',
-    img: 'https://picsum.photos/seed/promo1/150/130',
+    img: px(39134571, 150, 130),
   },
   {
     tag: '聚划算 × 淘宝百亿补贴',
     title: '超级补贴日\n爆款低至1折',
-    desc: '每日精选 限量开抢',
+    desc: '每日精选 限量开抢 手慢无',
     bg: 'linear-gradient(135deg, #ff0036 0%, #ff5000 100%)',
-    img: 'https://picsum.photos/seed/promo2/150/130',
+    img: px(9986410, 150, 130),
   },
   {
     tag: '聚划算 × 淘宝百亿补贴',
     title: '品牌特卖\n全场5折封顶',
-    desc: '大牌好物 一价到底',
+    desc: '大牌好物 无需比价 一价到底',
     bg: 'linear-gradient(135deg, #ff0036 0%, #ff5000 100%)',
-    img: 'https://picsum.photos/seed/promo3/150/130',
+    img: px(36409245, 150, 130),
   },
 ]
 
 // ===== 超值补贴区 =====
 const subsidyProducts = [
-  { img: 'https://picsum.photos/seed/sub1/90/90', price: '412.43' },
-  { img: 'https://picsum.photos/seed/sub2/90/90', price: '12.7' },
-  { img: 'https://picsum.photos/seed/sub3/90/90', price: '123.85' },
-  { img: 'https://picsum.photos/seed/sub4/90/90', price: '9.9' },
+  { img: px(6394655, 90, 90), price: '412.43' },
+  { img: px(30308595, 90, 90), price: '12.7' },
+  { img: px(12090814, 90, 90), price: '123.85' },
+  { img: px(16303233, 90, 90), price: '9.9' },
 ]
 
 // ===== 特色栏目矩阵 =====
@@ -375,11 +379,11 @@ const communityPosts = [
   '#前辈请赐教# 一起聊聊生意经吧！',
 ]
 const liveList = [
-  { name: '朴素眼镜线上2', avatar: 'https://picsum.photos/seed/live1/100/100' },
-  { name: '清清眼镜', avatar: 'https://picsum.photos/seed/live2/100/100' },
+  { name: '家居好物严选', avatar: px(20867012, 100, 100) },
+  { name: '数码优品专场', avatar: px(38165069, 100, 100) },
 ]
-const subsidySingle = { img: 'https://picsum.photos/seed/guobu/140/100', price: '6374.15' }
-const seckillSingle = { img: 'https://picsum.photos/seed/miaosha/140/100', price: '57.1' }
+const subsidySingle = { img: px(10655906, 140, 100), price: '6374.15' }
+const seckillSingle = { img: px(16303233, 140, 100), price: '57.1' }
 
 // ===== 个人中心 =====
 const bottomEntries = [

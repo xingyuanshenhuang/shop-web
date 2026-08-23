@@ -39,7 +39,7 @@
             :class="{ active: selectedCat === cat.id }"
             @click="selectedCat = cat.id"
           >
-            <span class="listing-categories__item-icon">{{ cat.icon }}</span>
+            <span class="listing-categories__item-icon" v-html="furnitureIcon(cat.icon)"></span>
             <span class="listing-categories__item-name">{{ cat.name }}</span>
           </div>
           <div class="listing-categories__brands">
@@ -87,7 +87,12 @@
       </div>
 
       <div class="listing-promo">
-        <span class="listing-promo__icon">🔥</span>
+        <span class="listing-promo__icon"
+          ><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+            ><path
+              d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+            /></svg
+        ></span>
         <span class="listing-promo__text">百亿补贴专场</span>
         <span class="listing-promo__sep">|</span>
         <span class="listing-promo__desc">限时满300减50</span>
@@ -177,6 +182,22 @@ import HomeSearchBar from '@/components/common/HomeSearchBar.vue'
 
 const route = useRoute()
 const router = useRouter()
+
+// 家居类目线框图标：与 Element Plus 风格一致的描边矢量图标（常数，非用户输入，v-html 安全）
+const furnitureSvg = {
+  bed: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 17V9.5A1.5 1.5 0 0 1 5.5 8h13A1.5 1.5 0 0 1 20 9.5V17"/><path d="M4 13h16"/><path d="M8 8V6.5A1.5 1.5 0 0 1 9.5 5h5A1.5 1.5 0 0 1 16 6.5V8"/><path d="M6.5 20v-1.5M17.5 20v-1.5"/></svg>',
+  sofa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="11" width="20" height="4" rx="1"/><path d="M4 11V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/><path d="M5 9a2 2 0 0 0-1 1.7"/><path d="M19 9a2 2 0 0 1 1 1.7"/><path d="M4 15v3M20 15v3"/></svg>',
+  table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="4" rx="1"/><path d="M5 10v8M19 10v8"/><path d="M4 18h16"/></svg>',
+  desk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="4" rx="1"/><path d="M3 10v10h18V10"/><path d="M9 13v2M15 13v2"/></svg>',
+  wardrobe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M12 3v18"/><path d="M9 8h1.5M13.5 8H15"/></svg>',
+  shoe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="1"/><path d="M12 5v15"/><path d="M8 8h1.5M14.5 8H16"/><path d="M8 12h1.5M14.5 12H16"/><path d="M8 16h1.5M14.5 16H16"/></svg>',
+  chair: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="5" rx="1"/><rect x="3" y="11" width="18" height="2" rx="1"/><path d="M7 13v8M17 13v8"/></svg>',
+  tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="8" rx="1"/><path d="M7 9V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3"/><path d="M12 5.5v1"/></svg>',
+}
+
+function furnitureIcon(key) {
+  return furnitureSvg[key] || furnitureSvg.table
+}
 
 const selectedCat = ref(null)
 const activeTab = ref('全部')
@@ -356,10 +377,21 @@ const hotCategoryOptions = ['沙发', '床', '茶几', '书桌', '衣柜', '电�
 .listing-categories__item:hover,
 .listing-categories__item.active {
   background: var(--color-light-orange);
+  color: var(--color-primary);
 }
 
 .listing-categories__item-icon {
-  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.listing-categories__item-icon svg {
+  width: 26px;
+  height: 26px;
+  color: var(--color-text-mid);
 }
 
 .listing-categories__item-name {
@@ -483,7 +515,8 @@ const hotCategoryOptions = ['沙发', '床', '茶几', '书桌', '衣柜', '电�
 }
 
 .listing-promo__icon {
-  font-size: 16px;
+  display: inline-flex;
+  color: var(--color-primary);
 }
 
 .listing-promo__text {

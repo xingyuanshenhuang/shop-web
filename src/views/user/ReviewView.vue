@@ -275,9 +275,15 @@ function toggleTag(tag) {
   }
 }
 
+// 模拟上传图片：从 Pexels 免费商用授权图库中选取商品实拍图
+const uploadImgPool = [
+  'https://images.pexels.com/photos/30308595/pexels-photo-30308595.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  'https://images.pexels.com/photos/13007642/pexels-photo-13007642.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+  'https://images.pexels.com/photos/35747131/pexels-photo-35747131.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+]
 function simulateUpload() {
-  const seed = `upload${Date.now()}`
-  uploadedImages.value.push(`https://picsum.photos/seed/${seed}/200/200`)
+  const idx = uploadedImages.value.length % uploadImgPool.length
+  uploadedImages.value.push(uploadImgPool[idx])
 }
 
 function submitReview() {

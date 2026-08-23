@@ -110,7 +110,11 @@
       <div v-if="showBonus" class="search-bar-right">
         <div class="bonus-entry">
           <div class="bonus-entry__icon">
-            <img src="https://picsum.photos/seed/bonus/56/56" alt="" class="bonus-entry__avatar" />
+            <img
+              src="https://images.pexels.com/photos/5942521/pexels-photo-5942521.jpeg?auto=compress&cs=tinysrgb&w=56&h=56&fit=crop"
+              alt=""
+              class="bonus-entry__avatar"
+            />
           </div>
           <div class="bonus-entry__text">
             <span class="bonus-entry__title">天天领红包</span>

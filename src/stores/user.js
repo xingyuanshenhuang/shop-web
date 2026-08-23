@@ -129,7 +129,8 @@ export const useUserStore = defineStore('user', () => {
       phone: p,
       passwordHash,
       salt,
-      avatar: `https://picsum.photos/seed/${encodeURIComponent(u)}/100/100`,
+      avatar:
+        'https://images.pexels.com/photos/4781155/pexels-photo-4781155.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop',
       createdAt: Date.now(),
     }
     const list = loadUsers()

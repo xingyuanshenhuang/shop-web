@@ -291,7 +291,9 @@
                     class="payment-radio"
                     :class="{ checked: selectedPayment === method.name }"
                   ></span>
-                  <span class="payment-icon">{{ method.icon }}</span>
+                  <el-icon class="payment-icon" :size="16" color="var(--color-text-mid)"
+                    ><component :is="method.icon"
+                  /></el-icon>
                   <span class="payment-name">{{ method.name }}</span>
                 </div>
                 <div
@@ -467,6 +469,9 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowLeft,
+  Wallet,
+  ChatDotSquare,
+  User,
 } from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cart'
 import { useRouter } from 'vue-router'
@@ -598,9 +603,9 @@ const summaryOriginalTop = ref(0)
 const summaryHeight = ref(0)
 
 const paymentMethods = [
-  { name: '支付宝', icon: '💳' },
-  { name: '微信支付', icon: '💚' },
-  { name: '朋友代付', icon: '👤' },
+  { name: '支付宝', icon: Wallet },
+  { name: '微信支付', icon: ChatDotSquare },
+  { name: '朋友代付', icon: User },
 ]
 
 const deliveryOptions = [

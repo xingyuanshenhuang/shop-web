@@ -138,7 +138,9 @@
               </div>
             </div>
             <div class="user-profile-card__plus-bar">
-              <span class="user-profile-card__plus-icon">👑</span>
+              <el-icon class="user-profile-card__plus-icon" :size="14" color="#FFD04B"
+                ><StarFilled /></el-icon
+              >
               <span class="user-profile-card__plus-label">PLUS会员</span>
               <span class="user-profile-card__plus-desc">权益重磅升级 点击此处开通 &gt;</span>
             </div>
@@ -490,6 +492,7 @@ import {
   Coin,
   Present,
   Star,
+  StarFilled,
   ArrowRight,
   ArrowLeft,
 } from '@element-plus/icons-vue'
@@ -547,7 +550,8 @@ const cartItemCount = computed(() => cartItems.length)
 
 // 最新订单预览数据
 const latestOrder = ref({
-  image: 'https://picsum.photos/seed/order1/80/80',
+  image:
+    'https://images.pexels.com/photos/30308595/pexels-photo-30308595.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop',
   text: '您的快件已派送成功（美乐佳代点），如有疑问请电快递员【刘吉...',
   time: '2026-05-18 09:24:58',
 })

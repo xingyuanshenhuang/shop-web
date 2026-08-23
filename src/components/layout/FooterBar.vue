@@ -3,7 +3,7 @@
     <div class="footer-services">
       <div class="footer-services__inner" v-for="svc in services" :key="svc.title">
         <div class="footer-services__icon">
-          {{ svc.icon }}
+          <el-icon :size="20" color="var(--color-primary)"><component :is="svc.icon" /></el-icon>
         </div>
         <div class="footer-services__text">
           <div class="footer-services__title">{{ svc.title }}</div>
@@ -25,11 +25,13 @@
 </template>
 
 <script setup>
+import { Medal, Lightning, RefreshLeft, Service } from '@element-plus/icons-vue'
+
 const services = [
-  { icon: '🛡️', title: '正品保障', desc: '品牌授权，假一赔十' },
-  { icon: '⚡', title: '极速发货', desc: '48小时内发货' },
-  { icon: '↩️', title: '七天退换', desc: '无理由退换货' },
-  { icon: '💬', title: '贴心客服', desc: '7×24小时在线' },
+  { icon: Medal, title: '正品保障', desc: '品牌授权，假一赔十' },
+  { icon: Lightning, title: '极速发货', desc: '48小时内发货' },
+  { icon: RefreshLeft, title: '七天退换', desc: '无理由退换货' },
+  { icon: Service, title: '贴心客服', desc: '7×24小时在线' },
 ]
 
 const navColumns = [

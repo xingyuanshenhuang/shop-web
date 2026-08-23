@@ -145,23 +145,23 @@
             <div class="detail-images-section">
               <div class="detail-images-section__block">
                 <h3>品牌故事</h3>
-                <p>源氏木语 — 只做纯实木家具，让每一个家庭都能享受自然之美。</p>
+                <p>源氏木语 — 只做纯实木家具，从原木选材到手工打磨，每一道工序都倾注匠人之心，让每一个家庭都能享受自然之美。</p>
                 <img
-                  src="https://picsum.photos/seed/brand/800/400"
+                  :src="px(30907891, 800, 400)"
                   style="width: 100%; border-radius: 8px; margin-top: 12px"
                 />
               </div>
               <div class="detail-images-section__block">
                 <h3>产品卖点</h3>
                 <img
-                  src="https://picsum.photos/seed/features/800/600"
+                  :src="px(7484794, 800, 600)"
                   style="width: 100%; border-radius: 8px"
                 />
               </div>
               <div class="detail-images-section__block">
                 <h3>资质认证</h3>
                 <img
-                  src="https://picsum.photos/seed/cert/800/300"
+                  :src="px(36003959, 800, 300)"
                   style="width: 100%; border-radius: 8px"
                 />
               </div>
@@ -208,7 +208,7 @@
             <h2 class="product-info__name text-clamp-2">{{ detail.name }}</h2>
             <div class="product-info__meta">
               <span class="product-info__sold">已售 {{ detail.sold }}+</span>
-              <span class="product-info__review-hint">多人评价"隔音效果很好"</span>
+              <span class="product-info__review-hint">多人评价"做工精细，无毛刺"</span>
             </div>
             <div class="product-info__rating">
               <el-rate
@@ -421,7 +421,7 @@ import {
   WarningFilled,
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { productDetail, products as allProducts } from '@/mock/data'
+import { getProductDetail, products as allProducts } from '@/mock/data'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { useFavoritesStore } from '@/stores/favorites'
@@ -430,13 +430,17 @@ import { useRouter, useRoute } from 'vue-router'
 import ProductCard from '@/components/common/ProductCard.vue'
 import ReviewDrawer from '@/components/product/ReviewDrawer.vue'
 
+// Pexels 免费商用授权图库，通过 query 参数裁剪尺寸以匹配布局
+const px = (id, w, h) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}&h=${h}&fit=crop`
+
 const userStore = useUserStore()
 const cartStore = useCartStore()
 const favoritesStore = useFavoritesStore()
 const historyStore = useHistoryStore()
 const router = useRouter()
 const route = useRoute()
-const detail = reactive({ ...productDetail })
+const detail = reactive(getProductDetail(route.params.id))
 const currentImage = ref(0)
 const showMagnifier = ref(false)
 const selectedColor = ref('原木色')
@@ -596,6 +600,29 @@ watch(showMagnifier, (val) => {
     nextTick(updateZoomSize)
   }
 })
+
+// 路由参数变化时（点击其他商品跳转）动态刷新详情与选中状态
+watch(
+  () => route.params.id,
+  (id) => {
+    Object.assign(detail, getProductDetail(id))
+    currentImage.value = 0
+    selectedColor.value = detail.colors[0]?.name ?? ''
+    selectedSize.value = detail.sizes[0] ?? ''
+    quantity.value = 1
+    activeReviewTag.value = '全部'
+    historyStore.recordView({
+      id: detail.id,
+      name: detail.name,
+      price: detail.price,
+      image: detail.images[0],
+    })
+    nextTick(() => {
+      updateStickyPosition()
+      updateActiveTabByScroll()
+    })
+  },
+)
 
 onMounted(() => {
   window.addEventListener('resize', updateZoomSize)
