@@ -25,7 +25,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
 
       # 使用 Node 自带的 corepack，依据 package.json 的 packageManager 安装对应 pnpm
       - name: Enable pnpm via corepack
